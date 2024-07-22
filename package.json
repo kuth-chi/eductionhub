@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "tailwind": "tailwindcss -i ./static/src/input.css -o ./static/css/style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.6"
+  },
+  "dependencies": {
+    "apexcharts": "^3.50.0",
+    "flowbite": "^2.4.1",
+    "postcss": "^8.4.39",
+    "postcss-cli": "^11.0.0",
+    "postcss-modules": "^6.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+django==5.0.7
+psycopg
+djangorestframework
+markdown
+django-filter
+django-oauth-toolkit
+django-cors-headers
+python-dotenv
+django-redis
+whitenoise
+psycopg2-binary

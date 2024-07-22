@@ -1,0 +1,39 @@
+{% load compress %}
+{% load static %}
+{% load humanize i18n %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - EZ Startup</title>
+        <!-- Add this -->
+        {% compress css %}
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        {% endcompress %}
+        <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
+        
+        {% block head %}{% endblock %}
+    </head>
+    <body class="bg-green-50">
+        <!-- Navbar -->
+        {% block navbar %}
+        {% endblock %}
+        
+        <div class="min-h-screen">
+          {% block content %}
+          {% endblock content %}
+        </div>
+        
+        <!-- Footer -->
+        {% block footer %}
+            
+        {% endblock %}
+        <!-- End of HTML -->
+        <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
+        {% block script %}
+        {% endblock script %}
+    </body>
+</html>
