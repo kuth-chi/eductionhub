@@ -7,8 +7,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 ALLOWED_HOSTS = ["*"]
 # CORS HEADER
-CORS_ALLOWED_ORIGINS = []
-print("CORS_ALLOWED_ORIGINS: ", CORS_ALLOWED_ORIGINS)
+# CORS_ALLOWED_ORIGINS = []
+# print("CORS_ALLOWED_ORIGINS: ", CORS_ALLOWED_ORIGINS)
 
 TEMPLATES = [
     {
@@ -29,21 +29,21 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 # hostname = os.getenv('DBHOST')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DBNAME'),
-        'HOST': os.getenv('DBHOST'),
-        'USER': os.getenv('DBUSER'),
-        'PASSWORD': os.getenv('DBPASS') 
-    }
-}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DBNAME'),
+#         'HOST': os.getenv('DBHOST'),
+#         'USER': os.getenv('DBUSER'),
+#         'PASSWORD': os.getenv('DBPASS') 
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Cache Settings
 CACHES = {
