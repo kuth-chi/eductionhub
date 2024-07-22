@@ -2,9 +2,9 @@ import os
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", False)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+print("SECRET_KEY: ", SECRET_KEY)
 
 ALLOWED_HOSTS = [
     'http://ez-startup.com',
@@ -34,16 +34,26 @@ TEMPLATES = [
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-hostname = os.environ['DBHOST']
+hostname = os.getenv('DBHOST')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DBNAME'],
-        'HOST': hostname + ".postgres.database.azure.com",
-        'USER': os.environ['DBUSER'],
-        'PASSWORD': os.environ['DBPASS'] 
+        'NAME': os.getenv('DBNAME'),
+        'HOST': hostname,
+        'USER': os.getenv('DBUSER'),
+        'PASSWORD': os.getenv('DBPASS') 
     }
 }
+
+# Cache Settings
+cache_location = os.getenv('CACHE_LOCATION')
+print(cache_location)
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": redis_location + "=@edu-cache.redis.cache.windows.net:6380/0",
+#     }
+# }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -65,15 +75,10 @@ STATICFILES_FINDERS = [
     'compressor.finders.CompressorFinder',
 ]
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
+# Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = ('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = ('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
