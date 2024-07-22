@@ -34,26 +34,30 @@ TEMPLATES = [
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-hostname = os.getenv('DBHOST')
+# hostname = os.getenv('DBHOST')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DBNAME'),
-        'HOST': hostname,
+        'HOST': os.getenv('DBHOST'),
         'USER': os.getenv('DBUSER'),
         'PASSWORD': os.getenv('DBPASS') 
     }
 }
-
-# Cache Settings
-cache_location = os.getenv('CACHE_LOCATION')
-print(cache_location)
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": redis_location + "=@edu-cache.redis.cache.windows.net:6380/0",
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+# Cache Settings
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "rediss://:oHh1CWAAMBk2m3pTOc0NjZRXmzum38vr3AzCaLm7AM0=@edu-cache.redis.cache.windows.net:6380/0",
+    }
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
