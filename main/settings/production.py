@@ -4,17 +4,11 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
-print("SECRET_KEY: ", SECRET_KEY)
 
-ALLOWED_HOSTS = [
-    'http://ez-startup.com',
-    'ez-startup.com',
-]
+ALLOWED_HOSTS = ["*"]
 # CORS HEADER
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8100",
-    "http://127.0.0.1:8100",
-]
+CORS_ALLOWED_ORIGINS = []
+print("CORS_ALLOWED_ORIGINS: ", CORS_ALLOWED_ORIGINS)
 
 TEMPLATES = [
     {
