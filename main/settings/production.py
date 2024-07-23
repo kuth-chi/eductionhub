@@ -46,17 +46,21 @@ TEMPLATES = [
 #     }
 # }
 connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-parameters = {pair.split("="):pair.split("=")[1] for pair in connection_string.split(" ")}
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": parameters["dbname"],
-        "USER": parameters["user"],
-        "PASSWORD": parameters["password"],
-        "HOST": parameters["host"],
-        "PORT": parameters["port"],
+if connection_string:
+    parameters = {pair.split("=")[0]: pair.split("=")[1] for pair in connection_string.split(" ")}
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parameters["dbname"],
+            "USER": parameters["user"],
+            "PASSWORD": parameters["password"],
+            "HOST": parameters["host"],
+            "PORT": parameters["port"],
+        }
     }
-}
+else:
+    raise ValueError("Database connection string is not set in environment variables.")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STORAGES = {
