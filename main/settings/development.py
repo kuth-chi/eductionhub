@@ -3,9 +3,9 @@ from .base import *
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 # CORS HEADER
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",
