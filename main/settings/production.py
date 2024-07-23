@@ -10,11 +10,14 @@ ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"]]
 CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"],]
 
 MIDDLEWARE = [
+    
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
+    'django.middleware.cache.UpdateCacheMiddleware', # new middleware cache
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware', # new middleware cache after
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -69,6 +72,26 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# CACHE WITH REDIS
+# Get values from environment variables
+redis_connection_string = os.environ["AZURE_REDIS_CONNECTIONSTRING"]
+if not redis_connection_string:
+    raise ValueError("Redis connection string is not set in environment variables.")
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": redis_connection_string,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PASSWORD": redis_connection_string.split(':')[2].split("@")[0],		
+        }
+    }
+}
+#Optional: Cache settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
 # Static files (CSS, JavaScript, Images)
 # STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
 # STATIC_URL = STATIC_HOST + "/static/"
