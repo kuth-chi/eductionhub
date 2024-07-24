@@ -1,14 +1,14 @@
 import os
 from urllib.parse import urlparse
-from .base import *
+from main.settings import *
+from main.settings import BASE_DIR
 
 
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
-ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"]] if 'WEBSITE_HOSTNAME' in os.environ else ['localhost', '127.0.0.1', '[::1]']
-# CORS HEADER
-CORS_ALLOWED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["https://localhost:8000", "https://127.0.0.1:8000", 'localhost:8000', "localhost"]
 
 MIDDLEWARE = [
 
@@ -76,34 +76,16 @@ STORAGES = {
 }
 
 # CACHE WITH REDIS
-# Fetch the Redis connection string from environment variables
-# redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
-# if not redis_connection_string:
-#     raise ValueError("Redis connection string is not set in environment variables.")
-
-# # # Parse the connection string
-# parsed_url = urlparse(redis_connection_string)
-
-# # # Extract the password, hostname, and port
-# redis_password = parsed_url.password
-# redis_host = parsed_url.hostname
-# redis_port = parsed_url.port
-
-# # # Configure the Django CACHES setting
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#             "PASSWORD": redis_password,
-#             "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
-#         }
-#     }
-# }
-# # Optional: Cache settings
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-# SESSION_CACHE_ALIAS = 'default'
+CACHES = {
+        "default": {  
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+        },
+    }
+}
 
 # Static files (CSS, JavaScript, Images)
 # STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
