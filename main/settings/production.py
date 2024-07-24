@@ -79,30 +79,30 @@ STORAGES = {
 
 # CACHE WITH REDIS
 # Fetch the Redis connection string from environment variables
-redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
-if not redis_connection_string:
-    raise ValueError("Redis connection string is not set in environment variables.")
+# redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
+# if not redis_connection_string:
+#     raise ValueError("Redis connection string is not set in environment variables.")
 
-# Parse the connection string
-parsed_url = urlparse(redis_connection_string)
+# # Parse the connection string
+# parsed_url = urlparse(redis_connection_string)
 
-# Extract the password, hostname, and port
-redis_password = parsed_url.password
-redis_host = parsed_url.hostname
-redis_port = parsed_url.port
+# # Extract the password, hostname, and port
+# redis_password = parsed_url.password
+# redis_host = parsed_url.hostname
+# redis_port = parsed_url.port
 
-# Configure the Django CACHES setting
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": redis_password,
-            "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
-        }
-    }
-}
+# # Configure the Django CACHES setting
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#             "PASSWORD": redis_password,
+#             "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
+#         }
+#     }
+# }
 # Optional: Cache settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
