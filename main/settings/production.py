@@ -1,13 +1,14 @@
 import os
 from .base import *
+from urllib.parse import urlparse
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
-ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"], "169.254.130.6"]
+ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"], "169.254.130.6", "169.254.130.6:8000", "*"]
 # CORS HEADER
-CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"],]
+# CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"]]
 
 MIDDLEWARE = [
 
@@ -66,6 +67,7 @@ if connection_string:
 else:
     raise ValueError(
         "Database connection string is not set in environment variables.")
+    
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STORAGES = {
@@ -76,18 +78,28 @@ STORAGES = {
 }
 
 # CACHE WITH REDIS
-# Get values from environment variables
-redis_connection_string = os.environ["AZURE_REDIS_CONNECTIONSTRING"]
+# Fetch the Redis connection string from environment variables
+redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
 if not redis_connection_string:
-    raise ValueError(
-        "Redis connection string is not set in environment variables.")
+    raise ValueError("Redis connection string is not set in environment variables.")
+
+# Parse the connection string
+parsed_url = urlparse(redis_connection_string)
+
+# Extract the password, hostname, and port
+redis_password = parsed_url.password
+redis_host = parsed_url.hostname
+redis_port = parsed_url.port
+
+# Configure the Django CACHES setting
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": redis_connection_string,
+        "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": redis_connection_string.split(':')[2].split("@")[0],
+            "PASSWORD": redis_password,
+            "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
         }
     }
 }
