@@ -10,14 +10,14 @@ ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"]]
 CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"],]
 
 MIDDLEWARE = [
-    
+
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.cache.UpdateCacheMiddleware', # new middleware cache
+    'django.middleware.cache.UpdateCacheMiddleware',  # new middleware cache
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware', # new middleware cache after
+    'django.middleware.cache.FetchFromCacheMiddleware',  # new middleware cache after
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -50,7 +50,8 @@ TEMPLATES = [
 # }
 connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
 if connection_string:
-    parameters = {pair.split("=")[0]: pair.split("=")[1] for pair in connection_string.split(" ")}
+    parameters = {pair.split("=")[0]: pair.split("=")[1]
+                  for pair in connection_string.split(" ")}
 
     DATABASES = {
         "default": {
@@ -63,7 +64,8 @@ if connection_string:
         }
     }
 else:
-    raise ValueError("Database connection string is not set in environment variables.")
+    raise ValueError(
+        "Database connection string is not set in environment variables.")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STORAGES = {
@@ -77,18 +79,19 @@ STORAGES = {
 # Get values from environment variables
 redis_connection_string = os.environ["AZURE_REDIS_CONNECTIONSTRING"]
 if not redis_connection_string:
-    raise ValueError("Redis connection string is not set in environment variables.")
+    raise ValueError(
+        "Redis connection string is not set in environment variables.")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": redis_connection_string,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            # "PASSWORD": redis_connection_string.split(':')[2].split("@")[0],		
+            "PASSWORD": redis_connection_string.split(':')[2].split("@")[0],
         }
     }
 }
-#Optional: Cache settings
+# Optional: Cache settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
@@ -111,3 +114,24 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+    },
+}
