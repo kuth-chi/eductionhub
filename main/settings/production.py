@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
-ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"], "169.254.130.6", "169.254.130.6:8000", "*"]
+ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"], "169.254.130.6", "169.254.130.6:8000"]
 # CORS HEADER
-# CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"]]
+CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"]]
 
 MIDDLEWARE = [
 
