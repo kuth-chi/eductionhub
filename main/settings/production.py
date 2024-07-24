@@ -1,14 +1,14 @@
 import os
-from .base import *
 from urllib.parse import urlparse
+from .base import *
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
-ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"], "169.254.130.6", "169.254.130.6:8000"]
+ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"]] if 'WEBSITE_HOSTNAME' in os.environ else ['localhost', '127.0.0.1', '[::1]']
 # CORS HEADER
-CORS_ALLOWED_ORIGINS = ["https://" + os.environ["WEBSITE_HOSTNAME"]]
+CORS_ALLOWED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["https://localhost:8000", "https://127.0.0.1:8000", 'localhost:8000', "localhost"]
 
 MIDDLEWARE = [
 
@@ -16,9 +16,9 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.cache.UpdateCacheMiddleware',  # new middleware cache
+    # 'django.middleware.cache.UpdateCacheMiddleware',  # new middleware cache
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',  # new middleware cache after
+    # 'django.middleware.cache.FetchFromCacheMiddleware',  # new middleware cache after
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -43,12 +43,6 @@ TEMPLATES = [
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
 if connection_string:
     parameters = {pair.split("=")[0]: pair.split("=")[1]
@@ -65,8 +59,12 @@ if connection_string:
         }
     }
 else:
-    raise ValueError(
-        "Database connection string is not set in environment variables.")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
     
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -79,33 +77,33 @@ STORAGES = {
 
 # CACHE WITH REDIS
 # Fetch the Redis connection string from environment variables
-redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
-if not redis_connection_string:
-    raise ValueError("Redis connection string is not set in environment variables.")
+# redis_connection_string = os.environ.get("AZURE_REDIS_CONNECTIONSTRING")
+# if not redis_connection_string:
+#     raise ValueError("Redis connection string is not set in environment variables.")
 
 # # # Parse the connection string
-parsed_url = urlparse(redis_connection_string)
+# parsed_url = urlparse(redis_connection_string)
 
-# # Extract the password, hostname, and port
-redis_password = parsed_url.password
-redis_host = parsed_url.hostname
-redis_port = parsed_url.port
+# # # Extract the password, hostname, and port
+# redis_password = parsed_url.password
+# redis_host = parsed_url.hostname
+# redis_port = parsed_url.port
 
 # # # Configure the Django CACHES setting
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": redis_password,
-            "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
-        }
-    }
-}
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": f"rediss://{redis_host}:{redis_port}/0",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#             "PASSWORD": redis_password,
+#             "SSL_CERT_REQS": None,  # Use this if SSL certificate verification is not required
+#         }
+#     }
+# }
 # # Optional: Cache settings
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# SESSION_CACHE_ALIAS = 'default'
 
 # Static files (CSS, JavaScript, Images)
 # STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
