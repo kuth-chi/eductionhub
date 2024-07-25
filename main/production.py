@@ -79,18 +79,6 @@ STORAGES = {
     },
 }
 
-# CACHE WITH REDIS
-CACHES = {
-        "default": {  
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-        },
-    }
-}
-
 # Static files (CSS, JavaScript, Images)
 # STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
 # STATIC_URL = STATIC_HOST + "/static/"
@@ -104,12 +92,23 @@ COMPRESS_ENABLED = True
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 ]
+# CACHE WITH REDIS
+CACHES = {
+        "default": {  
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+        },
+    }
+}
+
 
 LOGGING = {
     'version': 1,
