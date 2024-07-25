@@ -5,6 +5,7 @@ from main.settings import BASE_DIR
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+print("CSRF_TRUSTED_ORIGINS: ", CSRF_TRUSTED_ORIGINS)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
@@ -62,6 +63,7 @@ if not DEBUG:
                 "PORT": parameters["port"],
             }
         }
+        print("DATABASES: ", DATABASES)
 else:
     DATABASES = {
         'default': {
@@ -80,8 +82,6 @@ STORAGES = {
 }
 
 # Static files (CSS, JavaScript, Images)
-# STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
-# STATIC_URL = STATIC_HOST + "/static/"
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
