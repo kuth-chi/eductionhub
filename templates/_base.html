@@ -12,13 +12,14 @@
         <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/apple-touch-icon.png' %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/favicon-32x32.png' %}">
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
+        <link type="image/x-icon" href="{% static '/favicon.ico' %}" rel="shortcut icon">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
                 <!-- Add this -->
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
         <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
-        
+        <link rel="stylesheet" href="{% static 'libs/flowbite/dist/flowbite.min.css' %}">
         {% block head %}{% endblock %}
     </head>
     <body class="bg-green-50">
@@ -26,7 +27,7 @@
         {% block navbar %}
         {% endblock %}
         
-        <div class="min-h-screen">
+        <div class="max-h-screen">
           {% block content %}
           {% endblock content %}
         </div>

@@ -11,7 +11,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-settings_module = "main.settings.production" if "WEBSITE_HOSTNAME" in os.environ else "main.settings.development"
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+SETTINGS_MODULE = "main.settings.production" if "WEBSITE_HOSTNAME" in os.environ else "main.settings.development"
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', SETTINGS_MODULE)
 
 application = get_asgi_application()

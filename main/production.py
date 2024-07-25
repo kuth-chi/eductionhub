@@ -1,14 +1,17 @@
 import os
-from urllib.parse import urlparse
 from main.settings import *
 from main.settings import BASE_DIR
 
 
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 SECRET_KEY = os.environ['SECRET_KEY']
+
+INSTALLED_APPS += [
+    "corsheaders",
+]
 
 MIDDLEWARE = [
 
@@ -43,21 +46,22 @@ TEMPLATES = [
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-if connection_string:
-    parameters = {pair.split("=")[0]: pair.split("=")[1]
-                  for pair in connection_string.split(" ")}
+if not DEBUG:
+    connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    if connection_string:
+        parameters = {pair.split("=")[0]: pair.split("=")[1]
+                    for pair in connection_string.split(" ")}
 
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": parameters["dbname"],
-            "USER": parameters["user"],
-            "PASSWORD": parameters["password"],
-            "HOST": parameters["host"],
-            "PORT": parameters["port"],
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": parameters["dbname"],
+                "USER": parameters["user"],
+                "PASSWORD": parameters["password"],
+                "HOST": parameters["host"],
+                "PORT": parameters["port"],
+            }
         }
-    }
 else:
     DATABASES = {
         'default': {
