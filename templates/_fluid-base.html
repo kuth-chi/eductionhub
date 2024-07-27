@@ -23,21 +23,9 @@
         {% block head %}{% endblock %}
     </head>
     <body class="flex flex-col min-h-screen overflow-x-hidden">
-        <!-- Navbar -->
-        <div class="fixed top-0 left-0 z-10 w-full">
-            {% include 'shared/_navbar.html' %}
-        </div>
-        
-        <div class="flex-grow pt-24 pb-32 z-0">
-            {% block content %}
-            {% endblock content %}
-        </div>
-            
-            
-        <!-- Footer -->
-         <div class="fixed bottom-0 left-0 z-10 w-full"> 
-            {% include 'shared/_nav_bottom.html' %}
-        </div>
+       
+        {% block content %}
+        {% endblock content %}
         <!-- End of HTML -->
         <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
         {% block script %}
