@@ -79,6 +79,7 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
+    "ROSETTA_STORAGE_CLASS": "rosetta.storage.CacheRosettaStorage",
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -98,16 +99,16 @@ STATICFILES_FINDERS = [
     'compressor.finders.CompressorFinder',
 ]
 # CACHE WITH REDIS
-CACHES = {
-        "default": {  
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-        },
-    }
-}
+# CACHES = {
+#         "default": {  
+#             "BACKEND": "django_redis.cache.RedisCache",
+#             "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
+#             "OPTIONS": {
+#                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#                 "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+#         },
+#     }
+# }
 
 
 LOGGING = {

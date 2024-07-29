@@ -11,25 +11,33 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ["DEBUG"]
 
 ALLOWED_HOSTS = ["*"]
-
+CORS_ORIGIN_ALLOW_ALL = True
 if 'CODESPACE_NAME' in os.environ:
-    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
-    
+    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{
+        os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load private key
+with open(os.path.join(BASE_DIR, 'cert/private_key.pem'), 'rb') as f:
+    PRIVATE_KEY = f.read()
 
+# Load public key
+with open(os.path.join(BASE_DIR, 'cert/public_key.pem'), 'rb') as f:
+    PUBLIC_KEY = f.read()
+    
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 # python -c 'import secrets; print(secrets.token_hex())'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
-print(f"SECRET_KEY: {SECRET_KEY}")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,8 +53,16 @@ INSTALLED_APPS = [
     'django_filters',
     'oauth2_provider',
     'compressor',
+    'rosetta',  # http://127.0.0.1:8000/rosetta/pick/?rosetta
+    'drf_yasg',
     # My apps
     'user.apps.UserConfig',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'oauth2_provider.backends.OAuth2Backend',
+
 ]
 
 MIDDLEWARE = [
@@ -55,13 +71,42 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware', # OAuth2
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# Ensure SESSION settings are properly configured
+SESSION_COOKIE_NAME = "auth_server_sessionid"
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
 # Application definition
 ROOT_URLCONF = 'main.urls'
+
+# JWT settings
+JWT_AUTH = {
+    'JWT_PRIVATE_KEY': PRIVATE_KEY,
+    'JWT_PUBLIC_KEY': PUBLIC_KEY,
+    'JWT_ALGORITHM': 'RS256',
+    'JWT_EXPIRATION_DELTA': timedelta(seconds=3600),
+}
+# OAuth2 Settingss
+OAUTH2_PROVIDER = {
+    'DEFAULT_SCOPES': ['read', 'write', 'groups'],
+    'ALLOWED_REDIRECT_URIS': ['http://localhost:8100/callback'],  # Add your redirect URIs
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
 
 TEMPLATES = [
     {
@@ -87,29 +132,12 @@ if DEBUG:
         }
     }
 
+
 # Authentication Server OAuth2 Settings
 AUTH_USER_MODEL = 'user.User'
 # User Login 2Auth
 # LOGIN_URL = '/admin/login/'
 LOGIN_URL = '/accounts/login/'
-# OAuth2 Settings
-OAUTH2_PROVIDER = {
-    'SCOPES': {
-        'read': 'Read scope',
-        'write': 'Write scope',
-        'introspection': 'Introspect token scope',
-    }
-}
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    )
-}
 
 
 WSGI_APPLICATION = 'main.wsgi.application'
@@ -136,13 +164,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, "locale/"),
+)
 
 # STATIC_URL = STATIC_HOST + "/static/"
 STATIC_URL = '/static/'
@@ -160,6 +191,11 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 ]
+
+# Cirtificate Settings
+# Path to your private and public keys for JWT
+JWT_PRIVATE_KEY_PATH = 'private_key.pem'
+JWT_PUBLIC_KEY_PATH = 'public_key.pem'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

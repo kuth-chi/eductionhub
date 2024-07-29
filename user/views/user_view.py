@@ -1,4 +1,6 @@
+import logging
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from user.models import User
@@ -33,6 +35,7 @@ def user_register(request):
 
 def user_login(request):
     template_name = 'accounts/sign-in.html'
+    
     if request.method == 'POST':
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -40,16 +43,31 @@ def user_login(request):
         
         if user is not None:
             login(request, user)
-            # Redirect to the 'next' parameter or a default page
-            next_url = request.GET.get('next', '/')
-            # Avoid redirecting to the login page itself
-            if next_url == '/login/':
+            
+            # Retrieve the next URL from the request
+            next_url = request.GET.get('next')
+            if not next_url:
+                return redirect('/')
+            
+            # Make sure the next URL is not the login page itself
+            if next_url.startswith('/accounts/login'):
                 next_url = '/'
+            
+            # Add the code and state to the redirect URL if present
+            code = request.COOKIES.get('authorization_code')
+            state = request.COOKIES.get('state')
+            if code and state:
+                # Ensure the full URL for the Resource Server
+                if not next_url.startswith('http'):
+                    next_url = f"http://localhost:8100{next_url}"
+                next_url = f"{next_url}?code={code}&state={state}"
+            
             return redirect(next_url)
         else:
             messages.error(request, 'Invalid Username or Password')
     
     return render(request, template_name)
+
 
 # def user_logout(request):
 def user_logout(request):
