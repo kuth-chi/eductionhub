@@ -1,0 +1,306 @@
+{% extends 'profile/_base.html' %}
+{% load i18n custom_tags %}
+
+{% block title %}
+{{Title}}    
+{% endblock %}
+
+<!-- Head block -->
+ {% block head %}
+ <style>
+    .flying-shapes .shape {
+        @apply absolute bg-blue-500 opacity-75 rounded-full;
+    }
+</style>
+ {% endblock %}
+
+{% block body %}
+<div class="container mx-auto">
+    <div class="flex gap-1 md:gap-6 p-2 md:p-4 md:sticky">
+        <!-- Profile card -->
+        <div class="w-[60px] md:w-[330px] min-h-full">
+            <div class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-900 dark:border-gray-700 mb-2 md:mb-8">
+                <div class="flex justify-end px-4 pt-4">
+                    <button id="dropdownButton" data-dropdown-toggle="dropdown" class="inline-block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-1.5" type="button">
+                        <span class="sr-only">Open dropdown</span>
+                        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
+                            <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/>
+                        </svg>
+                    </button>
+                    <!-- Dropdown menu -->
+                    <div id="dropdown" class="z-10 hidden text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                        <ul class="py-2" aria-labelledby="dropdownButton">
+                            <li>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Edit</a>
+                            </li>
+                            <li>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Export Data</a>
+                            </li>
+                            <li>
+                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-12 items-center pb-10">
+                <div class="hidden md:flex flex-col items-center">
+                    {% if user.profile.photo %}
+                    <img class="w-20 h-20 mb-3 rounded-full shadow-lg"
+                    src="{{ user.profile.photo.url }}" alt="{{user.first_name}} profile">
+                    {% else %}
+                    <img class="w-20 h-20 mb-3 rounded-full shadow-lg"
+                    src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="default user photo">
+                    {% endif %}
+                    <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{% if user.first_name and user.last_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username|default:'User' }}{% endif %}</h5>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Visual Designer</span>
+                    <div class="flex mt-4 md:mt-6">
+                        <a href="#" class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-800/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Generate Resume</a>
+                        
+                    </div>
+                </div>
+                <ol class="w-full mt-2 md:mt-12 p-2 md:p-4">
+                    <li class="mb-2 border md:border-gray-300 dark:md:border-gray-600 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300">
+                        <a href="#" class="flex flex-row justify-between items-center">
+                            <div class="flex flex-row justify-start items-center">
+                                <svg class="w-8 h-8 text-gray-100 dark:text-white rounded-full bg-purple-500 hover:bg-purple-700 p-1 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>                                 
+                                <span class="text-gray-900 dark:text-white hidden md:block">Settings</span>
+                            </div>
+                            <i class="bi bi-chevron-right hidden md:block text-gray-700 dark:text-gray-400"></i>
+                        </a>
+                    </li>
+                    <li class="mb-2 border md:border-gray-300 dark:md:border-gray-600 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300">
+                        <a href="#" class="flex flex-row justify-between items-center">
+                            <div class="flex flex-row justify-start items-center">
+                                <svg class="w-8 h-8 text-gray-800 dark:text-white rounded-full bg-teal-500 hover:bg-teal-700 p-1 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.356 3.066a1 1 0 0 0-.712 0l-7 2.666A1 1 0 0 0 4 6.68a17.695 17.695 0 0 0 2.022 7.98 17.405 17.405 0 0 0 5.403 6.158 1 1 0 0 0 1.15 0 17.406 17.406 0 0 0 5.402-6.157A17.694 17.694 0 0 0 20 6.68a1 1 0 0 0-.644-.949l-7-2.666Z"/>
+                                </svg>
+                                <span class="text-gray-900 dark:text-white hidden md:block">Security</span>
+                            </div>
+                            <i class="bi bi-chevron-right hidden md:block text-gray-700 dark:text-gray-400"></i>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Welcome Card -->
+    <div class="flex flex-col w-full justify-center relative">
+        <div class="w-full relative z-10">
+            <div id="notification" class="w-full px-4 text-left border border-gray-200 rounded-lg shadow sm:p-8 bg-gradient-animate">
+                <div class="flex justify-between items-start">
+                    <h5 class="mb-2 text-3xl font-bold text-gray-800 dark:text-blue-800">
+                        {% if current_time|greeting|title == "Morning"%} {% translate 'Good Morning' %} 
+                        {% elif current_time|greeting|title == "Afternoon" %} {% translate 'Good Afternoon' %} 
+                        {% else %} {% translate 'Good Evening' %} 
+                        {% endif %}, 
+                        <span class="text-blue-600 dark:text-blue-800">{{ user.first_name|default:user.username }}!</span>
+                    </h5>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white absolute top-2 right-2" onclick="document.getElementById('notification').remove();">
+                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-gray-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="sr-only">Close notification</span>
+                    </button>
+                </div>
+                <p class="mb-5 text-base text-gray-700 sm:text-lg dark:text-gray-900">Stay up to date and move work forward with Eduction Hub on iOS & Android. Download our standalone app today.</p>
+                <div class="items-center justify-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
+                    <a href="#" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 text-white rounded-lg inline-flex items-center justify-center px-4 py-2.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+                        <svg class="me-3 w-7 h-7" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="apple" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"></path></svg>
+                        <div class="text-left rtl:text-right">
+                            <div class="mb-1 text-xs">Download on the</div>
+                            <div class="-mt-1 font-sans text-sm font-semibold">Mac App Store</div>
+                        </div>
+                    </a>
+                    <a href="#" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 text-white rounded-lg inline-flex items-center justify-center px-4 py-2.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+                        <svg class="me-3 w-7 h-7" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google-play" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"></path></svg>
+                        <div class="text-left rtl:text-right">
+                            <div class="mb-1 text-xs">Get in on</div>
+                            <div class="-mt-1 font-sans text-sm font-semibold">Google Play</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs content -->
+        <div class="">
+            <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
+                    <li class="me-2" role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg" id="about-tab" data-tabs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false">About</button>
+                    </li>
+                    <li class="me-2" role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="experiences-tab" data-tabs-target="#experiences" type="button" role="tab" aria-controls="experiences" aria-selected="false">Experiences</button>
+                    </li>
+                    <li class="me-2" role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="education-tab" data-tabs-target="#education" type="button" role="tab" aria-controls="education" aria-selected="false">Education</button>
+                    </li>
+                    <li role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="contact-tab" data-tabs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+                    </li>
+                </ul>
+            </div>
+            <div id="default-tab-content">
+                <div class="hidden  rounded-lg bg-gray-50 dark:bg-gray-800" id="about" role="tabpanel" aria-labelledby="about-tab">
+                    <div class="p-4">
+                        <div class="p-4 md:p-6 bg-white dark:bg-gray-800 rounded-2xl">
+                            <div class="first-letter:float-left 
+                            first-letter:mr-4
+                            first-letter:text-7xl 
+                            first-letter:text-blue-900 dark:first-letter:text-blue-300 first-letter:font-bold">
+                                <p class="text-gray-700 dark:text-gray-300">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt adipisci vitae eligendi sunt libero odio assumenda excepturi alias aspernatur suscipit non, natus quam, autem obcaecati ea iure in saepe nobis. Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quidem minus animi dolorem quas similique cum, illum, accusamus dicta fugiat non impedit! Commodi molestiae minus atque, minima suscipit perferendis quasi veniam.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class=" mb-6">
+                        <h4 class="py-4  w-full border-b border-gray-200 dark:border-gray-700 text-xl font-medium leading-6 text-gray-900 dark:text-white">EXPERIENCES</h4>
+                    </div>
+
+                    <!-- Timeline -->
+                     <div class="px-12">
+                        <div class="relative border-s border-gray-200 dark:border-gray-700">                  
+                            <div class="mb-10">            
+                                <span class="absolute flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full -start-6 ring-14 ring-white dark:ring-gray-900 dark:bg-blue-900">
+                                    <img class="rounded-full ring-2 ring-gray-500/50 shadow-lg" src="https://news-cdn.softpedia.com/images/news2/the-new-google-logo-is-a-lesson-in-modern-design-490648-3.jpg" alt="Bonnie image"/>
+                                </span>
+                                <div class="ms-10 px-4 pt-4 pb-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600">
+                                    <div class="items-center justify-between   sm:flex ">
+                                        <time class="mb-1 text-sm text-blue-500 dark:text-blue-300 font-normal  sm:order-last sm:mb-0">Just now</time>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><a href="#" class="font-semibold text-blue-600 dark:text-blue-500 hover:underline">Google Inc.</a> as Marketing Manager <span class="bg-gray-100 text-gray-800 text-sm font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">Technology</span></h3>
+                                    </div>
+                                    <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-400">January 01, 2002 - Present <i class="bi bi-dot"></i><span class="text-gray-600 dark:text-gray-400">7 months</span></time>
+                                    <h4 class="font-medium text-gray-900 dark:text-gray-200">Key Responsibilities</h4>
+                                    <ul class="list-disc ps-8 text-gray-800 dark:text-gray-300">
+                                        <li>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Exercitationem non sequi, id recusandae temporibus repellat, inventore sint reiciendis similique </li>
+                                        <li>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</li>
+                                        <li>Consectetur nobis molestiae quis veritatis unde laboriosam, soluta cum ipsa tempora error.</li>
+                                        <li>Veniam asperiores odit voluptatibus maxime sit numquam ducimus illo itaque perferendis.</li>
+                                        <li>Aut voluptatibus illum officiis voluptate fugiat magni.</li>
+                                        <li>illum officiis voluptate fugiat magni.</li>
+                                        <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Est illo dignissimos aperiam magni,.</li>
+                                        <!-- ... -->
+                                    </ul>
+                                    <hr class="h-px my-4 bg-gray-200 border-0 dark:bg-gray-600">
+                                    <ol class="flex flex-wrap">
+                                        <li><span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500">Dark</span></li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="mb-10">
+                                <span class="absolute flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full -start-5 ring-10 ring-white dark:ring-gray-900 dark:bg-blue-900">
+                                    <img class="rounded-full shadow-lg" src="https://www.kindpng.com/picc/m/27-278320_bootstrap-logo-logo-png-bootstrap-logo-transparent-png.png" alt="Bonnie image"/>
+                                </span>
+                                <div class="ms-10 px-4 pt-4 pb-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600">
+                                    <div class="items-center justify-between   sm:flex ">
+                                        <time class="mb-1 text-xs text-gray-500 dark:text-gray-300 font-normal  sm:order-last sm:mb-0">8 months ago</time>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><a href="#" class="font-semibold text-blue-600 dark:text-blue-500 hover:underline">Bootstrap</a> as Marketing Specialist <span class="bg-gray-100 text-gray-800 text-sm font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">Technology</span></h3>
+                                    </div>
+                                    <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-400">December 01, 2019 - December 31, 2023 <i class="bi bi-dot"></i><span class="text-gray-600 dark:text-gray-400">4 years</span></time>
+                                    <h4 class="font-medium text-gray-900 dark:text-gray-200">Key Responsibilities</h4>
+                                    <ul class="list-disc ps-8 text-gray-800 dark:text-gray-300">
+                                        <li>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Exercitationem non sequi, id recusandae temporibus repellat, inventore sint reiciendis similique </li>
+                                        <li>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</li>
+                                        <li>Consectetur nobis molestiae quis veritatis unde laboriosam, soluta cum ipsa tempora error.</li>
+                                        <li>Veniam asperiores odit voluptatibus maxime sit numquam ducimus illo itaque perferendis.</li>
+                                        <li>Aut voluptatibus illum officiis voluptate fugiat magni.</li>
+                                        <!-- ... -->
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="mb-10">
+                                <span class="absolute flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full -start-5 ring-10 ring-white dark:ring-gray-900 dark:bg-blue-900">
+                                    <img class="rounded-full shadow-lg" src="https://xuri.me/wp-content/uploads/2016/03/apache-spark-logo.png" alt="Bonnie image"/>
+                                </span>
+                                <div class="ms-10 px-4 pt-4 pb-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600">
+                                    <div class="items-center justify-between   sm:flex ">
+                                        <time class="mb-1 text-xs text-gray-500 dark:text-gray-300 font-normal  sm:order-last sm:mb-0">7 years ago</time>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><a href="#" class="font-semibold text-blue-600 dark:text-blue-500 hover:underline">Apache Spark</a> as Data Modeling <span class="bg-gray-100 text-gray-800 text-sm font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">Technology</span></h3>
+                                    </div>
+                                    <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-400">January 01, 2015 - December 31, 2017 <i class="bi bi-dot"></i><span class="text-gray-600 dark:text-gray-400">2 years</span></time>
+                                    <h4 class="font-medium text-gray-900 dark:text-gray-200">Key Responsibilities</h4>
+                                    <ul class="list-disc ps-8 text-gray-800 dark:text-gray-300">
+                                        <li>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Exercitationem non sequi, id recusandae temporibus repellat, inventore sint reiciendis similique </li>
+                                        <li>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</li>
+                                        <li>Consectetur nobis molestiae quis veritatis unde laboriosam, soluta cum ipsa tempora error.</li>
+                                        <li>Veniam asperiores odit voluptatibus maxime sit numquam ducimus illo itaque perferendis.</li>
+                                        <li>Aut voluptatibus illum officiis voluptate fugiat magni.</li>
+                                        <!-- ... -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eduction -->
+                    <div class=" mt-8 mb-6">
+                        <h4 class="py-4 w-full border-b border-gray-200 dark:border-gray-700 text-xl font-medium leading-6 text-gray-900 dark:text-white">EDUCATION</h4> 
+                    </div>
+                    <div class="ps-12 pe-4">
+                        <ol class="relative border-s border-gray-200 dark:border-gray-700">                  
+                            <li class="mb-10 ms-4">
+                                <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
+                                <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">January 2010 - May 2013</time>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Build Bright University (BBU) <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ms-3"><i class="bi bi-award-fill me-2"></i>CS</span></h3>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400"><i class="bi bi-geo-fill me-1"></i>Siem Reap, Cambodia</p>
+                                <a href="#" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">Learn more 
+                                    <svg class="w-3 h-3 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                                    </svg>
+                                </a>
+                            </li>
+                            <li class="mb-10 ms-4">
+                                <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
+                                <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">October 2006 - August 2009</time>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Oddar Meanchey School <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ms-3"><i class="bi bi-award-fill me-2"></i>Diploma</span></h3>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400"><i class="bi bi-geo-fill me-1"></i>Oddar Meanchey, Cambodia</p>
+                            </li>
+                            <li class="mb-10 ms-4">
+                                <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
+                                <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">November 2003 - October 2006</time>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ampil Secondary School <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ms-3"><i class="bi bi-award-fill me-2"></i>SSC</span></h3>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400"><i class="bi bi-geo-fill me-1"></i>Oddar Meanchey, Cambodia</p>
+                            </li>
+                            <li class="ms-4">
+                                <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
+                                <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">April 1997 - October 2003</time>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ampil Primary School <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ms-3"><i class="bi bi-award-fill me-2"></i>General</span></h3>
+                                <p class="text-base font-normal text-gray-500 dark:text-gray-400"><i class="bi bi-geo-fill me-1"></i>Oddar Meanchey, Cambodia</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- Experience Tab -->
+                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="experiences" role="tabpanel" aria-labelledby="experiences-tab">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">We are working on <strong class="font-medium text-gray-800 dark:text-white">Experience tab's associated content</strong>. We will release sooner.</p>
+                </div>
+
+                <!-- Eduction -->
+                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="education" role="tabpanel" aria-labelledby="education-tab">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">Education tab's associated content</strong>. We are working this content, it'll be available soon.</p>
+                </div>
+
+                <!-- Contact -->
+                <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">Contact tab's associated content</strong>. We are working on this content, it'll be available soon.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<script>
+anime({
+  targets: '.css-selector-demo .el',
+  translateX: 250
+});
+</script>
+{% endblock %}
+    
+    

@@ -18,13 +18,21 @@
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
+        <script>
+            // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
+        </script>
         <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
         <link rel="stylesheet" href="{% static 'libs/flowbite/dist/flowbite.min.css' %}">
         {% block head %}{% endblock %}
     </head>
-    <body class="flex flex-col min-h-screen overflow-x-hidden">
+    <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
         <!-- Navbar -->
-        <div class="fixed top-0 left-0 z-10 w-full">
+        <div class="fixed top-0 left-0 z-20 w-full backdrop-blur-xl">
             {% include 'shared/_navbar.html' %}
         </div>
         
@@ -35,13 +43,16 @@
             
             
         <!-- Footer -->
-         <div class="fixed bottom-0 left-0 z-10 w-full"> 
+         <div class="fixed bottom-0 left-0 z-10 w-full "> 
             {% include 'shared/_nav_bottom.html' %}
+             
         </div>
         <!-- End of HTML -->
         <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
-
+        <script src="{% static 'js/app.js' %}"></script>
+        <!-- HTMLX -->
+        <script src="{% static 'js/htmx.min.js' %}"></script>
         {% block script %}
         {% endblock script %}
     </body>

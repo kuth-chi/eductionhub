@@ -1,0 +1,70 @@
+{% load compress %}
+{% load static %}
+{% load humanize i18n %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - Admin</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/apple-touch-icon.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
+        <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
+        <link rel="manifest" href="{% static 'site.webmanifest' %}">
+                <!-- Add this -->
+        {% compress css %}
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/administrator.css' %}">
+        {% endcompress %}
+        <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
+        <link rel="stylesheet" href="{% static 'libs/flowbite/dist/flowbite.min.css' %}">
+        {% block head %}{% endblock %}
+        {% block style_page %}
+        {% endblock %}
+    </head>
+    <body class="flex flex-col min-h-screen overflow-x-hidden">
+        <!-- Navbar -->
+        <div class="fixed top-0 left-0 z-10 w-full">
+            {% block navbar %}
+                {% include 'admin-dashboard/shared/_admin-navbar.html' %}
+            {% endblock %}
+        </div>
+
+        <!-- Aside -->
+
+
+        <!-- Body -->
+        <div class="flex-grow pt-10 pb-32 px-8 z-0">
+            {% block body %}
+            {% endblock %}
+        </div>
+            
+            
+        <!-- Footer -->
+         <div class="fixed bottom-0 left-0 z-10 w-full"> 
+            {% block footer %}
+                {% include 'admin-dashboard/shared/_admin-footer.html' %}
+            {% endblock %}
+        </div>
+        <!-- End of HTML -->
+        <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
+
+        {% block script %}
+        {% endblock script %}
+        <!-- Script async -->
+        <script>
+            function setActive(element) {
+                // Remove active class from all dock items
+                const dockItems = document.querySelectorAll('.dock-item');
+                dockItems.forEach(item => item.classList.remove('active'));
+    
+                // Add active class to the clicked dock item
+                element.classList.add('active');
+            }
+        </script>
+    </body>
+</html>

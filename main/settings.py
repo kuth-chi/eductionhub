@@ -19,8 +19,7 @@ DEBUG = os.environ["DEBUG"]
 ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 if 'CODESPACE_NAME' in os.environ:
-    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{
-        os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
+    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,6 +56,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     # My apps
     'user.apps.UserConfig',
+    'administrator.apps.AdministratorConfig',
+    'ads.apps.AdsConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     'oauth2_provider.middleware.OAuth2TokenMiddleware', # OAuth2
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'user.middleware.profile.EnsureProfileMiddleware',
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -171,12 +173,14 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-LOCALE_PATHS = (
-    os.path.join(BASE_DIR, "locale/"),
-)
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 # STATIC_URL = STATIC_HOST + "/static/"
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Compressor Settings

@@ -1,7 +1,7 @@
 import os
 from main.settings import *
 from main.settings import BASE_DIR
-
+from azure.identity import DefaultAzureCredential
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
@@ -12,6 +12,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 INSTALLED_APPS += [
     "corsheaders",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -74,13 +75,33 @@ else:
     
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+AZURE_ACCOUNT_NAME = os.environ['AZURE_ACCOUNT_NAME']
+AZURE_CONTAINER = os.environ['AZURE_CONTAINER']
+AZURE_ACCOUNT_KEY = os.environ['AZURE_ACCOUNT_KEY']
+AZURE_STORAGE_URL = os.environ['AZURE_STORAGE_URL']
+
+DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
+
+MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STORAGES = {
-    # ...
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": AZURE_ACCOUNT_NAME,
+            "account_key": AZURE_ACCOUNT_KEY,
+            "azure_container": AZURE_CONTAINER,
+            "expiration_secs": None,
+        },
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
     "ROSETTA_STORAGE_CLASS": "rosetta.storage.CacheRosettaStorage",
 }
+
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'

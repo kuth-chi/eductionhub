@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from user.models import User
+from user.models import User, Profile
 from user.forms.user_forms import RegisterForm, CustomerAuthenticationForm
 
 # Create your views here.
@@ -42,6 +42,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            Profile.objects.get_or_create(user=user)
             login(request, user)
             
             # Retrieve the next URL from the request

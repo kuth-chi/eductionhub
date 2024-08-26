@@ -10,7 +10,13 @@ module.exports = {
     extend: {
       colors: {
         primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
-      }
+      },
+      backgroundImage: {
+        'morning-gradient': 'linear-gradient(to right, #FFD700, #FF8C00)',
+        'afternoon-gradient': 'linear-gradient(to right, #FF4500, #FF6347)',
+        'evening-gradient': 'linear-gradient(to right, #FFA500, #DC143C)',
+        'night-gradient': 'linear-gradient(to right, #000080, #191970)',
+      },
     },
     fontFamily: {
       'body': [
@@ -52,6 +58,7 @@ module.exports = {
   plugins: [
     require('flowbite/plugin')({
       charts: true,
+      datatables: true,
   }),
   ],
 }
