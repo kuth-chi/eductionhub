@@ -3,8 +3,10 @@ from main.settings import *
 from main.settings import BASE_DIR
 from azure.identity import DefaultAzureCredential
 
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
-CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']
+                 ] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
+CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']
+                        ] if 'WEBSITE_HOSTNAME' in os.environ else []
 print("CSRF_TRUSTED_ORIGINS: ", CSRF_TRUSTED_ORIGINS)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -52,7 +54,7 @@ if not DEBUG:
     connection_string = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
     if connection_string:
         parameters = {pair.split("=")[0]: pair.split("=")[1]
-                    for pair in connection_string.split(" ")}
+                      for pair in connection_string.split(" ")}
 
         DATABASES = {
             "default": {
@@ -72,20 +74,20 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    
+
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# Azure Storage settings
 AZURE_ACCOUNT_NAME = os.environ['AZURE_ACCOUNT_NAME']
 AZURE_CONTAINER = os.environ['AZURE_CONTAINER']
 AZURE_ACCOUNT_KEY = os.environ['AZURE_ACCOUNT_KEY']
 AZURE_STORAGE_URL = os.environ['AZURE_STORAGE_URL']
 
-DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+# Media files configuration
 AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
-
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# STORAGES setting for Django 5.x
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.azure_storage.AzureStorage",
@@ -99,18 +101,21 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
-    "ROSETTA_STORAGE_CLASS": "rosetta.storage.CacheRosettaStorage",
+    # Example for additional storage classes
+    "ROSETTA_STORAGE_CLASS": {
+        "BACKEND": "rosetta.storage.CacheRosettaStorage",
+    },
 }
 
-
-# Static files (CSS, JavaScript, Images)
+# Static files configuration
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Compressor Settings
+# Compressor settings
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_ENABLED = True
 
+# Static files finders
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
@@ -119,19 +124,20 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 ]
-# CACHE WITH REDIS
+
+# Cache configuration with Redis (commented out but ready for use)
 # CACHES = {
-#         "default": {  
-#             "BACKEND": "django_redis.cache.RedisCache",
-#             "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
-#             "OPTIONS": {
-#                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#                 "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
 #         },
 #     }
 # }
 
-
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
