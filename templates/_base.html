@@ -9,12 +9,14 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %} - Education Hub</title>
-        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/apple-touch-icon.png' %}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/favicon-32x32.png' %}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/icon-512.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/icon-32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/icon-16.png' %}">
         <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
-        <link rel="manifest" href="{% static 'site.webmanifest' %}">
+        
                 <!-- Add this -->
+        <!-- App -->
+        <link rel="manifest" href="{% static 'manifest.json' %}" />
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
@@ -31,21 +33,52 @@
         {% block head %}{% endblock %}
     </head>
     <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
+
+
         <!-- Navbar -->
         <div class="fixed top-0 left-0 z-20 w-full backdrop-blur-xl">
             {% include 'shared/_navbar.html' %}
+            <!-- Prompting Install -->
+            <div id="toast-interactive" class="hidden fixed inset-0 items-center justify-center w-full p-4 text-gray-500 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-400" role="alert">
+                <div class="max-w-xs p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-400">
+                    <div class="flex">
+                        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-blue-500 bg-blue-100 rounded-lg dark:text-blue-300 dark:bg-blue-900">
+                            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2m-8 1V4m0 12-4-4m4 4 4-4"/>
+                            </svg>  
+                            <span class="sr-only">Refresh icon</span>
+                        </div>
+                        <div class="ms-3 text-sm font-normal">
+                            <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">App is available</span>
+                            <div class="mb-2 text-sm font-normal">A new software version is available for download. Install now.</div> 
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <button id="install" class="inline-flex justify-center w-full px-2 py-1.5 text-xs font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800">Install</button>
+                                </div>
+                                <div>
+                                    <button data-dismiss-target="#toast-interactive" aria-label="Close" class="inline-flex justify-center w-full px-2 py-1.5 text-xs font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">Not now</button> 
+                                </div>
+                            </div>    
+                        </div>
+                        <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-interactive" aria-label="Close">
+                            <span class="sr-only">Close</span>
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="flex-grow pt-24 pb-32 z-0">
             {% block content %}
             {% endblock content %}
         </div>
-            
-            
+      
         <!-- Footer -->
          <div class="fixed bottom-0 left-0 z-10 w-full "> 
             {% include 'shared/_nav_bottom.html' %}
-             
         </div>
         <!-- End of HTML -->
         <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
@@ -53,6 +86,71 @@
         <script src="{% static 'js/app.js' %}"></script>
         <!-- HTMLX -->
         <script src="{% static 'js/htmx.min.js' %}"></script>
+            <!-- Register Service Worker -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('{% static '/standalone/sw.js' %}')
+                .then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch((error) => {
+                    console.log('Service Worker registration failed:', error);
+                });
+            }
+
+            // Check service worker 
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/static/standalone/sw.js");
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                // Install Application button
+                let installPrompt = null;
+                const installButton = document.querySelector("#install");
+                const toastInteractive = document.querySelector("#toast-interactive");
+            
+                // Function to check if the PWA is already installed
+                function isPwaInstalled() {
+                    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                }
+            
+                // If the PWA is already installed, don't show the toast or install button
+                if (isPwaInstalled()) {
+                    toastInteractive.style.display = 'none';
+                    return;
+                }
+            
+                // Listen for the beforeinstallprompt event
+                window.addEventListener("beforeinstallprompt", (event) => {
+                    event.preventDefault();
+                    installPrompt = event;
+            
+                    // Show the install prompt popup
+                    toastInteractive.classList.remove("hidden");
+                    toastInteractive.classList.add("block");
+                });
+            
+                // Handle the install button click
+                installButton.addEventListener("click", () => {
+                    if (installPrompt) {
+                        // Directly show the install prompt and then hide the toast
+                        installPrompt.prompt();
+                        installPrompt.userChoice.then(() => {
+                            // Regardless of the user's choice, hide the toast
+                            toastInteractive.classList.add("hidden");
+                            toastInteractive.classList.remove("block");
+                            installPrompt = null; // Reset the installPrompt variable
+                        });
+                    }
+                });
+            
+                // Optional: Close the toast notification when the close button is clicked
+                document.querySelector("[data-dismiss-target]").addEventListener("click", () => {
+                    toastInteractive.classList.add("hidden");
+                    toastInteractive.classList.remove("block");
+                });
+            });
+            
+        </script>
         {% block script %}
         {% endblock script %}
     </body>

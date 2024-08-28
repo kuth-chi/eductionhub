@@ -38,3 +38,43 @@ themeToggleBtn.addEventListener('click', function() {
     }
     
 });
+
+
+// Check service worker 
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/standalone/sw.js");
+}
+
+// Install Application button
+let installPrompt = null;
+const installButton = document.querySelector("#install");
+const toastInteractive = document.querySelector("#toast-interactive");
+
+// Listen for the beforeinstallprompt event
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+
+    // Show the install prompt popup
+    toastInteractive.style.display = "block";
+});
+
+// Handle the install button click
+installButton.addEventListener("click", () => {
+    if (installPrompt) {
+        installPrompt.prompt();
+        installPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+            installPrompt = null;
+        });
+    }
+});
+
+// Optional: Close the toast notification when the close button is clicked
+document.querySelector("[data-dismiss-target]").addEventListener("click", () => {
+    toastInteractive.style.display = "none";
+});
