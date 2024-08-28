@@ -88,8 +88,9 @@
         <script src="{% static 'js/htmx.min.js' %}"></script>
             <!-- Register Service Worker -->
         <script>
+            var app_static = '{% static 'standalone/sw.js' %}'
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('{% static '/standalone/sw.js' %}')
+                navigator.serviceWorker.register('app_static')
                 .then((registration) => {
                     console.log('Service Worker registered with scope:', registration.scope);
                 }).catch((error) => {
@@ -99,7 +100,7 @@
 
             // Check service worker 
             if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("/static/standalone/sw.js");
+                navigator.serviceWorker.register(app_static);
             }
 
             document.addEventListener("DOMContentLoaded", function () {

@@ -4,7 +4,7 @@ const urlsToCache = [
     '/static/js/app.js',
     '/static/icons/icon-32.png',
     '/manifest.json',
-    '/offline.html',
+    
 ];
 
 // Install the service worker
