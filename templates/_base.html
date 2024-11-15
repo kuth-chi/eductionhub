@@ -8,6 +8,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <title>{% block title %}{% endblock %} - Education Hub</title>
         <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/icon-512.png' %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/icon-32.png' %}">
@@ -17,6 +18,7 @@
                 <!-- Add this -->
         <!-- App -->
         <link rel="manifest" href="{% static 'manifest.json' %}" />
+        <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
@@ -83,14 +85,14 @@
         <!-- End of HTML -->
         <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
-        <script src="{% static 'js/app.js' %}"></script>
+        <script type="module" src="/static/js/app.js"></script>
         <!-- HTMLX -->
         <script src="{% static 'js/htmx.min.js' %}"></script>
             <!-- Register Service Worker -->
         <script>
-            var app_static = '{% static 'standalone/sw.js' %}'
+            var app_static = '{% static 'standalone/sw.js' %}';
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('app_static')
+                navigator.serviceWorker.register(app_static)
                 .then((registration) => {
                     console.log('Service Worker registered with scope:', registration.scope);
                 }).catch((error) => {

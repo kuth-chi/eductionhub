@@ -1,29 +1,15 @@
-"""
-URL configuration for main project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from oauth2_provider import urls as oauth2_urls
-from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-# Manual
 from user.views import base
+from django.views.i18n import set_language
+from rest_framework import permissions
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -40,25 +26,30 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # swagger
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    
+]
+
+urlpatterns = i18n_patterns(
     # oauth2
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    # page handle
     path("", base.index, name="home"),
     # app urls
     path("accounts/", include("user.urls")),
     path("admin-edu/", include("administrator.urls", namespace="administrator")),
-    path("orgs/", include("organization.urls", namespace="organization")),
-    
-    # swagger
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-]
+    path("organizations/", include("organization.urls", namespace="organization")),
+    path("schools/", include("schools.urls", namespace="schools")),
+    # language switcher
+    path('set_language/', set_language, name='set_language'),
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL,
                           document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Rosetta for translation
 if 'rosetta' in settings.INSTALLED_APPS:
-    urlpatterns += [
-        re_path(r'^rosetta/', include('rosetta.urls'))
-    ]
+    urlpatterns += [path('rosetta/', include('rosetta.urls'))]

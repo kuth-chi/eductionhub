@@ -1,20 +1,27 @@
-const CACHE_NAME = 'pwa-cache-v1';
+const CACHE_NAME = 'app-cache-v1';
 const urlsToCache = [
     '/',
+    '/index.html',
     '/static/js/app.js',
     '/static/icons/icon-32.png',
     '/manifest.json',
-    
+    '/styles/main.css',
+    '/scripts/main.js',
+    '/images/logo.png'
 ];
 
 // Install the service worker
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
-            })
+        caches.open(CACHE_NAME).then(async cache => {
+            try {
+                // Attempt to add all URLs to the cache
+                await cache.addAll(urlsToCache);
+                console.log('All resources cached successfully');
+            } catch (error) {
+                console.warn('Failed to cache some resources:', error);
+            }
+        })
     );
 });
 
@@ -27,21 +34,20 @@ self.addEventListener('fetch', event => {
                 if (response) {
                     return response;
                 }
+                // Fetch from network if not cached
                 return fetch(event.request);
             })
-            // When create offline page need to replace this '/' with path of offline page
-            .catch(() => caches.match('/'))
+            .catch(() => caches.match('/')) // Serve home page or offline page if offline
     );
 });
 
 // Update the service worker
 self.addEventListener('activate', event => {
-    const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    if (!cacheWhitelist.includes(cacheName)) {
+                    if (cacheName !== CACHE_NAME) {
                         return caches.delete(cacheName);
                     }
                 })

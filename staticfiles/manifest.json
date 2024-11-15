@@ -1,6 +1,6 @@
 {
-    "name": "Education",
-    "short_name": "PWA",
+    "name": "Education Hub",
+    "short_name": "EDU HUB",
     "description": "Education Hub application.",
     "start_url": "/",
     "display": "standalone",

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'administrator.apps.AdministratorConfig',
     'ads.apps.AdsConfig',
+    'schools.apps.SchoolsConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -68,6 +69,7 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -167,11 +169,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 LANGUAGE_CODE = 'en'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGES = [
+    ('en', 'English'),
+    ('km', 'Khmer'),
+    # ...
+]
+TIME_ZONE = 'Asia/Phnom_Penh'
 USE_I18N = True
-
+USE_I18N_STANDARD = True
+USE_L10N = True
 USE_TZ = True
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, "locale"),

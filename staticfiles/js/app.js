@@ -39,42 +39,12 @@ themeToggleBtn.addEventListener('click', function() {
     
 });
 
+import sha256 from './lib/cryptojs/crypto-js/sha256.js';
+import hmacSHA512 from 'static/js/lib/crytojs/crypto-js/hmac-sha512';
+import Base64 from 'static/js/lib/crytojs/crypto-js/enc-base64';
 
-// Check service worker 
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/static/standalone/sw.js");
-}
-
-// Install Application button
-let installPrompt = null;
-const installButton = document.querySelector("#install");
-const toastInteractive = document.querySelector("#toast-interactive");
-
-// Listen for the beforeinstallprompt event
-window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    installPrompt = event;
-
-    // Show the install prompt popup
-    toastInteractive.style.display = "block";
-});
-
-// Handle the install button click
-installButton.addEventListener("click", () => {
-    if (installPrompt) {
-        installPrompt.prompt();
-        installPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            installPrompt = null;
-        });
-    }
-});
-
-// Optional: Close the toast notification when the close button is clicked
-document.querySelector("[data-dismiss-target]").addEventListener("click", () => {
-    toastInteractive.style.display = "none";
-});
+var nonce = new Date();
+var nonceStr = nonce.toString();
+const hashDigest = sha256(nonceStr + message);
+const hmacDigest = Base64.stringify(hmacSHA512(nonceStr + hashDigest));
+console.log(hmacDigest);

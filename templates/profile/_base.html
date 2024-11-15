@@ -14,6 +14,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
         <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
+        <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
                 <!-- Add this -->
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -52,7 +53,7 @@
         <script src="{% static 'js/htmx.min.js' %}"></script>
         <script src="{% static 'js/app.js' %}"></script>
         <script src="{% static 'libs/animejs/anime.min.js' %}"></script>
-        {% block script %}
+        {% block scripts %}
         {% endblock %}
     </body>
 </html>

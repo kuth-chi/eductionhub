@@ -3,25 +3,32 @@ This is custom tags to create a greeting based on time
 """
 from datetime import datetime
 
+import pytz
 from django import template
+from django.utils.timezone import activate, localtime
 
+from user.models import Profile
 
 register = template.Library()
 
 
 @register.filter
-def greeting(time=None):
-    """ Greeting based on time """
-    if not time:
-        time = datetime.now().hour
-    else:
-        time = int(time)
+def greeting(user):
+    """ Greeting based on user's local time """
+    user_profile = Profile.objects.get(user=user)
+    user_timezone = pytz.timezone(user_profile.timezone)
 
-    if 5 <= time < 12:
+    # Activate user's time zone
+    activate(user_timezone)
+
+    # Get the current time in the user's time zone
+    user_local_time = localtime().hour
+
+    if 5 <= user_local_time < 12:
         return "morning"
-    elif 12 <= time < 18:
+    elif 12 <= user_local_time < 18:
         return "afternoon"
-    elif 18 <= time < 22:
+    elif 18 <= user_local_time < 22:
         return "evening"
 
     return "night"
