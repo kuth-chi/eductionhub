@@ -51,10 +51,18 @@ jobs:
         with:
           name: python-app
 
-      - name: Unzip artifact for deployment
+      - name: Unzip release.zip (if it exists)
         run: |
-          # Ensure the deployment happens in the right location
-          unzip release.zip 
+          unzip -o release.zip -d .
+
+      - name: Extract output.tar.gz if it exists
+        run: |
+          if [ -f ./output.tar.gz ]; then
+            echo "Extracting output.tar.gz"
+            tar -xvzf ./output.tar.gz -C .
+          else
+            echo "No output.tar.gz file found."
+          fi
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
