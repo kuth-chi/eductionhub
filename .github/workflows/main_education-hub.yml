@@ -44,34 +44,30 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      - name: Unzip release.zip (if it exists)
+      - name: Upload and extract output.tar.gz
         run: |
-          unzip -o release.zip -d .
-
-      - name: Extract output.tar.gz if it exists
-        run: |
-          if [ -f ./output.tar.gz ]; then
+          if [ -f output.tar.gz ]; then
             echo "Extracting output.tar.gz"
-            tar -xvzf ./output.tar.gz -C .
+            tar -xvzf output.tar.gz -C /home/site/wwwroot
           else
-            echo "No output.tar.gz file found."
+            echo "output.tar.gz not found!"
           fi
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'education-hub'
-          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_97317126A6E4494281984A0ACBBE7F0A }}
 
       - name: Display URL of deployed app
-        run: |
+        run: | 
           echo "Deployed app URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+
