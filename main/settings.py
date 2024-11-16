@@ -19,7 +19,8 @@ DEBUG = os.environ["DEBUG"]
 ALLOWED_HOSTS = ["*"]
 CORS_ORIGIN_ALLOW_ALL = True
 if 'CODESPACE_NAME' in os.environ:
-    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
+    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{
+        os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +32,7 @@ with open(os.path.join(BASE_DIR, 'cert/private_key.pem'), 'rb') as f:
 # Load public key
 with open(os.path.join(BASE_DIR, 'cert/public_key.pem'), 'rb') as f:
     PUBLIC_KEY = f.read()
-    
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 # python -c 'import secrets; print(secrets.token_hex())'
@@ -74,7 +75,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'oauth2_provider.middleware.OAuth2TokenMiddleware', # OAuth2
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',  # OAuth2
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'user.middleware.profile.EnsureProfileMiddleware',
@@ -100,7 +101,8 @@ JWT_AUTH = {
 # OAuth2 Settingss
 OAUTH2_PROVIDER = {
     'DEFAULT_SCOPES': ['read', 'write', 'groups'],
-    'ALLOWED_REDIRECT_URIS': ['http://localhost:8100/callback'],  # Add your redirect URIs
+    # Add your redirect URIs
+    'ALLOWED_REDIRECT_URIS': ['http://localhost:8100/callback'],
 }
 
 REST_FRAMEWORK = {
