@@ -1,14 +1,13 @@
-import os
 import base64
-from django.http import JsonResponse
+import os
 from hashlib import sha256
-from django.http import JsonResponse, HttpResponseForbidden
+
+from django.http import HttpResponseForbidden, JsonResponse
 
 
 def header_matches_env_var(header_value):
     """
     Returns true if SHA256 of header_value matches WEBSITE_AUTH_ENCRYPTION_KEY.
-
     :param header_value: Value of the x-ms-auth-internal-token header.
     """
     env_var = os.getenv('WEBSITE_AUTH_ENCRYPTION_KEY')
