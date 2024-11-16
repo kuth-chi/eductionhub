@@ -14,13 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ["DEBUG"]
+DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
-CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = []
+
 if 'CODESPACE_NAME' in os.environ:
-    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{
-        os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
+    CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,7 +81,7 @@ MIDDLEWARE = [
     'user.middleware.profile.EnsureProfileMiddleware',
 ]
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # Ensure SESSION settings are properly configured
 SESSION_COOKIE_NAME = "auth_server_sessionid"
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
@@ -186,20 +186,17 @@ LOCALE_PATHS = [
 ]
 
 # Base settings
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Compressor Settings
-COMPRESS_ROOT = STATIC_ROOT
-COMPRESS_ENABLED = True
-
+STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Storage configuration using STORAGES setting
+
+
+# # Storage configuration using STORAGES setting
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',

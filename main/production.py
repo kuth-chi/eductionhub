@@ -7,9 +7,6 @@ from azure.identity import DefaultAzureCredential
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 # SECRET_KEY = os.environ['SECRET_KEY']
 
@@ -87,6 +84,8 @@ AZURE_STORAGE_URL = os.environ['AZURE_STORAGE_URL']
 AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # STORAGES setting for Django 5.x
 
