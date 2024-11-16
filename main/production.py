@@ -88,7 +88,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # STORAGES setting for Django 5.x
-
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.azure_storage.AzureStorage",
