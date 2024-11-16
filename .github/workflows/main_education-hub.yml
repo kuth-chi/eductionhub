@@ -54,13 +54,8 @@ jobs:
       - name: Unzip artifact for deployment
         run: |
           # Ensure the deployment happens in the right location
-          cd /home/site/wwwroot  # Navigate to the right directory on Azure
-          unzip /tmp/release.zip  # Adjust if your artifact is stored elsewhere
-
-      - name: Clean up unused files (Optional)
-        run: |
-          # Clean up any unnecessary files to save space
-          rm -rf /home/site/wwwroot/large-unnecessary-files
+          cd /home/site/wwwroot 
+          unzip /tmp/release.zip 
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
