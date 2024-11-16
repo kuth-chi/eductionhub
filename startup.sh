@@ -2,4 +2,4 @@
 python manage.py migrate
 gunicorn --workers 2 --threads 4 --timeout 60 --access-logfile \
     '-' --error-logfile '-' --bind=0.0.0.0:$PORT \
-     --chdir=/home/site/wwwroot main.wsgi:application
+     --chdir=/home/site/wwwroot main.wsgi
