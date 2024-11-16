@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'administrator.apps.AdministratorConfig',
     'ads.apps.AdsConfig',
     'schools.apps.SchoolsConfig',
+    'health_check.apps.HealthCheckConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [
