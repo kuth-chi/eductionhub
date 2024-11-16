@@ -66,6 +66,8 @@ jobs:
         with:
           app-name: 'education-hub'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_97317126A6E4494281984A0ACBBE7F0A }}
+          package: release.zip
+        
 
       - name: Display URL of deployed app
         run: | 
