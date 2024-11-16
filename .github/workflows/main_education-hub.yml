@@ -54,8 +54,7 @@ jobs:
       - name: Unzip artifact for deployment
         run: |
           # Ensure the deployment happens in the right location
-          cd /home/site/wwwroot 
-          unzip /tmp/release.zip 
+          unzip release.zip 
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
