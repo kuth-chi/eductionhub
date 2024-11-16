@@ -32,7 +32,7 @@ urlpatterns = [
     
 ]
 
-urlpatterns = i18n_patterns(
+urlpatterns += i18n_patterns(
     # oauth2
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path("", base.index, name="home"),
