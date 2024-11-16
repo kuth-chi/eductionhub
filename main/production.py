@@ -1,14 +1,16 @@
 import os
 from main.settings import *
 from main.settings import BASE_DIR
+
 from azure.identity import DefaultAzureCredential
+
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else ["*"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-SECRET_KEY = os.environ['SECRET_KEY']
+# SECRET_KEY = os.environ['SECRET_KEY']
 
 INSTALLED_APPS += [
     "corsheaders",
@@ -64,7 +66,7 @@ if not DEBUG:
                 "PORT": parameters["port"],
             }
         }
-        print("DATABASES: ", DATABASES)
+
 else:
     DATABASES = {
         'default': {
@@ -100,7 +102,6 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
-    # Example for additional storage classes
     "ROSETTA_STORAGE_CLASS": {
         "BACKEND": "rosetta.storage.CacheRosettaStorage",
     },
@@ -113,16 +114,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Compressor settings
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_ENABLED = True
-
-# Static files finders
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
-]
 
 # Cache configuration with Redis (commented out but ready for use)
 # CACHES = {
