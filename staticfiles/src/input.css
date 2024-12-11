@@ -31,4 +31,21 @@
     animation: gradientBackground 15s ease-in-out infinite;
   }
 }
+
+
+@font-face {
+  font-family: 'Battambang-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/Battambang-Regular.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Khmer-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/Khmer-Regular.ttf) format('ttf');
+}
+
   

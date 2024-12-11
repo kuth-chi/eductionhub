@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-21 07:55+0700\n"
+"POT-Creation-Date: 2024-11-23 17:03+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: .\administrator\views.py:17 .\administrator\views.py:32
 msgid "Admin"
 msgstr ""
@@ -25,16 +26,168 @@ msgstr ""
 msgid "Ads Manager"
 msgstr ""
 
-#: .\templates\profile\index.html:95
-msgid "Good Morning"
+#: .\schools\models\OnlineProfile.py:10
+msgid "Base URL of the platform"
 msgstr ""
 
-#: .\templates\profile\index.html:96
-msgid "Good Afternoon"
+#: .\schools\models\OnlineProfile.py:24
+msgid "URL of the school's profile on the platform"
 msgstr ""
 
-#: .\templates\profile\index.html:97
-msgid "Good Evening"
+#: .\schools\models\OnlineProfile.py:26
+msgid "Username or handle on the platform"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:15
+msgid "Description about the school type"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:23
+msgid "School Type"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:37
+msgid "logo"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:38
+msgid "name"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:40
+msgid "local name"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:42
+msgid "short name"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:43
+msgid "code"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:45
+msgid "The school description"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:47
+msgid "type"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:49
+msgid "established"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:51
+msgid "founder"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:53
+msgid "president"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:55
+msgid "endowment"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:57
+msgid "location"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:58
+msgid "motto"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:58
+msgid "N/A"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:59
+msgid "tuition"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:61
+msgid "Unnamed School"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:66
+msgid "school"
+msgstr ""
+
+#: .\schools\models\schoolsModel.py:67
+msgid "schools"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:66
+msgid "Click upload"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:66
+msgid "or drag and drop"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:67
+msgid "MAX"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:75
+msgid "LOGO"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:193
+msgid "e.g, 15.3654,104.2586"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:208
+msgid "Cancel"
+msgstr ""
+
+#: .\schools\templates\schools\create.html:209
+msgid "Save School"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:37
+msgid "Enroll Now"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:105
+msgid "Add school"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:112
+msgid "Sorting"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:117
+msgid "Ascending"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:121
+msgid "Deascending"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:128
+msgid "Filter"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:136
+msgid "Category"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:143
+msgid "University"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:150
+msgid "Institude"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:157
+msgid "High school"
+msgstr ""
+
+#: .\schools\templates\schools\index.html:164
+msgid "Community"
 msgstr ""
 
 #: .\user\models.py:28

@@ -39,12 +39,12 @@ themeToggleBtn.addEventListener('click', function() {
     
 });
 
-import sha256 from './lib/cryptojs/crypto-js/sha256.js';
-import hmacSHA512 from 'static/js/lib/crytojs/crypto-js/hmac-sha512';
-import Base64 from 'static/js/lib/crytojs/crypto-js/enc-base64';
+// import sha256 from 'static/js/lib/crytojs/crypto-js/sha256.js';
+// import hmacSHA512 from 'static/js/lib/crytojs/crypto-js/hmac-sha512';
+// import Base64 from 'static/js/lib/crytojs/crypto-js/enc-base64';
 
-var nonce = new Date();
-var nonceStr = nonce.toString();
-const hashDigest = sha256(nonceStr + message);
-const hmacDigest = Base64.stringify(hmacSHA512(nonceStr + hashDigest));
-console.log(hmacDigest);
+// var nonce = new Date();
+// var nonceStr = nonce.toString();
+// const hashDigest = sha256(nonceStr + message);
+// const hmacDigest = Base64.stringify(hmacSHA512(nonceStr + hashDigest));
+// console.log(hmacDigest);

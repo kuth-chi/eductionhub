@@ -1,12 +1,11 @@
 import os
 from main.settings import *
 from main.settings import BASE_DIR
-
+from logging.handlers import TimedRotatingFileHandler
 from azure.identity import DefaultAzureCredential
 
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
-print("Allowed hosts", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CORS_ALLOW_ALL_ORIGINS = True
 DEBUG = False
@@ -17,19 +16,12 @@ INSTALLED_APPS += [
     "storages",
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE += [
 
-    'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     # 'django.middleware.cache.UpdateCacheMiddleware',  # new middleware cache
-    'django.middleware.common.CommonMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',  # new middleware cache after
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 TEMPLATES = [
@@ -136,14 +128,21 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'app.log',
+            'when': 'midnight',
+            'interval': 1, # default interval every day
+            'backupCount': 730, # Keeps log for 730 days or 2 years old
+        }
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'DEBUG' if DEBUG else 'WARNING',
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },
