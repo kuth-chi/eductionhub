@@ -21,7 +21,6 @@ class SchoolType(DefaultField):
         ordering = ["type"]
         verbose_name = _('School Type')
 
-
 def school_logo_upload_path(instance, filename):
     """ Generate a file path for new school logo uploads. """
     ext = filename.split('.')[-1]
