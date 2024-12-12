@@ -92,9 +92,6 @@ class SchoolDetailView(DetailView):
 
         return context
 
-
-
-
 class SchoolListView(ListView):
     template_name = 'schools/index.html'
     model = School
