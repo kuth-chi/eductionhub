@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'oauth2_provider',
+    'rest_framework.authtoken',
     'compressor',
     'rosetta',  # http://127.0.0.1:8000/rosetta/pick/?rosetta
     'drf_yasg',
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     'ads.apps.AdsConfig',
     'schools.apps.SchoolsConfig',
     'health_check.apps.HealthCheckConfig',
+    'api.apps.ApiConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -107,11 +109,16 @@ OAUTH2_PROVIDER = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',      
     ),
 }
 
@@ -124,6 +131,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],

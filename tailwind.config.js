@@ -1,11 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./templates/**/*.html', './static/**/*.{js,jsx,ts,tsx,html}'],
-  darkMode: 'class',
   content: [
-      './templates/**/*.html',
-      './node_modules/flowbite/**/*.js',
+    './templates/**/*.html', 
+    './static/**/*.{js,jsx,ts,tsx,html}', 
+    './node_modules/flowbite/**/*.js'
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -17,8 +17,26 @@ module.exports = {
         'evening-gradient': 'linear-gradient(to right, #FFA500, #DC143C)',
         'night-gradient': 'linear-gradient(to right, #000080, #191970)',
       },
+      
     },
     fontFamily: {
+      'localization': [
+        'Battambang-Regular', 
+        'Khmer-Regular', 
+        'sans-serif', 
+        'Inter', 
+        'Monospace', 
+        '-apple-system', 
+        'Segoe UI', 'system-ui', 
+        'Roboto', 'Arial', 
+        'Noto Sans', 
+        'FreeSans', 
+        'Apple Color Emoji', 
+        'Segoe UI Emoji', 
+        'Segoe UI Symbol', 
+        'Noto Color Emoji',
+
+      ], 
       'body': [
         'Inter', 
         'ui-sans-serif', 
@@ -34,7 +52,9 @@ module.exports = {
         'Apple Color Emoji', 
         'Segoe UI Emoji', 
         'Segoe UI Symbol', 
-        'Noto Color Emoji'
+        'Noto Color Emoji',
+        'Battambang-Regular',
+        'Khmer-Regular',
       ],
       'sans': [
         'Inter', 
@@ -51,7 +71,9 @@ module.exports = {
         'Apple Color Emoji', 
         'Segoe UI Emoji', 
         'Segoe UI Symbol', 
-        'Noto Color Emoji'
+        'Noto Color Emoji',
+        'serif',
+        'Khmer-Regular',
       ]
     },
   },

@@ -38,7 +38,7 @@ html,
   -moz-tab-size: 4; /* 3 */
   -o-tab-size: 4;
      tab-size: 4; /* 3 */
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji; /* 4 */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji, serif, Khmer-Regular; /* 4 */
   font-feature-settings: normal; /* 5 */
   font-variation-settings: normal; /* 6 */
   -webkit-tap-highlight-color: transparent; /* 7 */
@@ -1572,6 +1572,10 @@ input:checked + .toggle-bg {
   display: table;
 }
 
+.\!grid {
+  display: grid !important;
+}
+
 .grid {
   display: grid;
 }
@@ -2622,8 +2626,16 @@ input:checked + .toggle-bg {
   vertical-align: middle;
 }
 
+.font-body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji, Battambang-Regular, Khmer-Regular;
+}
+
+.font-localization {
+  font-family: Battambang-Regular, Khmer-Regular, sans-serif, Inter, Monospace, -apple-system, Segoe UI, system-ui, Roboto, Arial, Noto Sans, FreeSans, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+
 .font-sans {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji, serif, Khmer-Regular;
 }
 
 .text-2xl {
@@ -2989,6 +3001,22 @@ input:checked + .toggle-bg {
     background-size: 400% 400%;
     animation: gradientBackground 15s ease-in-out infinite;
   }
+
+@font-face {
+  font-family: 'Battambang-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/Battambang-Regular.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Khmer-Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/Khmer-Regular.ttf) format('ttf');
+}
 
 .first-letter\:float-left::first-letter {
   float: left;
@@ -4069,4 +4097,5 @@ input:checked + .toggle-bg {
   --tw-translate-x: 25%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+
   
