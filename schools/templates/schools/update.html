@@ -1,0 +1,35 @@
+{% extends './_base.html' %}
+{% load static i18n %}
+
+{% block title %}
+    {{ title }}
+{% endblock title %}
+
+
+{% block styles %}
+{% endblock styles %}
+{% block head_scripts %}
+{% endblock head_scripts %}
+
+{% block content %}  
+{% endblock content %}
+
+
+{% block dock %}
+
+{% endblock dock %}
+
+
+{% block scripts %}
+{% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% for message in messages %}
+                if ("{{ message.level_tag }}" == "success") {
+                    document.dispatchEvent(new Event('show-toast'));
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+{% endblock scripts %}
