@@ -79,7 +79,6 @@ AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # STORAGES setting for Django 5.x
 STORAGES = {
@@ -89,7 +88,7 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "expiration_secs": None,
+            "expiration_secs": 3600,
         },
     },
     "staticfiles": {
@@ -107,6 +106,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Compressor settings
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_ENABLED = True
+COMPRESS_URL = STATIC_URL
 
 # Cache configuration with Redis (commented out but ready for use)
 # CACHES = {
@@ -119,6 +119,14 @@ COMPRESS_ENABLED = True
 #         },
 #     }
 # }
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache'), 
+        'TIMEOUT': 36000,
+    }
+}
 
 # Logging configuration
 LOGGING = {

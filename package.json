@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "postcss ./static/src/input.css -o ./static/css/style.css --watch"
+    "build:css": "postcss ./static/src/input.css -o ./static/css/style.css --watch"
   },
   "devDependencies": {
     "postcss-import": "^16.1.0",
