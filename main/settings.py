@@ -194,6 +194,13 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, "locale"),
 ]
 
+# Static files finders
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
+
 # Base settings
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
@@ -202,9 +209,6 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-
 # # Storage configuration using STORAGES setting
 STORAGES = {
     'default': {
@@ -220,13 +224,6 @@ STORAGES = {
         },
     },
 }
-
-# Static files finders
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
-]
 
 # Cirtificate Settings
 # Path to your private and public keys for JWT

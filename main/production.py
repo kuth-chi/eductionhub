@@ -20,6 +20,7 @@ MIDDLEWARE += [
 
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    'django.middleware.gzip.GZipMiddleware',
     # 'django.middleware.cache.UpdateCacheMiddleware',  # new middleware cache
     # 'django.middleware.cache.FetchFromCacheMiddleware',  # new middleware cache after
 ]
@@ -98,6 +99,7 @@ STORAGES = {
         "BACKEND": "rosetta.storage.CacheRosettaStorage",
     },
 }
+
 
 # Static files configuration
 STATIC_URL = '/static/'

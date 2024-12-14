@@ -19,8 +19,8 @@
         <!-- App -->
         <link rel="manifest" href="{% static 'manifest.json' %}" />
         <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
-        {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        {% compress css %}
         {% endcompress %}
         <script>
             // On page load or when changing themes, best to add inline in `head` to avoid FOUC
