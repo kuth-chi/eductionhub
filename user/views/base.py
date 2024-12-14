@@ -8,13 +8,13 @@ import string
 import base64
 import hashlib
 from django.http import JsonResponse
+from django.http import response
 from django.views.decorators.csrf import csrf_exempt
 from user.views.utils import generate_jwt, verify_jwt
 from django.shortcuts import render
 from django.urls import reverse
+from schools.models.schoolsModel import School
 
-
-UNSPLASH = requests.get("https://picsum.photos/v2/list?page=2&limit=54", timeout=10).json()
 
 def index(request):
     '''
@@ -24,19 +24,11 @@ def index(request):
 
     code_challenge = hashlib.sha256(code_verifier.encode('utf-8')).digest()
     code_challenge = base64.urlsafe_b64encode(code_challenge).decode('utf-8').replace('=', '')
-    print(code_challenge)
-
-    # Resolve the URL for 'schools-list' using its namespace and name
-    school_url_path = reverse('api:schools-view')
-    school_url = request.build_absolute_uri(school_url_path)
-    # Use the full URL for the request
-    SCHOOL = requests.get(school_url, timeout=10).json()
-
-    image_urls = UNSPLASH    
+    SCHOOL = School.objects.all()    
     context = {
         "page_title": "Home",
         "header_title": "Home",
-        'school_data': SCHOOL,  # Include the school data in the context
+        'school_data': SCHOOL, 
     }
     
     template_name = "pages/home.html"
