@@ -3399,6 +3399,14 @@ input:checked + .toggle-bg {
   border-color: rgb(114 59 19 / var(--tw-border-opacity));
 }
 
+.border-gray-300\/20 {
+  border-color: rgb(209 213 219 / 0.2);
+}
+
+.border-gray-300\/30 {
+  border-color: rgb(209 213 219 / 0.3);
+}
+
 .border-e-gray-50 {
   --tw-border-opacity: 1;
   border-inline-end-color: rgb(249 250 251 / var(--tw-border-opacity));
@@ -3902,6 +3910,10 @@ input:checked + .toggle-bg {
 .bg-yellow-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(99 49 18 / var(--tw-bg-opacity));
+}
+
+.bg-gray-50\/30 {
+  background-color: rgb(249 250 251 / 0.3);
 }
 
 .bg-opacity-0 {
