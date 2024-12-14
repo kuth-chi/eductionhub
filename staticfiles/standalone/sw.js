@@ -32,14 +32,12 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Cache hit - return response
                 if (response) {
                     return response;
                 }
-                // Fetch from network if not cached
                 return fetch(event.request);
             })
-            .catch(() => caches.match('/')) // Serve home page or offline page if offline
+            .catch(() => caches.match('/'))
     );
 });
 

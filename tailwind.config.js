@@ -2,7 +2,11 @@
 module.exports = {
   content: [
     './templates/**/*.html', 
-    './static/**/*.{js,jsx,ts,tsx,html}', 
+    './static/**/*.{js,jsx,ts,tsx,html}',
+    './templates/**/*.html',
+    './static/**/*.js',
+    './static/**/*.css',
+    './static/**/*.vue', 
     './node_modules/flowbite/**/*.js'
   ],
   darkMode: 'class',
