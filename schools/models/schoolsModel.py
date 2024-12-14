@@ -36,29 +36,49 @@ def school_cover_image_upload_path(instance, filename):
     return os.path.join('uploads/schools/cover/', filename)
 
 
+class Address(models.Model):
+    """ Represents address model """
+    name = models.CharField(max_length=128, blank=True, verbose_name=_('name'))
+    street = models.CharField(max_length=255, blank=True, verbose_name=_('street'))
+    city = models.CharField(max_length=128, blank=True, verbose_name=_('city'))
+    state = models.CharField(max_length=128, blank=True, verbose_name=_('state'))
+    zip_code = models.CharField(max_length=10, blank=True, verbose_name=_('zip code'))
+    country = models.CharField(max_length=128, blank=True, verbose_name=_('country'))
+    slug = models.SlugField(max_length=255, blank=True, unique=True)
+
+    # References
+    schools = models.ManyToManyField('School', related_name="school_addresses")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.street + " " + self.city + " " + self.state + " " + self.zip_code + " " + self.country)
+        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return str(self.street) + ", " + str(self.city) + ", " + str(self.state) + ", " + str(self.zip_code) + ", " + str(self.country)
+    
+    class Meta:
+        verbose_name = _('address')
+        verbose_name_plural = _('addresses')
+        ordering = ['name']
+        index_together = ['street', 'city','state', 'zip_code', 'country']
+
+
 class School(models.Model):
     """ Represents for School models """
-    logo = models.ImageField(
-        blank=True, upload_to=school_logo_upload_path, null=True, verbose_name=_('logo'))
-    cover_image = models.ImageField(upload_to=school_cover_image_upload_path, blank=True, null=True, verbose_name=_('cover image'))
+    logo = models.ImageField(upload_to=school_logo_upload_path, null=True, blank=True, verbose_name=_('logo'))
+    cover_image = models.ImageField(upload_to=school_cover_image_upload_path, null=True, blank=True, verbose_name=_('photo'))
     name = models.CharField(max_length=75, blank=True, verbose_name=_('name'))
-    local_name = models.CharField(
-        max_length=128, blank=True, verbose_name=_('local name'))
-    short_name = models.CharField(
-        max_length=25, blank=True, verbose_name=_('short name'))
+    local_name = models.CharField(max_length=128, blank=True, verbose_name=_('local name'))
+    short_name = models.CharField(max_length=25, blank=True, verbose_name=_('short name'))
     code = models.CharField(max_length=15, blank=True, verbose_name=_('code'))
-    description = models.TextField(
-        blank=True, default=_("The school description"))
-    established = models.DateField(
-        null=True, blank=True, verbose_name=_('established'))
-    founder = models.CharField(
-        max_length=125, blank=True, verbose_name=_('founder'))
-    president = models.CharField(
-        max_length=125, blank=True, verbose_name=_('president'))
-    endowment = models.DecimalField(
-        max_digits=18, decimal_places=2, blank=True, default=0.00, verbose_name=_('endowment'))
-    location = models.CharField(
-        max_length=255, blank=True, verbose_name=_('location'))
+    description = models.TextField(blank=True, default=_("The school description"))
+    established = models.DateField(null=True, blank=True, verbose_name=_('established'))
+    founder = models.CharField(max_length=125, blank=True, verbose_name=_('founder'))
+    president = models.CharField(max_length=125, blank=True, verbose_name=_('president'))
+    endowment = models.DecimalField(max_digits=18, decimal_places=2, blank=True, default=0.00, verbose_name=_('endowment'))
+    location = models.CharField(max_length=255, blank=True, verbose_name=_('location'))
     motto = models.CharField(max_length=250, blank=True, verbose_name=_('motto'), default=_('N/A'))	
     tuition = models.DecimalField(max_digits=18, decimal_places=2, blank=True, default=0.00, verbose_name=(_("tuition")))
     

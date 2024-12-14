@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
-from rest_framework import filters
 from rest_framework import viewsets, status
 from rest_framework.renderers import JSONRenderer
 
@@ -32,7 +31,6 @@ class SchoolViewSet(viewsets.ViewSet):
     """
     ViewSet for handling CRUD operations for School, with filtering, search, and ordering.
     """
-    renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
     # lookup_field = 'uuid'
 
@@ -60,6 +58,9 @@ class SchoolViewSet(viewsets.ViewSet):
         else:
             queryset = queryset.order_by('created_date')
 
+        if not queryset:
+            return Response([], status=status.HTTP_200_OK)
+         
         serializer = SchoolSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -303,14 +303,15 @@
     <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
         <div class="grow">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 ease-in duration-300">
+      
                 {% for s in school_data %}
-                    <div style="cursor: pointer;" class="relative {% if s.cover_image.height > s.cover_image.width %} row-span-2 {% endif %}"
-                        onclick="window.open('{% url 'schools:school-detail' s.pk %}')" 
+                    <div style="cursor: pointer;" class="relative {% if s.school_photo.height > s.school_photo.width %} row-span-2 {% endif %}"
+                        onclick="window.open('{% url 'schools:school-detail' s.pk %}')"
                         rel="noopener noreferrer" title="{{ s.name }}">
-                        
+                
                         {% if s.cover_image %}
-                            <img class="h-full max-w-full rounded-lg hover:brightness-105" src="{{ s.cover_image }}"
-                                alt="{{ s.name }}">
+                            <img class="h-full max-w-full rounded-lg hover:brightness-105" 
+                                src="{{ s.school_photo.url }}" alt="{{ s.name|default:'School image' }}">
                         {% else %}
                             <!-- Display short_name if cover_image is not available -->
                             <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
@@ -323,9 +324,8 @@
                         </div>
                     </div>
                 {% empty %}
-                    <p>No schools available.</p>
+                    <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
                 {% endfor %}
-            
             </div>
         </div>
     </div>

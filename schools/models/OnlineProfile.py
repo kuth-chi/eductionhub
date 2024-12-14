@@ -28,14 +28,10 @@ class Platform(models.Model):
 
 class PlatformProfile(models.Model):
     """Represents a profile of a school on a specific online platform"""
-    school = models.ForeignKey(
-        School, on_delete=models.CASCADE, related_name="platform_profiles_school")
-    platform = models.ForeignKey(
-        Platform, on_delete=models.CASCADE, related_name="platform_profiles_platform")
-    profile_url = models.URLField(blank=True, help_text=_(
-        "URL of the school's profile on the platform"))
-    username = models.CharField(max_length=128, blank=True, help_text=_(
-        "Username or handle on the platform"))
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="platform_profiles_school")
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE, related_name="platform_profiles_platform")
+    profile_url = models.URLField(blank=True, help_text=_("URL of the school's profile on the platform"))
+    username = models.CharField(max_length=128, blank=True, help_text=_("Username or handle on the platform"))
     
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     created_date = models.DateTimeField(auto_now_add=True)
