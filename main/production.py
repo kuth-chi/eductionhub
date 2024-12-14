@@ -89,7 +89,7 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "expiration_secs": 3600,
+            "expiration_secs": None,
         },
     },
     "staticfiles": {
@@ -104,11 +104,20 @@ STORAGES = {
 # Static files configuration
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 
 # Compressor settings
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_ENABLED = True
 COMPRESS_URL = STATIC_URL
+COMPRESS_OFFLINE = True 
+COMPRESS_CSS_FILTERS = [
+    "compressor.filters.css_default.CssAbsoluteFilter",
+    "compressor.filters.cssmin.CSSMinFilter",
+]
+COMPRESS_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 # Cache configuration with Redis (commented out but ready for use)
 # CACHES = {

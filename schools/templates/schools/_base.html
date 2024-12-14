@@ -1,7 +1,6 @@
 {% load compress %}
 {% load static %}
 {% load humanize i18n %}
-{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -18,8 +17,8 @@
         <!-- App -->
         <link rel="manifest" href="{% static 'manifest.json' %}" />
         <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
-        {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        {% compress css %}
         {% endcompress %}
         <script>
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

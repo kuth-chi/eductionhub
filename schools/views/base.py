@@ -10,6 +10,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from schools.models.OnlineProfile import PlatformProfile
 from schools.models.schoolsModel import School
@@ -29,13 +30,16 @@ class IndexView(TemplateView):
         return context
 
 
-class SchoolCreateView(CreateView):
+class SchoolCreateView(LoginRequiredMixin, CreateView):
     ''' This is extended CreateView class to generate dynamic forms for School models '''
     model = School
     template_name = "schools/create.html"
     success_url = reverse_lazy("schools:index")
     fields = ("name", "logo", "local_name", "short_name", "description",
               "established", "type", "founder", "president", "endowment", "location")
+
+    login_url = '/accounts/login/'  
+    redirect_field_name = 'next'  
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -54,7 +58,6 @@ class SchoolCreateView(CreateView):
         return ctx
 
     def form_valid(self, form):
-        # Ensure `type` handles empty selections
         form.cleaned_data['type'] = form.cleaned_data.get('type') or []
         if not form.instance.uuid:
             form.instance.uuid = uuid.uuid4()
