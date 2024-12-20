@@ -3,9 +3,11 @@ from main.settings import *
 from main.settings import BASE_DIR
 from logging.handlers import TimedRotatingFileHandler
 from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient
 
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS += []
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CORS_ALLOW_ALL_ORIGINS = True
 DEBUG = False
@@ -70,16 +72,15 @@ else:
 
 # Static files (CSS, JavaScript, Images)
 # Azure Storage settings
-AZURE_ACCOUNT_NAME = os.environ['AZURE_ACCOUNT_NAME']
-AZURE_CONTAINER = os.environ['AZURE_CONTAINER']
-AZURE_ACCOUNT_KEY = os.environ['AZURE_ACCOUNT_KEY']
-AZURE_STORAGE_URL = os.environ['AZURE_STORAGE_URL']
+AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
+AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL")
 
 # Media files configuration
-AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
-MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # STORAGES setting for Django 5.x
 STORAGES = {
@@ -89,13 +90,15 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "expiration_secs": None,
+            "custom_domain": AZURE_CUSTOM_DOMAIN,
+            "expiration_secs": 3600, 
+            "token_credential": DefaultAzureCredential(),
         },
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
-    "ROSETTA_STORAGE_CLASS": {
+    "rosetta_storage_class": { 
         "BACKEND": "rosetta.storage.CacheRosettaStorage",
     },
 }
