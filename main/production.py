@@ -92,7 +92,6 @@ STORAGES = {
             "azure_container": AZURE_CONTAINER,
             "custom_domain": AZURE_CUSTOM_DOMAIN,
             "expiration_secs": 3600, 
-            "token_credential": DefaultAzureCredential(),
         },
     },
     "staticfiles": {
