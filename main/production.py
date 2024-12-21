@@ -98,7 +98,7 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             # "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "credential": credential,
+            "AZURE_TOKEN_CREDENTIAL": credential,
             # "custom_domain": AZURE_CUSTOM_DOMAIN,
             # "expiration_secs": 3600, 
         },
