@@ -84,12 +84,6 @@ MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 CSRF_TRUSTED_ORIGINS += [f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"]
 
-# Use DefaultAzureCredential for authentication
-credential = DefaultAzureCredential()
-blob_service_client = BlobServiceClient(
-    account_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
-    credential=credential
-)
 # STORAGES setting for Django 5.x
 STORAGES = {
     "default": {
@@ -98,7 +92,7 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             # "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "AZURE_TOKEN_CREDENTIAL": credential,
+            "token_credential": DefaultAzureCredential(),
             # "custom_domain": AZURE_CUSTOM_DOMAIN,
             # "expiration_secs": 3600, 
         },
