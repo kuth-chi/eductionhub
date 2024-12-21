@@ -7,8 +7,9 @@ from azure.storage.blob import BlobServiceClient
 
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
-ALLOWED_HOSTS += []
+ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+
 CORS_ALLOW_ALL_ORIGINS = True
 DEBUG = False
 # SECRET_KEY = os.environ['SECRET_KEY']
@@ -81,17 +82,25 @@ AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL")
 AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+CSRF_TRUSTED_ORIGINS += [f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"]
 
+# Use DefaultAzureCredential for authentication
+credential = DefaultAzureCredential()
+blob_service_client = BlobServiceClient(
+    account_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net",
+    credential=credential
+)
 # STORAGES setting for Django 5.x
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.azure_storage.AzureStorage",
         "OPTIONS": {
             "account_name": AZURE_ACCOUNT_NAME,
-            "account_key": AZURE_ACCOUNT_KEY,
+            # "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "custom_domain": AZURE_CUSTOM_DOMAIN,
-            "expiration_secs": 3600, 
+            "credential": credential,
+            # "custom_domain": AZURE_CUSTOM_DOMAIN,
+            # "expiration_secs": 3600, 
         },
     },
     "staticfiles": {
