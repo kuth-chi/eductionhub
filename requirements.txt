@@ -6,7 +6,7 @@ azure-identity==1.19.0
 azure-storage-blob==12.21.0
 certifi==2024.7.4
 cffi==1.16.0
-charset-normalizer==3.3.2
+charset-normalizer==3.4.1
 cryptography==42.0.8
 Django==5.0.7
 django-appconf==1.0.6
