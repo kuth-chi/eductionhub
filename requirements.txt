@@ -29,7 +29,7 @@ msal==1.30.0
 msal-extensions==1.2.0
 oauthlib==3.2.2
 packaging==24.1
-pillow==10.4.0
+pillow==11.1.0
 polib==1.2.0
 portalocker==2.10.1
 psycopg==3.2.1
