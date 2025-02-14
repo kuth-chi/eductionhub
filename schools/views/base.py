@@ -81,11 +81,7 @@ class SchoolDetailView(DetailView):
         context['educational_levels'] = school.educational_levels.all()
         context['types'] = school.type.all()
         context['platforms'] = school.platforms.all()
-
-        # Fetch PlatformProfiles for this school
         context['platform_profiles'] = PlatformProfile.objects.filter(school=school)
-
-        # Set additional context
         context['title'] = "School Information"
         context['active'] = "active"
 

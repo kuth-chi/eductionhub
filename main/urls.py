@@ -37,6 +37,7 @@ urlpatterns += i18n_patterns(
     # oauth2
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path("", base.index, name="home"),
+    path('school/type/<str:type>/', base.index, name='home_type'),
     # app urls
     path("accounts/", include("user.urls")),
     path("admin-edu/", include("administrator.urls", namespace="administrator")),

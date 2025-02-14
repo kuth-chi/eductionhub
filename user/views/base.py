@@ -11,28 +11,29 @@ from django.http import JsonResponse
 from django.http import response
 from django.views.decorators.csrf import csrf_exempt
 from user.views.utils import generate_jwt, verify_jwt
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from schools.models.schoolsModel import School
+from schools.models.schoolsModel import School, SchoolType
 
 
-def index(request):
-    '''
-    Function to render home page
-    '''
-    code_verifier = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(random.randint(43, 128)))
-
-    code_challenge = hashlib.sha256(code_verifier.encode('utf-8')).digest()
-    code_challenge = base64.urlsafe_b64encode(code_challenge).decode('utf-8').replace('=', '')
-    SCHOOL = School.objects.all()    
+def index(request, type=None):
+    print('Type: ', type)
+    if type:
+        try:
+            SCHOOL = School.objects.filter(type__type__iexact = type).distinct()        
+        except SchoolType.DoesNotExist:
+            SCHOOL = School.objects.none()
+    else:
+        SCHOOL = School.objects.all()
+        
     context = {
         "page_title": "Home",
         "header_title": "Home",
         'school_data': SCHOOL, 
     }
-    
-    template_name = "pages/home.html"
-    return render(request, template_name, context)
+
+    return render(request, "pages/home.html", context)
+
 
 
 
