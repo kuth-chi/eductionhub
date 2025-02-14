@@ -288,35 +288,53 @@
     </section>
 
     <div class="flex flex-wrap items-center justify-center my-8 md:my-12 sticky bg-gray-50 dark:bg-gray-800">
-        <button type="button"
+        <button onclick="window.location.href='/'"
+            type="button"
             class="text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800">All
-            categories</button>
-        <button type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Public School</button>
-        <button type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Private Schools</button>
-        <button type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">International Schools</button>
-        <button type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Scholarship</button>
+            categories
+        </button>
+        <button onclick="window.location.href='{% url 'home_type' 'public' %}'"
+            type="button"
+            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
+            Public School
+        </button>
+        
+        <button onclick="window.location.href='{% url 'home_type' 'private' %}'" type="button"
+            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
+            Private Schools
+        </button>
+        <button onclick="window.location.href='{% url 'home_type' 'international' %}'" type="button"
+            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
+            International Schools
+        </button>
+        <button onclick="window.location.href='{% url 'home_type' 'public' %}'" type="button"
+            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
+            Scholarship
+        </button>
     </div>
     <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
         <div class="grow">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 ease-in duration-300">
       
                 {% for s in school_data %}
-                    <div style="cursor: pointer;" class="relative {% if s.school_photo.height > s.school_photo.width %} row-span-2 {% endif %}"
-                        onclick="window.open('{% url 'schools:school-detail' s.pk %}')"
+                    <div style="cursor: pointer;" class="relative {% if s.cover_image.height > s.cover_image.width %} row-span-2 {% endif %} hover:shadow shadow-md"
+                        onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
                         rel="noopener noreferrer" title="{{ s.name }}">
                 
                         {% if s.cover_image %}
                             <img class="h-full max-w-full rounded-lg hover:brightness-105" 
-                                src="{{ s.school_photo.url }}" alt="{{ s.name|default:'School image' }}">
+                                src="{{ s.cover_image.url }}" alt="{{ s.name|default:'School image' }}">
                         {% else %}
+                            {% if s.logo %}
+                            <img class="h-full max-w-full rounded-lg hover:brightness-105" 
+                            src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
+                            
+                            {% else %}
                             <!-- Display short_name if cover_image is not available -->
                             <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
-                                {{ s.short_name }}
+                                {{ s.short_name|slice:":1"|upper }}
                             </div>
+                            {% endif %}
                         {% endif %}
                 
                         <div class="absolute bottom-0 bg-gray-800 bg-opacity-70 px-2 py-1 rounded-lg text-white text-md">
