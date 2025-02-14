@@ -39,7 +39,7 @@ pycparser==2.22
 PyJWT==2.10.1
 python-dotenv==1.0.1
 pytz==2025.1
-pywin32==308
+# pywin32==308
 PyYAML==6.0.2
 rcssmin==1.1.2
 redis==5.2.1
