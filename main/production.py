@@ -87,14 +87,12 @@ CSRF_TRUSTED_ORIGINS += [f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"]
 # STORAGES setting for Django 5.x
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "BACKEND": "storages.backends.azure.AzureStorage",  
         "OPTIONS": {
             "account_name": AZURE_ACCOUNT_NAME,
-            # "account_key": AZURE_ACCOUNT_KEY,
+            "account_key": AZURE_ACCOUNT_KEY,  
             "azure_container": AZURE_CONTAINER,
-            "token_credential": DefaultAzureCredential(),
-            # "custom_domain": AZURE_CUSTOM_DOMAIN,
-            "expiration_secs": 10, 
+            "expiration_secs": 10,  
         },
     },
     "staticfiles": {
@@ -104,6 +102,7 @@ STORAGES = {
         "BACKEND": "rosetta.storage.CacheRosettaStorage",
     },
 }
+
 
 
 # Static files configuration
