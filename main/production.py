@@ -1,9 +1,7 @@
 import os
 from main.settings import *
 from main.settings import BASE_DIR
-from logging.handlers import TimedRotatingFileHandler
-from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient
+
 
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
