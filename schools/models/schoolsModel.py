@@ -114,7 +114,7 @@ class School(models.Model):
     tuition = models.DecimalField(max_digits=18, decimal_places=2, blank=True, default=0.00, verbose_name=(_("tuition")))
     
     # References
-    type = models.ManyToManyField("SchoolType", related_name="school_types", blank=True, verbose_name=_('type'))
+    type = models.ManyToManyField("SchoolType", verbose_name=_('type'))
     platforms = models.ManyToManyField("Platform", related_name="school_platforms", through="PlatformProfile", verbose_name=_('platforms'))
     educational_levels = models.ManyToManyField("EducationalLevel", related_name="school_educational_levels", blank=True, verbose_name=_("school level"))
     

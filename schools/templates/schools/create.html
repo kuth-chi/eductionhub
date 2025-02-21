@@ -123,17 +123,21 @@
                         <span class="text-sm text-red-600 dark:text-red-800">{{ error }}</span>
                     {% endfor %}
                 </div>
-
                 <div class="relative z-0 w-full mb-5 group">
-                    <label for="{{ form.type.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label for="{{ form.type.id_for_label }}" 
+                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ form.type.label }}
                     </label>
-                    {{ form.type }}
-                    {% for error in form.type.errors %}
-                        <span class="text-sm text-red-600">{{ error }}</span>
-                    {% endfor %}
+                    <select name="type" id="type" 
+                        class="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400 transition duration-200">
+                        {% for choice in form.fields.type.choices %}
+                            <option value="{{ choice.0 }}" class="dark:bg-gray-800 dark:text-white">
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                
+
                 <div class="grid md:grid-cols-2 md:gap-6">
                     <div class="relative z-0 w-full mb-5 group">
                         <input type="text" 
@@ -195,7 +199,7 @@
                         class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder="{% translate 'e.g, 15.3654,104.2586' %}" required />
                     <label 
                         for="{{ form.location.id_for_label }}" 
-                        class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        class="peer-focus:font-medium absolute text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 ">
                         {{ form.location.label }}
                     </label>
                 </div>  

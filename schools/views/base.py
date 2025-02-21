@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from schools.models.OnlineProfile import PlatformProfile
-from schools.models.schoolsModel import School
+from schools.models.schoolsModel import School, SchoolType
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +43,18 @@ class SchoolCreateView(LoginRequiredMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['type'].required = False
-        form.fields['type'].widget = forms.SelectMultiple(attrs={
-            "class": "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        })
+        if 'type' in form.fields:
+            form.fields['type'].queryset = SchoolType.objects.all()
+            form.fields['type'].required = False
+            form.fields['type'].widget = forms.SelectMultiple(attrs={
+                "class": "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            })
+        else:
+            print("❌ Type field is missing in form!")
+
         return form
+
+
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

@@ -326,7 +326,7 @@
                                 src="{{ s.cover_image.url }}" alt="{{ s.name|default:'School image' }}">
                         {% else %}
                             {% if s.logo %}
-                            <img class="h-full max-w-full rounded-lg hover:brightness-105" 
+                            <img class="h-full max-w-full rounded-lg hover:brightness-105 aspect-square" 
                             src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
                             
                             {% else %}
