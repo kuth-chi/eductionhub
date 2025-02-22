@@ -41,7 +41,7 @@
     <div class="max-w-screen-xl ">
         <div class="row items-center">
             <div id="header" class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-8">
-                <div class="relative max-h-60 rounded-lg" style="background: url('{{ school.cover_image.url }}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 400px;">
+                <div class="relative max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 400px;">
                     <div  class="absolute blur-gradient-bg w-full flex flex-col md:flex-row items-center space-x-4 md:space-x-32 modal-ux-header px-8 pb-0 left-0 bottom-0 translate-x-0 transition-transform rounded-lg shadow-lg">
                         <!-- LOGO -->
                         <div id="logo-container" class="">
