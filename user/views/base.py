@@ -17,7 +17,7 @@ from schools.models.schoolsModel import School, SchoolType
 
 
 def index(request, type=None):
-    print('Type: ', type)
+    
     if type:
         try:
             SCHOOL = School.objects.filter(type__type__iexact = type).distinct()        
@@ -26,10 +26,15 @@ def index(request, type=None):
     else:
         SCHOOL = School.objects.all()
         
+    types = SchoolType.objects.all()
+    print(type)
+    
     context = {
         "page_title": "Home",
         "header_title": "Home",
         'school_data': SCHOOL, 
+        'type_req': type,
+        'types': types,
     }
 
     return render(request, "pages/home.html", context)

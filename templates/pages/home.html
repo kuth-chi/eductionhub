@@ -290,23 +290,25 @@
     <div class="flex flex-wrap items-center justify-center my-8 md:my-12 sticky bg-gray-50 dark:bg-gray-800">
         <button onclick="window.location.href='/'"
             type="button"
-            class="text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800">All
-            categories
+            class="text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800">
+            All categories
         </button>
-        <button onclick="window.location.href='{% url 'home_type' 'public' %}'"
-            type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
-            Public School
-        </button>
-        
-        <button onclick="window.location.href='{% url 'home_type' 'private' %}'" type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
-            Private Schools
-        </button>
-        <button onclick="window.location.href='{% url 'home_type' 'international' %}'" type="button"
-            class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
-            International Schools
-        </button>
+       
+        {% for t in types %}
+            {% if t.type == type_req %}
+            <button onclick="window.location.href='{% url 'home_type' t.type %}'" type="button"
+                class="text-white border border-white hover:border-gray-200 bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-white">
+                {{ t.type }}
+            </button>
+            {% else %}
+                <button onclick="window.location.href='{% url 'home_type' t.type %}'" type="button"
+                    class="text-gray-900 border border-white hover:border-blue-400 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-blue-700 bg-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
+                    {{ t.type }}
+                </button>
+            {% endif %}
+        {% empty %}
+        {% endfor %}
+
         <button onclick="window.location.href='{% url 'home_type' 'public' %}'" type="button"
             class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
             Scholarship
@@ -314,7 +316,7 @@
     </div>
     <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
         <div class="grow">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 ease-in duration-300">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 ease-in items-center duration-300">
       
                 {% for s in school_data %}
                     <div style="cursor: pointer;" class="relative {% if s.cover_image.height > s.cover_image.width %} row-span-2 {% endif %} hover:shadow shadow-md"
@@ -326,7 +328,7 @@
                                 src="{{ s.cover_image.url }}" alt="{{ s.name|default:'School image' }}">
                         {% else %}
                             {% if s.logo %}
-                            <img class="h-full object-cover max-w-full rounded-lg hover:brightness-105 aspect-square" 
+                            <img class="w-full object-cover rounded-lg hover:brightness-105 aspect-square" 
                             src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
                             
                             {% else %}
