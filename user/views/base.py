@@ -27,8 +27,7 @@ def index(request, type=None):
         SCHOOL = School.objects.all()
         
     types = SchoolType.objects.all()
-    print(type)
-    
+        
     context = {
         "page_title": "Home",
         "header_title": "Home",

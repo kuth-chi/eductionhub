@@ -91,6 +91,7 @@ class SchoolDetailView(DetailView):
         context['platform_profiles'] = PlatformProfile.objects.filter(school=school)
         context['title'] = "School Information"
         context['active'] = "active"
+        context['page_name'] = "school"
 
         # Generate cover image URL
         if school.cover_image:
