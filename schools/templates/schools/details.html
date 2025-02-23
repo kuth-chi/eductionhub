@@ -41,8 +41,8 @@
     <div class="max-w-screen-xl ">
         <div class="row items-center">
             <div id="header" class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-8">
-                <div class="relative max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 400px;">
-                    <div  class="absolute blur-gradient-bg w-full flex flex-col md:flex-row items-center space-x-4 md:space-x-32 modal-ux-header px-8 pb-0 left-0 bottom-0 translate-x-0 transition-transform rounded-lg shadow-lg">
+                <div class="relative max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 460px;">
+                    <div  class="absolute blur-gradient-bg w-full flex flex-col md:flex-row items-center space-x-4 md:space-x-32 modal-ux-header px-8 pb-0 left-0 bottom-0 translate-x-0 rounded-lg shadow-lg">
                         <!-- LOGO -->
                         <div id="logo-container" class="">
                             <div class="flex flex-col items-center">
@@ -53,7 +53,7 @@
                                         <div class="object-cover h-48 w-48 rounded-full">{{ school.name|upper|slice:":2"}}</div>
                                     {% endif %}
                                 </div>
-                                <div class="py-4 md:py-6 text-gray-500 dark:text-gray-400 lang-charset"></div>
+                                <div class="py-0 md:py-6 text-gray-500 dark:text-gray-400 lang-charset"></div>
                             </div>
                         </div>
                     
@@ -67,7 +67,7 @@
                                 {{ school.short_name }} 
                                 {% endif %}
                             </a>
-                            <h2 id="header-title" class="text-gray-900 dark:text-white text-3xl font-extrabold my-2 md:my-4 lang-charset">
+                            <h2 id="header-title" class="text-white text-3xl font-extrabold my-2 md:my-4 lang-charset">
                                 {% if request.LANGUAGE_CODE == 'en' %}
                                     {{ school.name }} 
                                 {% else %}
@@ -104,7 +104,9 @@
                                 </svg>
                                 {{ school.type.all|first }}
                             </a>
-                            <h2 class="text-gray-900 dark:text-white text-2xl font-extrabold mb-2">{{ school.name }}</h2>
+                            <h2 class="text-gray-900 dark:text-white text-xl font-extrabold mb-2 lang-charset">
+                              {% translate "Story Of" %} {% if request.LANGUAGE_CODE == 'en' %} {{ school.name }} {% else %} {{ school.local_name }} {% endif %}
+                            </h2>
                             <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-4 lang-charset">{{ school.description }}</p>
                             {% for p in platform_profiles %}
                                 {% if p.platform.name|lower == "website" %}
@@ -141,7 +143,7 @@
                             <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-4">    
                                 <div class="flex space-x-4">
                                 {% for profile in platform_profiles %}
-                                    <a href='{{ profile.profile_url }}' target="_blank" title="{{ profile.username }}"><img  class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800" src="{{ profile.platform.url }}favicon.ico" alt="{{ profile.name }}"></a>
+                                    <a href='{{ profile.profile_url }}' target="_blank" title="{{ profile.username }}"><img  class="w-10 h-10 border-2 hover:border-blue-500 dark:hover:hover:border-blue-200 rounded-full dark:border-gray-800 dark:grayscale dark:hover:grayscale-0 transition-all duration-300 hover:scale-105 hover:border-spacing-2" src="{{ profile.platform.url }}favicon.ico" alt="{{ profile.name }}"></a>
                                 {% empty %}
                                 
                                 {% endfor %}
@@ -165,7 +167,9 @@
 
 
 {% block scripts %}
-    
+<script> 
+    const PAGE_NAME = "{{ page_name }}";
+</script>
 {% endblock scripts %}
 
 
