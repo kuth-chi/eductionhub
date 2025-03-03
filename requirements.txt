@@ -4,7 +4,7 @@ autopep8==2.3.2
 azure-core==1.32.0
 azure-identity==1.20.0
 azure-storage-blob==12.24.1
-cryptography==44.0.1
+cryptography==44.0.2
 Django==5.1.6
 django-appconf==1.1.0
 django-compressor==4.5.1
