@@ -6,9 +6,3 @@ document.addEventListener("DOMContentLoaded", function() {
         document.body.appendChild(script);
     }
 }); 
-
-// Using 
-// Block Script with the following
-// <script> 
-// const PAGE_NAME = "{{ page_name }}";
-// </script>

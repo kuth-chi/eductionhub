@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'schools.apps.SchoolsConfig',
     'health_check.apps.HealthCheckConfig',
     'api.apps.ApiConfig',
+    'organization.apps.OrganizationConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [

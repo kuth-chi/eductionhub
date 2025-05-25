@@ -24,11 +24,11 @@
         position: absolute;
         inset: 0;
         background: linear-gradient(180deg, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.9) 100%);
+        backdrop-filter: blur(1px);
         -webkit-backdrop-filter: blur(10px); 
-        backdrop-filter: blur(10px); 
         pointer-events: none; 
+        z-index: -1; 
         border-radius: inherit;
-        z-index: 0; 
     }
     
     </style>
@@ -74,7 +74,7 @@
                                     {{ school.local_name }} 
                                 {% endif %}
                             </h2>
-                            <div> 
+                            <div class="flex flex-col justify-start"> 
                                 <div>
                                     {% for item in school.educational_levels.all %}
                                         <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">{{ item.level_name }}</span>
@@ -140,15 +140,42 @@
                         </div>
                         <div class=" bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 w-full md:max-w-sm">
                             <h2 class="text-gray-900 dark:text-white text-xl font-medium lang-charset mb-2">{% translate 'Profiles' %}</h2>
-                            <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-4">    
-                                <div class="flex space-x-4">
+                            <div class="mb-4">
+                            <div class="flex space-x-4 mb-4">
                                 {% for profile in platform_profiles %}
-                                    <a href='{{ profile.profile_url }}' target="_blank" title="{{ profile.username }}"><img  class="w-10 h-10 border-2 hover:border-blue-500 dark:hover:hover:border-blue-200 rounded-full dark:border-gray-800 dark:grayscale dark:hover:grayscale-0 transition-all duration-300 hover:scale-105 hover:border-spacing-2" src="{{ profile.platform.url }}favicon.ico" alt="{{ profile.name }}"></a>
+                                <a href="{{ profile.profile_url }}" target="_blank" title="{{ profile.username }}"
+                                    class="transition-all duration-300 hover:scale-105">
+                                    <img
+                                    src="https://www.google.com/s2/favicons?sz=64&domain_url={{ profile.platform.url }}"
+                                    class="w-10 h-10 border-2 rounded-full 
+                                            hover:border-blue-500 
+                                            dark:border-gray-800 
+                                            dark:hover:border-blue-200 
+                                            dark:grayscale dark:hover:grayscale-0"
+                                    alt="{{ profile.platform.name }}">
+                                </a>
                                 {% empty %}
-                                
+                                <span class="text-sm text-gray-400 dark:text-gray-500">{% translate 'No profiles available.' %}</span>
                                 {% endfor %}
-                                </div>
-                            </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for btn in school.custom_buttons.all %}
+                                    {% if btn.is_visible %}
+                                        <a href="{{ btn.link }}" 
+                                        class="inline-flex items-center gap-2 hover:scale-105 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all duration-150 ease-in-out hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                        style="background-color: {{ btn.color }}; color: {{ btn.text_color }};">
+                                            {% if btn.icon %}
+                                                <i class="{{ btn.icon }} text-base"></i>
+                                            {% endif %}
+                                            {{ btn.name }}
+                                        </a>
+                                    {% endif %}
+                                {% empty %}
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm italic">{% translate "No custom buttons available." %}</p>
+                                {% endfor %}
+                            </div>
+                            </div>
+
                             <!-- 
                             <a href="#" class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center">Redirect to
                                 <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
@@ -161,6 +188,20 @@
                 </div>
             </section>                        
         </div>
+    </div>
+    <hr>
+    <div class="row">
+        {% if related_items %}
+        <h3 class="text-xl font-semibold mb-2">{% translate "You might also like" %}</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {% for item in related_items %}
+            <a href="{{ item.get_absolute_url }}" class="block rounded-lg shadow-md p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition">
+                <h4 class="text-md font-bold">{{ item.name }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-300">{{ item.local_name }}</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock content %}

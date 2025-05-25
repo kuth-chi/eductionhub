@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from schools.models.base import DefaultField
-
+from organization.models import Organization
 class SchoolType(DefaultField):
     """ This class represents a school type """
     type = models.CharField(max_length=128, unique=True,
@@ -117,7 +117,7 @@ class School(models.Model):
     type = models.ManyToManyField("SchoolType", verbose_name=_('type'))
     platforms = models.ManyToManyField("Platform", related_name="school_platforms", through="PlatformProfile", verbose_name=_('platforms'))
     educational_levels = models.ManyToManyField("EducationalLevel", related_name="school_educational_levels", blank=True, verbose_name=_("school level"))
-    
+    organization = models.ForeignKey("organization.Organization", on_delete=models.CASCADE, blank=True, null=True)
     # Tracking Fields
     slug = models.SlugField(max_length=75, blank=True, verbose_name=_('slug'))
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, verbose_name=_("unique identifier"))
@@ -140,6 +140,48 @@ class School(models.Model):
         verbose_name = _("school")
         verbose_name_plural = _("schools")
 
+class SchoolCustomizeButton(models.Model):
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="custom_buttons")
+    order_number = models.PositiveIntegerField(default=0, help_text="Display order of the button.")
+    name = models.CharField(max_length=100, default="Untitled", help_text="Text displayed on the button.")
+    link = models.URLField(help_text="Target URL when button is clicked.")
+    color = models.CharField(max_length=7, default="#1D4ED8", help_text="Hex color for the button background.")
+    text_color = models.CharField(max_length=7, default="#FFFFFF", help_text="Hex color for the button text.")
+    icon = models.CharField(max_length=50, blank=True, null=True, help_text="Optional icon class (e.g. 'fa fa-book') or emoji.")
+    is_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order_number"]
+        verbose_name = "Custom School Button"
+        verbose_name_plural = "Custom School Buttons"
+
+    def __str__(self):
+        return f"{self.name} ({self.school.name})"
+
+class ScholarshipType(models.Model):
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Type Name"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    
+    is_need_based = models.BooleanField(default=False, help_text="Does this require financial need?")
+    is_merit_based = models.BooleanField(default=False, help_text="Is this based on academic/skill merit?")
+    is_athletic = models.BooleanField(default=False, help_text="Is this for athletic performance?")
+    is_organization_specific = models.BooleanField(default=False, help_text="Linked to specific organization?")
+    
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Scholarship Type")
+        verbose_name_plural = _("Scholarship Types")
+        ordering = ['name']
+
 
 class Scholarship(models.Model):
     """ Represents a scholarship offered by institutions or organizations """
@@ -156,6 +198,7 @@ class Scholarship(models.Model):
     description = models.TextField(blank=True, verbose_name="Scholarship Description")
     local_description = models.TextField(blank=True, verbose_name="Scholarship Local Description")
     provider = models.CharField(max_length=255, blank=True, verbose_name="Scholarship Provider")
+    destination_countries = models.ManyToManyField(Country, related_name="destination_scholarships")
     website = models.URLField(blank=True, verbose_name="Application Website")
 
     # Financial Details
@@ -188,6 +231,7 @@ class Scholarship(models.Model):
     duration = models.CharField(max_length=255, blank=True, verbose_name="Duration of Scholarship")
     contact_email = models.EmailField(blank=True, verbose_name="Contact Email")
     notes = models.TextField(blank=True, verbose_name="Additional Notes")
+    type = models.ForeignKey("ScholarshipType", on_delete=models.SET_NULL, null=True, blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -214,3 +258,33 @@ class FieldOfStudy(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SchoolScholarship(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    school = models.ForeignKey('School', on_delete=models.CASCADE)
+    scholarship = models.ForeignKey('Scholarship', on_delete=models.CASCADE)
+    updated_date = models.DateTimeField(auto_now=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.school.name} - {self.scholarship.name}"
+    
+    class Meta:
+        verbose_name = _("Scholarship by school")
+        verbose_name_plural = _("Scholarship by schools")
+
+
+class OrganizationScholarship(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    scholarship = models.ForeignKey('Scholarship', on_delete=models.CASCADE)
+    updated_date = models.DateTimeField(auto_now=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.school.name} - {self.scholarship.name}"
+    
+    class Meta:
+        verbose_name = _("Scholarship by organization")
+        verbose_name_plural = _("Scholarship by organization")

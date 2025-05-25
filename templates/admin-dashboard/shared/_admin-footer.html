@@ -1,3 +1,4 @@
+{% load static %}
 <div class="row">
     <footer class="w-full p-4 md:flex md:items-center md:justify-between md:p-6 ">
         <div class="fixed dock flex items-center justify-center space-x-4 p-3">
@@ -18,8 +19,7 @@
                 
             </a>
             <a href="#" class="dock-item" onclick="setActive(this)">
-                <img src="https://via.placeholder.com/50" alt="Settings" class="icon w-10 h-10 rounded-full">
-                
+                <img src="{% static "/svg/settings-96.svg" %}" alt="Settings" class="icon w-10 h-10 rounded-full">
             </a>
         </div>
     </footer>

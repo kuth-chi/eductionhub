@@ -1,7 +1,7 @@
 {% load i18n %}
 
 
-<div class="fixed bottom-0 z-50 w-full -translate-x-1/2 bg-gray-100 border-t border-gray-400 left-1/2 dark:bg-gray-900 dark:border-gray-600">
+<div class="fixed bottom-0 z-30 w-full -translate-x-1/2 bg-gray-100 border-t border-gray-400 left-1/2 dark:bg-gray-900 dark:border-gray-600">
     <div class="w-full">
         <div class="grid max-w-xs grid-cols-3 gap-1 p-1 mx-auto my-2 bg-gray-100 rounded-lg dark:bg-gray-600" role="group">
             {% block dock %}
@@ -9,10 +9,10 @@
                 <button id="dock-left" type="button" class="px-5 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 rounded-lg">
                     News
                 </button>
-                <button id="dock-center" type="button" onclick="window.location.href='{% url 'schools:index' %}'" class="px-5 py-1.5 text-xs font-medium text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900 rounded-lg">
+                <button id="dock-center" type="button" onclick='window.location.href="{% url "schools:index" %}"' class="px-5 py-1.5 text-xs font-medium text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900 rounded-lg">
                     Schools
                 </button>
-                <button id="dock-right" type="button" class="px-5 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 rounded-lg">
+                <button id="dock-right" type="button" onclick='window.location.href="{% url "scholarships" %}"' class="px-5 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 rounded-lg">
                     Scholarships
                 </button>
               
@@ -107,7 +107,7 @@
 
 
 <!-- Menu -->
-<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700" id="app-dropdown-menu">
+<div class="z-30 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700" id="app-dropdown-menu">
     <div class="relative p-4 w-full max-w-md max-h-full">
         <div class="grid grid-cols-3 gap-4 p-4 lg:grid-cols-4">
             <div class="p-4 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 dark:hover:bg-gray-600 dark:bg-gray-700">
@@ -176,7 +176,6 @@
                <div class="font-medium text-center text-gray-500 dark:text-gray-400">Custom</div>
             </div>
          </div>
-
     </div>
 </div>
 

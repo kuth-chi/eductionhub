@@ -1,5 +1,6 @@
 import uuid
 import logging
+from django.db.models import Q
 from typing import Any
 from django import forms
 from django.contrib import messages
@@ -84,7 +85,6 @@ class SchoolDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         school = context['school']
 
-        # Prefetch related data for the specific school
         context['educational_levels'] = school.educational_levels.all()
         context['types'] = school.type.all()
         context['platforms'] = school.platforms.all()
@@ -93,9 +93,24 @@ class SchoolDetailView(DetailView):
         context['active'] = "active"
         context['page_name'] = "school"
 
-        # Generate cover image URL
+        # Cover image
         if school.cover_image:
             context['cover_image_url'] = self.request.build_absolute_uri(school.cover_image.url)
+
+        # 🧠 Smart Recommendations (AI-style logic)
+        rec_qs = School.objects.exclude(id=school.id)
+
+        # Build dynamic query
+        filters = Q()
+        if school.educational_levels.exists():
+            filters |= Q(educational_levels__in=school.educational_levels.all())
+        if school.type.exists():
+            filters |= Q(type__in=school.type.all())
+        if hasattr(school, "location"):
+            filters |= Q(location=school.location)
+
+        related_schools = rec_qs.filter(filters).distinct()[:6]
+        context['related_items'] = related_schools
 
         return context
 
