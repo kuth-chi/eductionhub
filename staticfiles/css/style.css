@@ -4285,6 +4285,10 @@ input:checked + .toggle-bg {
   padding: 2rem;
 }
 
+.p-14 {
+  padding: 3.5rem;
+}
+
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
@@ -6546,8 +6550,8 @@ input:checked + .toggle-bg {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .md\:grid-cols-5 {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .md\:flex-row {
@@ -6617,6 +6621,10 @@ input:checked + .toggle-bg {
     padding: 2rem;
   }
 
+  .md\:p-14 {
+    padding: 3.5rem;
+  }
+
   .md\:px-0 {
     padding-left: 0px;
     padding-right: 0px;
@@ -6678,6 +6686,10 @@ input:checked + .toggle-bg {
 
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .lg\:gap-16 {

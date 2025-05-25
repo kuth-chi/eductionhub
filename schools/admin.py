@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
 from schools.models.OnlineProfile import Platform, PlatformProfile
 from schools.models.levels import EducationalLevel
-from schools.models.schoolsModel import SchoolType, School
+from schools.models.schoolsModel import ScholarshipType, SchoolScholarship, SchoolType, School, SchoolCustomizeButton
 
 # Register your models here.
 @admin.register(Platform)
@@ -36,18 +36,44 @@ class SchoolAdmin(admin.ModelAdmin):
     logo_preview.short_description = 'Logo Preview'
     cover_preview.short_description = "Cover Preview"
 
+class SchoolCustomizeButtonInline(admin.TabularInline):
+    model = SchoolCustomizeButton
+    extra = 1  # Number of blank buttons shown by default
+    fields = ('order_number', 'name', 'link', 'color', 'text_color', 'icon', 'is_visible')
+    ordering = ('order_number',)
+    show_change_link = True
+
 class SchoolTypeAdmin(admin.ModelAdmin):
     list_display = ("type", "description", "icon")
     search_fields = ("type", "description")
     list_filter = ("created_date",)
 
-
+@admin.register(SchoolCustomizeButton)
+class SchoolCustomizeButtonAdmin(admin.ModelAdmin):
+    list_display = ('name', 'school', 'order_number', 'is_visible')
+    list_filter = ('is_visible',)
+    search_fields = ('name', 'school__name')
+    ordering = ('school', 'order_number')
+    
 class EducationalLevelAdmin(admin.ModelAdmin):
     list_display = ('level_name', 'color', 'created_date', 'updated_date')
     search_fields = ('level_name', 'color')
     list_filter = ('created_date', 'updated_date')
 
+@admin.register(SchoolScholarship)
+class SchoolScholarshipAdmin(admin.ModelAdmin):
+    list_display = ('school', 'scholarship', 'created_date', 'updated_date')
+    search_fields = ('school__name', 'scholarship__name')
+    list_filter = ('school', 'scholarship', 'created_date')
+    readonly_fields = ('uuid', 'created_date', 'updated_date')
 
+@admin.register(ScholarshipType)
+class ScholarshipTypeAdmin(admin.ModelAdmin):
+    list_display = ("name", "is_active", "is_need_based", "is_merit_based", "is_athletic", "created_at")
+    list_filter = ("is_active", "is_need_based", "is_merit_based", "is_athletic")
+    search_fields = ("name", "description")
+    ordering = ("name",)
+    
 admin.site.register(SchoolType, SchoolTypeAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(EducationalLevel, EducationalLevelAdmin)

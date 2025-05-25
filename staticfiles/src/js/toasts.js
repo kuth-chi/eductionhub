@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     function showToast() {
         const toast = document.getElementById('toast-success');
-        toast.classList.remove('hidden'); // Make toast visible
+        toast.classList.remove('hidden');
 
         // Automatically hide the toast after 3 seconds
         setTimeout(() => {

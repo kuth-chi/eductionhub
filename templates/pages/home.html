@@ -309,14 +309,14 @@
         {% empty %}
         {% endfor %}
 
-        <button onclick="window.location.href='{% url 'home_type' 'public' %}'" type="button"
+        <button onclick="window.location.href='{% url 'scholarships' %}'" type="button"
             class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">
             Scholarship
         </button>
     </div>
     <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
         <div class="grow">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-4 ease-in items-center duration-300">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-8 gap-4 ease-in items-center duration-300">
                 {% for s in school_data %}
                     <div style="cursor: pointer;" class="relative hover:shadow shadow-md rounded-xl bg-gray-200 dark:bg-gray-900 group-hover:bg-blue-500"
                         onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
@@ -324,13 +324,11 @@
                         {% if s.logo %}
                             <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square" 
                             src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
-                            
-                            {% else %}
+                        {% else %}
                             <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
                                 {{ s.short_name|slice:":1"|upper }}
                             </div>
                         {% endif %}
-                     
                         <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
                             {% if request.LANGUAGE_CODE == 'en' %}
                                 {{ s.name }}
@@ -344,6 +342,9 @@
                 {% endfor %}
             </div>
         </div>
+    </div>
+    <div class="mt-6">
+
     </div>
 </div>
 {% endblock content %}

@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from user.views.utils import generate_jwt, verify_jwt
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from schools.models.schoolsModel import School, SchoolType
+from schools.models.schoolsModel import ScholarshipType, School, SchoolType, Scholarship
 
 
 def index(request, type=None):
@@ -39,7 +39,27 @@ def index(request, type=None):
     return render(request, "pages/home.html", context)
 
 
+def scholarship(request, type=None):
+    
+    if type:
+        try:
+            scholarship_data = Scholarship.objects.filter(type__type__iexact = type).distinct()        
+        except SchoolType.DoesNotExist:
+            scholarship_data = Scholarship.objects.none()
+    else:
+        scholarship_data = Scholarship.objects.all()
+        
+    types = ScholarshipType.objects.all()
+        
+    context = {
+        "page_title": "Home",
+        "header_title": "Home",
+        'scholarships': scholarship_data, 
+        'type_req': type,
+        'types': types,
+    }
 
+    return render(request, "pages/scholarships.html", context)
 
 
 @csrf_exempt

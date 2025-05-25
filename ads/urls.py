@@ -5,5 +5,5 @@ from ads import views
 app_name = "ads"
 
 urlpatterns = [
-    path("", views.AdsDashboardView.as_view() , name="dashboard"),
+    path("manager/", views.AdsDashboardView.as_view() , name="dashboard"),
 ]
