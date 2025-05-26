@@ -1,58 +1,50 @@
 {% extends '_base.html' %}
-
+{% load ad_tags %}
 {% block title %}{{page_title|default:'No title'}}{% endblock %}
 
 {% block content %}
 <div class="container mx-auto relative px-2 md:px-0">
     <div class="grid grid-flow-row grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mx-auto place-content-rounded bg-gray-50 dark:bg-gray-800">
+        {% get_ads_grouped_by_type as ads_by_type %}
+
         <div class="col-start-1 col-end-3 w-full h-full dark:bg-gray-900 items-center rounded-2xl align-middle md:p-6">
             <div id="default-carousel" class="relative w-full h-full" data-carousel="slide">
+
                 <!-- Carousel wrapper -->
-                <div class="relative h-56 md:h-96 overflow-hidden rounded-lg ">
-                    <!-- Item 1 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://pppenglish.sgp1.digitaloceanspaces.com/image/main/field/image/front-page-rural-children-education.jpg"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 2 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://www.ctvnews.ca/polopoly_fs/1.1209756.1364209669!/httpImage/image.jpg_gen/derivatives/landscape_1020/image.jpg"
-                            class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 3 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://www.ctvnews.ca/polopoly_fs/1.1209756.1364209669!/httpImage/image.jpg_gen/derivatives/landscape_620/image.jpg"
-                            class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 4 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://live.staticflickr.com/1156/3174863666_ba10c96c8e_k.jpg"
-                            class="absolute block object-cover w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 5 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://borgenproject.org/wp-content/uploads/Girls-Education-in-Cambodia-1.jpg"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
+                <div class="relative h-56 md:h-96 overflow-hidden rounded-lg">
+                    {% if ads_by_type %}
+                        {% for ad_type, ads in ads_by_type.items %}
+                            <h3 class="text-white text-lg font-semibold mb-2">{{ ad_type }}</h3>
+                            {% for ad in ads|slice:":5" %}
+                                <div class="{% if forloop.first and forloop.parentloop.first %}block{% else %}hidden{% endif %} duration-700 ease-in-out" data-carousel-item>
+                                    <img src="{{ ad.poster.url }}"
+                                        class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                        alt="{{ ad.campaign_title }}">
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="block duration-700 ease-in-out" data-carousel-item>
+                            <img src="https://via.placeholder.com/1600x600?text=No+Ads+Available"
+                                class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                alt="No ads available">
+                        </div>
+                    {% endif %}
                 </div>
+
                 <!-- Slider indicators -->
                 <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1"
-                        data-carousel-slide-to="0"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2"
-                        data-carousel-slide-to="1"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3"
-                        data-carousel-slide-to="2"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4"
-                        data-carousel-slide-to="3"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 5"
-                        data-carousel-slide-to="4"></button>
+                    {% if ads_by_type %}
+                        {% for ad_type, ads in ads_by_type.items %}
+                            {% for ad in ads|slice:":5" %}
+                                <button type="button" class="w-3 h-3 rounded-full" aria-label="Slide {{ forloop.counter }}"
+                                        data-carousel-slide-to="{{ forloop.counter0 }}"
+                                        {% if forloop.first and forloop.parentloop.first %}aria-current="true"{% endif %}></button>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
                 </div>
+
                 <!-- Slider controls -->
                 <button type="button"
                     class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
@@ -82,6 +74,7 @@
                 </button>
             </div>
         </div>
+
         <!-- Right side -->
         <div class="cols-1 md:col-span-2 ease-in">
             <div class="flex flex-col md:flex-row gap-4 justify-center w-full">

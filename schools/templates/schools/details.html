@@ -41,7 +41,7 @@
     <div class="max-w-screen-xl ">
         <div class="row items-center">
             <div id="header" class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-8">
-                <div class="relative max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 460px;">
+                <div class="relative max-h-full md:max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 460px;">
                     <div  class="absolute blur-gradient-bg w-full flex flex-col md:flex-row items-center space-x-4 md:space-x-32 modal-ux-header px-8 pb-0 left-0 bottom-0 translate-x-0 rounded-lg shadow-lg">
                         <!-- LOGO -->
                         <div id="logo-container" class="">
@@ -192,43 +192,40 @@
         </div>
     </div>
 </div>
-<div class="container items-center text-center">
-        <hr>
-    <div class="row ">
-        <div class="max-w-screen-xl ">
-            {% if related_items %}
-            <h3 class="text-xl font-semibold mb-2">{% translate "You might also like" %}</h3>
-            <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
-                <div class="grow">
-                    <div class="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-6 2xl:grid-cols-8 gap-4 ease-in items-center duration-300">
-                        {% for s in related_items|slice:":8" %}
-                            <div style="cursor: pointer;" class="relative hover:shadow shadow-md rounded-xl bg-gray-200 dark:bg-gray-900 group-hover:bg-blue-500"
-                                onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
-                                rel="noopener noreferrer" title="{{ s.name }}">
-                                {% if s.logo %}
-                                    <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square" 
-                                    src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
-                                {% else %}
-                                    <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
-                                        {{ s.short_name|slice:":1"|upper }}
-                                    </div>
-                                {% endif %}
-                                <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
-                                    {% if request.LANGUAGE_CODE == 'en' %}
-                                        {{ s.name }}
-                                    {% else %}
-                                        {{ s.local_name }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% empty %}
-                            <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
-                        {% endfor %}
+    <!-- Search Results -->
+  <section class="bg-white dark:bg-gray-900 mt-4">
+    <div class="py-8 px-2 mx-auto max-w-screen-xl text-center lg:py-12 lg:px-4">
+        {% if related_items %}
+        <h3 class="text-xl dark:text-white text-md text-start lang-charset font-semibold mb-4">{% translate "You might also like" %}</h3>
+      <div class="grid gap-8 lg:gap-12 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
+        {% for s in related_items|slice:":8" %}
+            <div style="cursor: pointer;" class="relative w-full bg-white border text-center border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105"
+                onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
+                rel="noopener noreferrer" title="{{ s.name }}">
+                {% if s.logo %}
+                    <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square" 
+                    src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
+                {% else %}
+                    <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
+                        {{ s.short_name|slice:":1"|upper }}
                     </div>
+                {% endif %}
+                <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
+                    {% if request.LANGUAGE_CODE == 'en' %}
+                        {{ s.name }}
+                    {% else %}
+                        {{ s.local_name }}
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
-        </div>
+        {% empty %}
+            <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
+       
     </div>
 </div>
 {% endblock content %}
