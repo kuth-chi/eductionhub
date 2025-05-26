@@ -1,10 +1,11 @@
 {
   "scripts": {
-    "build:css": "postcss ./static/src/input.css -o ./static/css/style.css --watch"
+    "build:css": "npx @tailwindcss/cli -i ./static/src/input.css -o ./static/css/style.css --watch"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.7",
     "postcss-import": "^16.1.0",
-    "tailwindcss": "^3.4.6"
+    "tailwindcss": "^1.9.6"
   },
   "dependencies": {
     "apexcharts": "^3.50.0",

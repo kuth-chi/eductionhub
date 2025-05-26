@@ -17,7 +17,6 @@ from schools.models.schoolsModel import ScholarshipType, School, SchoolType, Sch
 
 
 def index(request, type=None):
-    
     if type:
         try:
             SCHOOL = School.objects.filter(type__type__iexact = type).distinct()        

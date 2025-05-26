@@ -1,5 +1,6 @@
 # admin.py
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import AdSpace, AdType, AdManager, AdPlacement, UserProfile, UserBehavior, AdImpression, AdClick
 
 @admin.register(AdSpace)
@@ -14,9 +15,16 @@ class AdTypeAdmin(admin.ModelAdmin):
 
 @admin.register(AdManager)
 class AdManagerAdmin(admin.ModelAdmin):
-    list_display = ('campaign_title', 'ad_type', 'start_datetime', 'end_datetime', 'is_active')
+    list_display = ('campaign_title', 'ad_type', 'start_datetime', 'end_datetime', 'is_active', 'poster_preview')
     list_filter = ('ad_type', 'is_active')
     search_fields = ('campaign_title', 'tags')
+
+    def poster_preview(self, obj):
+        if obj.poster:
+            return format_html('<img src="{}" style="height: 60px;" />', obj.poster.url)
+        return "No Image"
+
+    poster_preview.short_description = "Poster"
 
 @admin.register(AdPlacement)
 class AdPlacementAdmin(admin.ModelAdmin):

@@ -8,10 +8,10 @@ from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
 
 def ad_poster_upload_path(instance, filename):
-    """ Generate a file path for new school logo uploads. """
+    """Generate a file path for new ad poster uploads."""
     ext = filename.split('.')[-1]
-    name = re.sub(r'[^a-zA-Z0-9_-]', '', instance.name) or "unnamed-poster"
-    filename = f"{name}-{uuid.uuid4()}.{ext}"
+    title = re.sub(r'[^a-zA-Z0-9_-]', '', instance.campaign_title) or "unnamed-poster"
+    filename = f"{title}-{uuid.uuid4()}.{ext}"
     return os.path.join('uploads/admanager/posters/', filename)
 
 class AdSpace(models.Model):
@@ -73,10 +73,9 @@ class AdPlacement(models.Model):
         ordering = ['position']
 
     def save(self, *args, **kwargs):
-        if self.position == 0:
-            # Auto-assign the next available position
-            max_position = AdPlacement.objects.filter(ad_space=self.ad_space).aggregate(Max('position'))['position__max']
-            self.position = (max_position or 0) + 1
+        if not self.position and self.ad_space_id:
+            max_position = AdPlacement.objects.filter(ad_space=self.ad_space).aggregate(Max('position'))['position__max'] or 0
+            self.position = max_position + 1
         super().save(*args, **kwargs)
 
     def __str__(self):
