@@ -189,17 +189,40 @@
             </section>                        
         </div>
     </div>
-    <hr>
+</div>
+<div class="container">
+        <hr>
     <div class="row">
         {% if related_items %}
         <h3 class="text-xl font-semibold mb-2">{% translate "You might also like" %}</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {% for item in related_items %}
-            <a href="{{ item.get_absolute_url }}" class="block rounded-lg shadow-md p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition">
-                <h4 class="text-md font-bold">{{ item.name }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-300">{{ item.local_name }}</p>
-            </a>
-            {% endfor %}
+        <div class="flex flex-row gap-2 lg:gap-8 justify-between px-4 bg-gray-50 dark:bg-gray-800">
+            <div class="grow">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-8 gap-4 ease-in items-center duration-300">
+                    {% for s in related_items|slice:":8" %}
+                        <div style="cursor: pointer;" class="relative hover:shadow shadow-md rounded-xl bg-gray-200 dark:bg-gray-900 group-hover:bg-blue-500"
+                            onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
+                            rel="noopener noreferrer" title="{{ s.name }}">
+                            {% if s.logo %}
+                                <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square" 
+                                src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
+                            {% else %}
+                                <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
+                                    {{ s.short_name|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
+                                {% if request.LANGUAGE_CODE == 'en' %}
+                                    {{ s.name }}
+                                {% else %}
+                                    {{ s.local_name }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>
