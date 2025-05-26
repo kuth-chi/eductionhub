@@ -1,19 +1,20 @@
 {
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./static/src/input.css -o ./static/css/style.css --watch"
+    "build:css": "npx tailwindcss -i ./static/src/input.css -o ./static/css/style.css --minify",
+    "watch:css": "npx tailwindcss -i ./static/src/input.css -o ./static/css/style.css --watch"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.7",
     "postcss-import": "^16.1.0",
-    "tailwindcss": "^1.9.6"
+    "tailwindcss": "^4.1.7"
   },
   "dependencies": {
-    "apexcharts": "^3.50.0",
-    "autoprefixer": "^10.4.19",
+    "@tailwindcss/postcss": "^4.1.7",
+    "apexcharts": "^4.7.0",
+    "autoprefixer": "^10.4.21",
     "crypto-js": "^4.2.0",
-    "flowbite": "^2.4.1",
-    "postcss": "^8.4.39",
-    "postcss-cli": "^11.0.0",
-    "postcss-modules": "^6.0.0"
+    "flowbite": "^3.1.2",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "postcss-modules": "^6.0.1"
   }
 }
