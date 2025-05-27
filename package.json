@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "A project using Tailwind CSS",
   "scripts": {
-    "watch": "npx @tailwindcss/cli -i ./static/src/input.css -o ./static/css/style.css --watch"
+    "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./static/css/style.css --watch",
+    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./static/css/style.css --minify"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.7",
