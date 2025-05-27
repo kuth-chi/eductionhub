@@ -77,4 +77,3 @@ def verify_token_view(request):
             return JsonResponse({'claims': claims})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-

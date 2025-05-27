@@ -73,4 +73,3 @@ class ExperienceObject:
             return True
         except self.experience_model.DoesNotExist:
             return False
-
