@@ -1,19 +1,17 @@
 {
+  "name": "tailwindcss-project",
+  "version": "1.0.0",
+  "description": "A project using Tailwind CSS",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./static/src/input.css -o ./static/css/style.css --watch"
+    "watch": "npx @tailwindcss/cli -i ./static/src/input.css -o ./static/css/style.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.7",
-    "postcss-import": "^16.1.0",
-    "tailwindcss": "^1.9.6"
+    "tailwindcss": "^4.1.7"
   },
   "dependencies": {
-    "apexcharts": "^3.50.0",
-    "autoprefixer": "^10.4.19",
-    "crypto-js": "^4.2.0",
-    "flowbite": "^2.4.1",
-    "postcss": "^8.4.39",
-    "postcss-cli": "^11.0.0",
-    "postcss-modules": "^6.0.0"
+    "apexcharts": "^3.46.0",
+    "flowbite": "^3.1.2",
+    "simple-datatables": "^10.0.0"
   }
 }

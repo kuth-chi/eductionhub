@@ -57,13 +57,13 @@ INSTALLED_APPS = [
     'rosetta',  # http://127.0.0.1:8000/rosetta/pick/?rosetta
     'drf_yasg',
     # My apps
-    'user.apps.UserConfig',
-    'administrator.apps.AdministratorConfig',
-    'ads.apps.AdsConfig',
-    'schools.apps.SchoolsConfig',
-    'health_check.apps.HealthCheckConfig',
-    'api.apps.ApiConfig',
-    'organization.apps.OrganizationConfig',
+    'user',
+    'administrator',
+    'ads',
+    'schools',
+    'health_check',
+    'api',
+    'organization',
 ]
 
 AUTHENTICATION_BACKENDS = [
