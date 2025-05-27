@@ -26,7 +26,7 @@ class ProfileView(View):
 
         # Build absolute public profile URL
         public_profile_url = request.build_absolute_uri(
-            reverse('public_profile', kwargs={'id': user_profile.uuid})
+            reverse('accounts:public_profile', kwargs={'id': user_profile.uuid})
         )
 
         # Generate QR code

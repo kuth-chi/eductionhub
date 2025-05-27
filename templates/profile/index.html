@@ -11,7 +11,7 @@
  {% endblock %}
 
 {% block body %}
-<div class="container mx-auto">
+<div class="w-full mx-auto text-center">
     <!-- Profile card -->
     <div class="max-w-sm rounded-lg shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-full">
         <div class="flex flex-col space-y-12 items-center pb-10 pt-10">
@@ -51,7 +51,7 @@
                         Show QR
                     </button>
 
-                    <a href="{% url 'public_profile' id=user.profile.uuid %}" 
+                    <a href="{% url 'accounts:public_profile' id=user.profile.uuid %}" 
                         class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-emerald-700 rounded-lg hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-800/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         View public
                     </a>
@@ -129,7 +129,7 @@
             </div>
                             <!-- Add Contact form (hidden by default) -->
                 <form id="add-contact-form"
-                    action="{% url 'add_contact' %}" method="post"
+                    action="{% url 'accounts:add_contact' %}" method="post"
                     class="hidden mt-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
                     {% csrf_token %}
                     
