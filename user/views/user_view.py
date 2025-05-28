@@ -27,7 +27,7 @@ def user_register(request):
                 user = User.objects.create_user(username=username, password=password)
                 user.save()
                 messages.success(request, "Account created successfully")
-                return redirect('login')
+                return redirect('accounts:login')
     else:
         form = RegisterForm()
     return render(request, template_name)
@@ -73,4 +73,4 @@ def user_login(request):
 # def user_logout(request):
 def user_logout(request):
     logout(request)
-    return redirect(user_login)
+    return redirect('accounts:login')
