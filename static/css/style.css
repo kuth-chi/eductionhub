@@ -125,6 +125,7 @@
   --color-sky-800: oklch(44.3% 0.11 240.79);
   --color-slate-100: oklch(96.8% 0.007 247.896);
   --color-slate-200: oklch(92.9% 0.013 255.508);
+  --color-slate-400: oklch(70.4% 0.04 256.788);
   --color-slate-700: oklch(37.2% 0.044 257.287);
   --spacing: 0.25rem;
   --breakpoint-sm: 40rem;
@@ -970,15 +971,6 @@
   .max-w-2xl {
     max-width: var(--container-2xl);
   }
-  .max-w-4xl {
-    max-width: var(--container-4xl);
-  }
-  .max-w-5xl {
-    max-width: var(--container-5xl);
-  }
-  .max-w-6xl {
-    max-width: var(--container-6xl);
-  }
   .max-w-\[48px\] {
     max-width: 48px;
   }
@@ -1253,9 +1245,6 @@
   }
   .justify-end {
     justify-content: flex-end;
-  }
-  .justify-normal {
-    justify-content: normal;
   }
   .justify-start {
     justify-content: flex-start;
@@ -1782,8 +1771,8 @@
   .py-3\.5 {
     padding-block: calc(var(--spacing) * 3.5);
   }
-  .py-6 {
-    padding-block: calc(var(--spacing) * 6);
+  .py-4 {
+    padding-block: calc(var(--spacing) * 4);
   }
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
@@ -1883,6 +1872,10 @@
   .text-4xl {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
+  }
+  .text-5xl {
+    font-size: var(--text-5xl);
+    line-height: var(--tw-leading, var(--text-5xl--line-height));
   }
   .text-base {
     font-size: var(--text-base);
@@ -2821,6 +2814,11 @@
       height: calc(var(--spacing) * 96);
     }
   }
+  .md\:h-full {
+    @media (width >= 48rem) {
+      height: 100%;
+    }
+  }
   .md\:h-screen {
     @media (width >= 48rem) {
       height: 100vh;
@@ -2854,6 +2852,11 @@
   .md\:max-w-2xl {
     @media (width >= 48rem) {
       max-width: var(--container-2xl);
+    }
+  }
+  .md\:max-w-full {
+    @media (width >= 48rem) {
+      max-width: 100%;
     }
   }
   .md\:grid-cols-2 {
@@ -3022,21 +3025,6 @@
   .md\:py-16 {
     @media (width >= 48rem) {
       padding-block: calc(var(--spacing) * 16);
-    }
-  }
-  .md\:pb-2 {
-    @media (width >= 48rem) {
-      padding-bottom: calc(var(--spacing) * 2);
-    }
-  }
-  .md\:pb-4 {
-    @media (width >= 48rem) {
-      padding-bottom: calc(var(--spacing) * 4);
-    }
-  }
-  .md\:pb-6 {
-    @media (width >= 48rem) {
-      padding-bottom: calc(var(--spacing) * 6);
     }
   }
   .md\:text-start {
@@ -3523,6 +3511,11 @@
   .dark\:text-slate-100 {
     @media (prefers-color-scheme: dark) {
       color: var(--color-slate-100);
+    }
+  }
+  .dark\:text-slate-400 {
+    @media (prefers-color-scheme: dark) {
+      color: var(--color-slate-400);
     }
   }
   .dark\:text-white {
