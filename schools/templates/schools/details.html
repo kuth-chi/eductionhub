@@ -43,7 +43,8 @@
         <div class="row items-center">
             <div id="header" class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-8">
                 <div class="relative max-h-full md:max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 460px;">
-                    <div  class="absolute blur-gradient-bg w-full h-full flex flex-col md:flex-row items-center md:items-end space-x-4 md:space-x-14 modal-ux-header px-8 py-6 md:p-0 md:pb-6 left-0 bottom-0 translate-x-0 rounded-lg shadow-lg">
+                    <div class="absolute blur-gradient-bg w-full h-full flex flex-col md:flex-row md:items-end items-center justify-center md:justify-normal space-x-4 md:space-x-14 modal-ux-header px-4 py-6 md:p-6 left-0 bottom-0 md:-bottom-14 translate-x-0 rounded-lg shadow-lg">
+
                         <!-- LOGO -->
                         <div id="logo-container" class="">
                             <div class="flex flex-col items-center">
@@ -139,7 +140,7 @@
                                 </dl>
                             </div>                            
                         </div>
-                        <div class=" bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 mt-6 w-full">
+                        <div class=" bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 mt-6 md:mt-0 w-full">
                             <h2 class="text-gray-900 dark:text-white text-xl font-medium lang-charset mb-2">{% translate 'Profiles' %}</h2>
                             <div class="mb-4">
                             <div class="flex space-x-4 mb-4">

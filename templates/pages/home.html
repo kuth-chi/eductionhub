@@ -14,7 +14,7 @@
                         {% for ad_type, ads in ads_by_type.items %}
                             <h3 class="text-white text-lg font-semibold mb-2">{{ ad_type }}</h3>
                             {% for ad in ads|slice:":5" %}
-                                <div class="{% if forloop.first and forloop.parentloop.first %}block{% else %}hidden{% endif %} duration-700 ease-in-out hidden duration-700" data-carousel-item>
+                                <div class="{% if forloop.first and forloop.parentloop.first %}block{% else %}hidden{% endif %} duration-700 ease-in-out hidden" data-carousel-item>
                                     <img src="{{ ad.poster.url }}"
                                         class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/1 top-1/2 left-1/2"
                                         alt="{{ ad.campaign_title }}">
