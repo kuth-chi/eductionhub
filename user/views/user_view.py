@@ -1,4 +1,6 @@
 import logging
+import time
+from django.core.cache import cache
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -33,40 +35,47 @@ def user_register(request):
     return render(request, template_name)
 
 
+
 def user_login(request):
     template_name = 'accounts/sign-in.html'
-    
+
     if request.method == 'POST':
         username = request.POST.get("username")
         password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)
         
+        # Rate-limiting: get failed attempts from cache
+        cache_key = f"login_attempts_{username}"
+        attempts = cache.get(cache_key, 0)
+
+        # Introduce delay: 1 + 1 * attempts seconds
+        time.sleep(1 + attempts)
+
+        user = authenticate(request, username=username, password=password)
+
         if user is not None:
+            # Reset the attempt counter on successful login
+            cache.delete(cache_key)
+
             Profile.objects.get_or_create(user=user)
             login(request, user)
-            
-            # Retrieve the next URL from the request
+
             next_url = request.GET.get('next')
-            if not next_url:
-                return redirect('/')
-            
-            # Make sure the next URL is not the login page itself
-            if next_url.startswith('/accounts/login'):
+            if not next_url or next_url.startswith('/accounts/login'):
                 next_url = '/'
-            
-            # Add the code and state to the redirect URL if present
+
             code = request.COOKIES.get('authorization_code')
             state = request.COOKIES.get('state')
             if code and state:
-                # Ensure the full URL for the Resource Server
                 if not next_url.startswith('http'):
                     next_url = f"http://localhost:8100{next_url}"
                 next_url = f"{next_url}?code={code}&state={state}"
-            
+
             return redirect(next_url)
         else:
+            # Increment failed attempts
+            cache.set(cache_key, attempts + 1, timeout=300)  # expire after 5 minutes
             messages.error(request, 'Invalid Username or Password')
-    
+
     return render(request, template_name)
 
 
