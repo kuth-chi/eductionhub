@@ -1,5 +1,4 @@
 from django.urls import path
-
 from user.views.base import token_view, verify_token_view
 from .views import user_view, profile
 

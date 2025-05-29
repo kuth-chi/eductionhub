@@ -12,13 +12,21 @@
                 <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
                     {% if ads_by_type %}
                         {% for ad_type, ads in ads_by_type.items %}
-                            <h3 class="text-white text-lg font-semibold mb-2">{{ ad_type }}</h3>
                             {% for ad in ads|slice:":5" %}
-                                <div class="{% if forloop.first and forloop.parentloop.first %}block{% else %}hidden{% endif %} duration-700 ease-in-out hidden" data-carousel-item>
+                            <div class="{% if forloop.first and forloop.parentloop.first %}block{% else %}hidden{% endif %} duration-700 ease-in-out h-full w-full" data-carousel-item>
+                                <div class="relative w-full h-full">
                                     <img src="{{ ad.poster.url }}"
-                                        class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/1 top-1/2 left-1/2"
+                                        class="object-cover w-full h-full"
                                         alt="{{ ad.campaign_title }}">
                                 </div>
+                            </div>
+                            {% empty %}
+                                <div class="block duration-700 ease-in-out" data-carousel-item>
+                                    <img src="https://via.placeholder.com/1600x600?text=No+Ads+Available"
+                                        class="absolute object-cover block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                        alt="No ads available">
+                                </div>
+
                             {% endfor %}
                         {% endfor %}
                     {% else %}
@@ -71,6 +79,7 @@
                     </span>
                 </button>
             </div>
+            <h3 class="text-2xl pt-2 text-slate-700 dark:text-slate-400">SUPPORTED US</h3>
         </div>
 
         <!-- Right side -->
