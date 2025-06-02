@@ -21,7 +21,7 @@ class EducationalLevel(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return super().__str__() + self.level_name
+        return self.level_name
     
     class Meta:
         ordering = ("level_name", "-created_date", "updated_date")
