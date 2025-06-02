@@ -62,13 +62,21 @@
                 <!-- Show list when available -->
                 <ol class="w-full mt-2 md:mt-12 p-2 md:p-4 space-y-2">
                     {% for contact in contact_profiles %}
-                        <li class="border md:border-gray-300 dark:md:border-gray-600 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300 group">
+                        <li class="border md:border-gray-300 dark:md:border-gray-700/30 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300 group">
                             <div class="flex justify-between items-center">
+                                {% if contact.platform.icon %}
+                                    <a href="{% if contact.platform.name == "Telephone" %} tel:{{contact.username}}{% else %}mailto:{{contact.username}}{% endif %}" class="w-8 h-8 flex items-center gap-2">
+                                        <div class="w-8 h-8 p-2 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                                        <i class="bi bi-{{ contact.platform.icon }} text-xl text-gray-700 dark:text-gray-400"></i>
+                                        </div>
+                                        <span class="text-gray-900 dark:text-white">{{ contact.username }}</span>
+                                    </a>
+                                {% else %}
                                 <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-2">
                                     <img class="w-8 h-8 rounded-full" src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}" alt="{{ contact.platform.name }}">
                                     <span class="text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
                                 </a>
-
+                                {% endif %}
                                 <!-- Edit Button -->
                                 <button class="text-sm text-blue-600 hover:underline" onclick="toggleEditForm('{{ contact.uuid }}')">
                                     Edit
@@ -76,7 +84,7 @@
                             </div>
 
                             <!-- Hidden Edit Form -->
-                            <form id="edit-form-{{ contact.uuid }}" action="{% url 'edit_contact' uuid=contact.uuid %}" method="post"
+                            <form id="edit-form-{{ contact.uuid }}" action="{% url 'accounts:edit_contact' uuid=contact.uuid %}" method="post"
                                 class="hidden mt-4 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                 {% csrf_token %}
                                 <div>
@@ -144,13 +152,13 @@
                     </div>
 
                     <div>
-                        <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">Profile URL</label>
+                        <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
                         <input type="url" name="profile_url" id="profile_url"
                             class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
                     </div>
 
                     <div>
-                        <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">Privacy</label>
+                        <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
                         <select name="privacy" id="privacy"
                             class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
                             {% for val, label in privacy_choices %}

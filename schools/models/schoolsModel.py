@@ -140,6 +140,7 @@ class School(models.Model):
         verbose_name = _("school")
         verbose_name_plural = _("schools")
 
+
 class SchoolCustomizeButton(models.Model):
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="custom_buttons")
     order_number = models.PositiveIntegerField(default=0, help_text="Display order of the button.")
@@ -159,6 +160,7 @@ class SchoolCustomizeButton(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.school.name})"
+    
 
 class ScholarshipType(models.Model):
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
