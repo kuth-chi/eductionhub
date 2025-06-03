@@ -1,7 +1,5 @@
 {% load compress %}
-{% load static %}
-{% load humanize i18n %}
-{% load i18n %}
+{% load humanize i18n static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -14,11 +12,11 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
         <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
-        <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
-                <!-- Add this -->
+        <!-- Add this -->
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
+        <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
         <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
         <link rel="stylesheet" href="{% static 'libs/flowbite/dist/flowbite.min.css' %}">
         <script>
