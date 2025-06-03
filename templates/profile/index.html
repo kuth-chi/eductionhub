@@ -112,11 +112,11 @@
                                 <div class="flex gap-2">
                                     <button type="submit"
                                         class="mt-2 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded shadow">
-                                        Save
+                                       {% translate "Save" %} 
                                     </button>
                                     <button type="button" onclick="toggleEditForm('{{ contact.uuid }}')"
                                         class="mt-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:underline">
-                                        Cancel
+                                       {% translate "Cancel" %} 
                                     </button>
                                 </div>
                             </form>
@@ -125,7 +125,7 @@
                 </ol>
             {% else %}
                 <!-- No contacts message -->
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No contacts available.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> {% translate "No contacts available" %} .</p>
 
             {% endif %}
             <!-- Add Contact button center-aligned -->
