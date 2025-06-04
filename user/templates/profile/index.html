@@ -1,0 +1,231 @@
+{% extends 'profile/_base.html' %}
+{% load i18n custom_tags static %}
+
+{% block title %}
+{{Title}}    
+{% endblock %}
+
+<!-- Head block -->
+ {% block head %}
+
+ {% endblock %}
+
+{% block body %}
+<div class="w-full mx-auto text-center">
+    <!-- Profile card -->
+    <div class="max-w-sm rounded-lg shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-full">
+        <div class="flex flex-col space-y-12 items-center pb-10 pt-10">
+            <div class="flex flex-col items-center">
+                <div class="relative w-48 h-48">
+                    <!-- Photo -->
+                    <div id="photo-wrapper" class="absolute inset-0 flex justify-center items-center transition-all duration-300 ease-in-out">
+                        {% if user.profile.photo %}
+                            <img id="profile-photo" class="w-48 h-48 mb-3 rounded-full object-cover shadow-lg"
+                                src="{{ user.profile.photo.url }}" alt="{{user.first_name}} profile">
+                        {% else %}
+                            <img id="profile-photo" class="w-48 h-48 mb-3 rounded-full shadow-lg"
+                                src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="default user photo">
+                        {% endif %}
+                    </div>
+
+                    {% if qr_code_base64 %}
+                    <!-- QR Code -->
+                    <div id="qr-wrapper" class="absolute inset-0 justify-center items-center transition-all duration-300 ease-in-out hidden">
+                        <img id="qr-code" src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code"
+                            class="w-48 h-48 mb-2 rounded-md bg-white shadow-lg" />
+                    </div>
+                    {% endif %}
+                </div>
+                <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">
+                    {% if user.first_name and user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                    {% else %}
+                        {{ user.username|default:'User' }}
+                    {% endif %}
+                </h5>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{profile.occupation}}</span>
+
+                <div class="flex flex-wrap gap-2 mt-4 md:mt-6">
+                    <button id="toggle-btn"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-800/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Show QR
+                    </button>
+
+                    <a href="{% url 'accounts:public_profile' id=user.profile.uuid %}" 
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-emerald-700 rounded-lg hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-800/50 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        View public
+                    </a>
+                </div>
+            </div>
+            <!-- If no contacts, show the Add button center-aligned -->
+            {% if contact_profiles %}
+                <!-- Show list when available -->
+                <ol class="w-full mt-2 md:mt-12 p-2 md:p-4 space-y-2">
+                    {% for contact in contact_profiles %}
+                        <li class="border md:border-gray-300 dark:md:border-gray-700/30 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300 group">
+                            <div class="flex justify-between items-center">
+                                {% if contact.platform.icon %}
+                                    <a href="{% if contact.platform.name == "Telephone" %} tel:{{contact.username}}{% else %}mailto:{{contact.username}}{% endif %}" class="w-8 h-8 flex items-center gap-2">
+                                        <div class="w-8 h-8 p-2 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                                        <i class="bi bi-{{ contact.platform.icon }} text-xl text-gray-700 dark:text-gray-400"></i>
+                                        </div>
+                                        <span class="text-gray-900 dark:text-white">{{ contact.username }}</span>
+                                    </a>
+                                {% else %}
+                                <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-2">
+                                    <img class="w-8 h-8 rounded-full" src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}" alt="{{ contact.platform.name }}">
+                                    <span class="text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
+                                </a>
+                                {% endif %}
+                                <!-- Edit Button -->
+                                <button class="text-sm text-blue-600 hover:underline" onclick="toggleEditForm('{{ contact.uuid }}')">
+                                    Edit
+                                </button>
+                            </div>
+
+                            <!-- Hidden Edit Form -->
+                            <form id="edit-form-{{ contact.uuid }}" action="{% url 'accounts:edit_contact' uuid=contact.uuid %}" method="post"
+                                class="hidden mt-4 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                {% csrf_token %}
+                                <div>
+                                    <label for="profile_url_{{ contact.uuid }}" class="block text-sm text-gray-700 dark:text-gray-300">Profile URL</label>
+                                    <input type="url" name="profile_url" id="profile_url_{{ contact.uuid }}" value="{{ contact.profile_url }}"
+                                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                                </div>
+
+                                <div>
+                                    <label for="username_{{ contact.uuid }}" class="block text-sm text-gray-700 dark:text-gray-300">Username</label>
+                                    <input type="text" name="username" id="username_{{ contact.uuid }}" value="{{ contact.username }}"
+                                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                                </div>
+
+                                <div>
+                                    <label for="privacy_{{ contact.uuid }}" class="block text-sm text-gray-700 dark:text-gray-300">Privacy</label>
+                                    <select name="privacy" id="privacy_{{ contact.uuid }}"
+                                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                                        {% for val, label in contact.PrivacyChoices.choices %}
+                                            <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button type="submit"
+                                        class="mt-2 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded shadow">
+                                       {% translate "Save" %} 
+                                    </button>
+                                    <button type="button" onclick="toggleEditForm('{{ contact.uuid }}')"
+                                        class="mt-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:underline">
+                                       {% translate "Cancel" %} 
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <!-- No contacts message -->
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> {% translate "No contacts available" %} .</p>
+
+            {% endif %}
+            <!-- Add Contact button center-aligned -->
+            <div class="flex justify-center">
+                <button id="toggle-contact-form"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-800 dark:hover:bg-blue-700">
+                    + {% translate 'Add Contact' %}
+                </button>
+            </div>
+                            <!-- Add Contact form (hidden by default) -->
+                <form id="add-contact-form"
+                    action="{% url 'accounts:add_contact' %}" method="post"
+                    class="hidden mt-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label for="platform" class="block text-sm text-gray-700 dark:text-gray-300">Platform</label>
+                        <select name="platform" id="platform"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                            {% for platform in platforms %}
+                                <option value="{{ platform.id }}">{{ platform.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
+                        <input type="url" name="profile_url" id="profile_url"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                    </div>
+
+                    <div>
+                        <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
+                        <select name="privacy" id="privacy"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                            {% for val, label in privacy_choices %}
+                                <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit"
+                            class="mt-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded shadow">
+                            {% translate 'Add Contact' %}
+                        </button>
+                    </div>
+                </form>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block scripts %}
+<!-- <script type="text/javascript" src="{% static 'js/pages/prof-index.js' %}"></script> -->
+<script>
+
+function toggleEditForm(uuid) {
+    const form = document.getElementById(`edit-form-${uuid}`);
+    if (form) {
+        form.classList.toggle('hidden');
+    }
+}
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("toggle-btn");
+    const photoWrapper = document.getElementById("photo-wrapper");
+    const qrWrapper = document.getElementById("qr-wrapper");
+    const addContactBtn = document.getElementById("toggle-contact-form");
+    const addContactForm = document.getElementById("add-contact-form");
+
+    let showingQR = false;
+
+    toggleBtn?.addEventListener("click", () => {
+        showingQR = !showingQR;
+
+        if (showingQR) {
+            photoWrapper.classList.add("hidden");
+            qrWrapper.classList.remove("hidden");
+            toggleBtn.textContent = "Show Photo";
+        } else {
+            qrWrapper.classList.add("hidden");
+            photoWrapper.classList.remove("hidden");
+            toggleBtn.textContent = "Show QR";
+        }
+    });
+
+    addContactBtn?.addEventListener("click", () => {
+        if (addContactForm) {
+            addContactForm.classList.toggle("hidden");
+        }
+    });
+});
+
+
+</script>
+
+
+{% endblock %}
+    
+    

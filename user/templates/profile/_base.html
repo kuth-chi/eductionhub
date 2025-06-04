@@ -1,0 +1,57 @@
+{% load compress %}
+{% load humanize i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - Education Hub</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/apple-touch-icon.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon-16x16.png' %}">
+        <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
+        <link rel="manifest" href="{% static 'site.webmanifest' %}">
+        <!-- Add this -->
+        {% compress css %}
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        {% endcompress %}
+        <link rel="stylesheet" href="{% static 'libs/flag-icons/css/flag-icons.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'libs/icons-1.11.3/font/bootstrap-icons.min.css' %}">
+        <link rel="stylesheet" href="{% static 'libs/flowbite/dist/flowbite.min.css' %}">
+        <script>
+            // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
+        </script>
+        {% block head %}{% endblock %}
+
+    </head>
+    <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
+        <!-- Navbar -->
+        <div class="fixed top-0 left-0 z-10 w-full">
+            {% include 'shared/_navbar.html' %}
+        </div>
+        
+        <div class="flex-grow pt-24 pb-32 z-0 flex justify-center items-start">
+            {% block body %}
+            {% endblock body %}
+        </div>
+    
+        <!-- Footer -->
+         <div class="fixed bottom-0 left-0 z-10 w-full"> 
+            {% include 'shared/_nav_bottom.html' %}
+        </div>
+        <!-- End of HTML -->
+        <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
+        <script src="{% static 'js/htmx.min.js' %}"></script>
+        <script src="{% static 'js/app.js' %}"></script>
+        <script src="{% static 'libs/animejs/anime.min.js' %}"></script>
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>
