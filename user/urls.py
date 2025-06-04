@@ -5,8 +5,8 @@ from .views import user_view, profile
 app_name = "accounts"
 
 urlpatterns = [
-    path('', profile.ProfileView.as_view(), name='profile'),
-    path('<uuid:id>/', profile.PublicProfileView.as_view(), name='public_profile'),
+    path('me/', profile.ProfileView.as_view(), name='profile'),
+    path('public/<uuid:id>/', profile.PublicProfileView.as_view(), name='public_profile'),
     path('register/', user_view.user_register, name='register'),
     path('login/', user_view.user_login, name='login'),
     path('logout/', user_view.user_logout, name='logout'),
