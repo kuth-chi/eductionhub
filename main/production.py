@@ -1,4 +1,5 @@
 import os
+import re
 from main.settings import *
 from main.settings import BASE_DIR
 
@@ -7,8 +8,16 @@ from main.settings import BASE_DIR
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+CORS_ALLOWED_ORIGINS = [
+    'https://eduhubstorage.blob.core.windows.net',
+    f"https://{os.environ['WEBSITE_HOSTNAME']}" if 'WEBSITE_HOSTNAME' in os.environ else ''
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.blob\.core\.windows\.net$",
+]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CSRF_COOKIE_SECURE = True
+CORS_ALLOW_ALL_ORIGINS = False
 DEBUG = False
 # SECRET_KEY = os.environ['SECRET_KEY']
 
@@ -142,8 +151,8 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'app.log',
             'when': 'midnight',
-            'interval': 1, # default interval every day
-            'backupCount': 730, # Keeps log for 730 days or 2 years old
+            'interval': 1, 
+            'backupCount': 730,
         }
     },
     'root': {

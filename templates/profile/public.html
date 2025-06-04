@@ -28,7 +28,7 @@
              </div>
              <ol class="w-full mt-2 md:mt-8 p-4 md:p-8">
                  {% for contact in contact_profiles %}
-                     <li class="mb-2 border md:border-gray-300 dark:md:border-gray-600 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300">
+                     <li class="mb-2 border border-solid border-gray-700/30 dark:border-gray-400/30 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300">
                         <div class="flex justify-between items-center">
                             {% if contact.platform.icon %}
                                 <a href="{% if contact.platform.name == "Telephone" %} tel:{{contact.username}}{% else %}mailto:{{contact.username}}{% endif %}" class="w-8 h-8 flex items-center gap-2">
