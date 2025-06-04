@@ -85,6 +85,35 @@ class SchoolDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         school = context['school']
 
+        # Initialize coordinates and bbox
+        lat, lon = None, None
+        bbox = None
+
+        if school.location:
+            try:
+                lat_str, lon_str = school.location.split(',', 1)
+                lat = float(lat_str.strip())
+                lon = float(lon_str.strip())
+
+                # Validate coordinate ranges
+                if -90 <= lat <= 90 and -180 <= lon <= 180:
+                    # Precompute bbox with 6 decimal places
+                    bbox = {
+                        'min_lon': round(lon - 0.005, 6),
+                        'min_lat': round(lat - 0.003, 6),
+                        'max_lon': round(lon + 0.005, 6),
+                        'max_lat': round(lat + 0.003, 6),
+                    }
+                else:
+                    context['location_error'] = "Invalid latitude or longitude values."
+            except (ValueError, AttributeError):
+                context['location_error'] = "Invalid location format. Expected 'lat,lon'."
+        else:
+            context['location_error'] = "No location data available."
+
+        context["lat"] = lat
+        context["lon"] = lon
+        context["bbox"] = bbox
         context['educational_levels'] = school.educational_levels.all()
         context['types'] = school.type.all()
         context['platforms'] = school.platforms.all()
@@ -93,26 +122,21 @@ class SchoolDetailView(DetailView):
         context['active'] = "active"
         context['page_name'] = "school"
 
-        # Cover image
         if school.cover_image:
             context['cover_image_url'] = self.request.build_absolute_uri(school.cover_image.url)
 
-        # 🧠 Smart Recommendations (AI-style logic)
         rec_qs = School.objects.exclude(id=school.id)
-
-        # Build dynamic query
         filters = Q()
         if school.educational_levels.exists():
             filters |= Q(educational_levels__in=school.educational_levels.all())
         if school.type.exists():
             filters |= Q(type__in=school.type.all())
-        if hasattr(school, "location"):
+        if school.location:
             filters |= Q(location=school.location)
 
-        related_schools = rec_qs.filter(filters).distinct()[:6]
-        context['related_items'] = related_schools
-
+        context['related_items'] = rec_qs.filter(filters).distinct()[:6]
         return context
+    
 
 class SchoolListView(ListView):
     template_name = 'schools/index.html'

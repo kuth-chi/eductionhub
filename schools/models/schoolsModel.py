@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from schools.models.base import DefaultField
 from organization.models import Organization
+
 class SchoolType(DefaultField):
     """ This class represents a school type """
     type = models.CharField(max_length=128, unique=True,
