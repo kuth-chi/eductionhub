@@ -26,7 +26,7 @@ class ProfileView(View):
 
         # Build absolute public profile URL
         public_profile_url = request.build_absolute_uri(
-            reverse('accounts:public_profile', kwargs={'id': user_profile.uuid})
+            reverse('profiles:public_profile', kwargs={'id': user_profile.uuid})
         )
 
         # Generate QR code
@@ -76,16 +76,16 @@ class ProfileView(View):
                 # Update the experience if an ID is provided
                 updated_experience = experience_object.update(experience_id)
                 if updated_experience:
-                    return redirect('profile:index')  # Redirect after successful update
+                    return redirect('profile:index')
                 else:
-                    pass  # Optionally handle the case where the update failed (e.g., show an error)
+                    pass
             else:
-                # Create a new experience if no ID is provided
+                
                 new_experience = experience_object.create()
                 if new_experience:
-                    return redirect('profile:index')  # Redirect after successful creation
+                    return redirect('profile:index') 
         
-        return redirect('profile:index')  # Redirect in case the request method is not POST or any other error
+        return redirect('profile:index')
 
     def save_education(self, request, education):
         """

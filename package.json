@@ -7,11 +7,11 @@
     "build": "npx @tailwindcss/cli -i ./src/input.css -o ./static/css/style.css --minify"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.7",
-    "tailwindcss": "^4.1.7"
+    "@tailwindcss/cli": "^4.1.8",
+    "tailwindcss": "^4.1.8"
   },
   "dependencies": {
-    "apexcharts": "^3.46.0",
+    "apexcharts": "^4.7.0",
     "flag-icons": "^7.5.0",
     "flowbite": "^3.1.2",
     "simple-datatables": "^10.0.0"

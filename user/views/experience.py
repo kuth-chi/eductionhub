@@ -56,7 +56,7 @@ class ExperienceObject:
         try:
             experience = self.experience_model.objects.get(id=experience_id)
             for key, value in self.experience_input.items():
-                if hasattr(experience, key):  # Make sure the attribute exists
+                if hasattr(experience, key):
                     setattr(experience, key, value)
             experience.save()
             return experience

@@ -39,7 +39,7 @@ class SchoolCreateView(LoginRequiredMixin, CreateView):
     fields = ("name", "logo", "local_name", "short_name", "description",
               "established", "type", "founder", "president", "endowment", "location")
 
-    login_url = '/accounts/login/'  
+    login_url = reverse_lazy('profiles:login')  
     redirect_field_name = 'next'  
 
     def get_form(self, form_class=None):

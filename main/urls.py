@@ -41,7 +41,7 @@ urlpatterns += i18n_patterns(
     path("ads/", include("ads.urls"), name="ads"),
     path('school/type/<str:type>/', base.index, name='home_type'),
     # app urls
-    path("profiles/", include("user.urls", namespace="accounts")),
+    path("profiles/", include("user.urls", namespace="profiles")),
     path("admin-edu/", include("administrator.urls", namespace="administrator")),
     path("organizations/", include("organization.urls", namespace="organization")),
     path("schools/", include("schools.urls", namespace="schools")),
