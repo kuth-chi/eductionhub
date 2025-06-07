@@ -1,21 +1,28 @@
 # Security Policy
 
-## Supported Versions
+## 🎓 Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+This section outlines which versions of the Schools system are actively maintained with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| 0.0.3   | ✅ Yes     |
+| 0.0.1   | ❌ No      |
+| 0.0.0   | ✅ Yes     |
+| < 0.0   | ❌ No      |
 
-## Reporting a Vulnerability
+> ℹ️ We're currently on **v0.0.3** — still early days, so stay tuned for big things.
 
-Use this section to tell people how to report a vulnerability.
+---
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+## 🔐 Reporting a Vulnerability
+
+Spotted a bug or a security issue? Help us keep the system safe:
+
+- **Where to report:** [Insert link or email]  
+- **Response time:** We’ll usually get back to you within a few days.  
+- **What to expect:**  
+  - If it’s valid, we’ll patch it ASAP and shout you out (if you want).  
+  - If not, we’ll explain why. Either way, you’ll hear back.
+
+Thanks for helping us make Schools better for everyone 💙
