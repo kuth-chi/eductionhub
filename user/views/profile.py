@@ -37,6 +37,8 @@ class ProfileView(View):
         privacy_choices = ProfileContact.PrivacyChoices.choices 
         contact_profiles = ProfileContact.objects.filter(profile__user=request.user)
 
+        platforms = Platform.objects.all()
+
         context = {
             "Title": page_title,
             "Header": "Profile",
@@ -47,7 +49,8 @@ class ProfileView(View):
             "qr_code_base64": qr_code_base64,
             "public_profile_url": public_profile_url,
             "privacy_choices": privacy_choices,
-            "contact_profiles": contact_profiles
+            "contact_profiles": contact_profiles,
+            "platforms": platforms,
         }
 
         return render(request, template_name, context)

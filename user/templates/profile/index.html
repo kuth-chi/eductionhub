@@ -73,7 +73,7 @@
                                     </a>
                                 {% else %}
                                 <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-2">
-                                    <img class="w-8 h-8 rounded-full" src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}" alt="{{ contact.platform.name }}">
+                                    <img class="w-8 h-8 rounded-full grayscale-50 hover:grayscale-0" src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}" alt="{{ contact.platform.name }}">
                                     <span class="text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
                                 </a>
                                 {% endif %}
@@ -147,7 +147,7 @@
                             class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
                             {% for platform in platforms %}
                                 <option value="{{ platform.id }}">{{ platform.name }}</option>
-                            {% endfor %}
+                           {% empty %}{% endfor %}
                         </select>
                     </div>
 
