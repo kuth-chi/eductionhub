@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'health_check',
     'api',
     'organization',
+    'search',
 ]
 
 AUTHENTICATION_BACKENDS = [
