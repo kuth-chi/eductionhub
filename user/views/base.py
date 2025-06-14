@@ -76,4 +76,7 @@ def verify_token_view(request):
             claims = verify_jwt(token)
             return JsonResponse({'claims': claims})
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("Error verifying token", exc_info=True)
+            return JsonResponse({'error': 'An error occurred while verifying the token.'}, status=400)
