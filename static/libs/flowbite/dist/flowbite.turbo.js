@@ -5677,7 +5677,7 @@ var CopyClipboard = /** @class */ (function () {
         var textToCopy = this.getTargetValue();
         // Check if HTMLEntities option is enabled
         if (this._options.htmlEntities) {
-            // Encode the text using HTML entities
+            // Safely decode the text while escaping meta-characters
             textToCopy = this.decodeHTML(textToCopy);
         }
         // Create a temporary textarea element
@@ -5693,11 +5693,21 @@ var CopyClipboard = /** @class */ (function () {
         this._options.onCopy(this);
         return textToCopy;
     };
-    // Function to encode text into HTML entities
+    // Function to safely decode HTML entities while escaping meta-characters
     CopyClipboard.prototype.decodeHTML = function (html) {
         var textarea = document.createElement('textarea');
         textarea.innerHTML = html;
-        return textarea.textContent;
+        var decodedText = textarea.textContent || '';
+        // Escape meta-characters to prevent XSS
+        return decodedText.replace(/[&<>"']/g, function (char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char];
+        });
     };
     CopyClipboard.prototype.updateOnCopyCallback = function (callback) {
         this._options.onCopy = callback;
