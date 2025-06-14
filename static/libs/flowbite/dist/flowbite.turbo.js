@@ -5695,9 +5695,22 @@ var CopyClipboard = /** @class */ (function () {
     };
     // Function to safely decode HTML entities while escaping meta-characters
     CopyClipboard.prototype.decodeHTML = function (html) {
-        var textarea = document.createElement('textarea');
-        textarea.innerHTML = html;
-        var decodedText = textarea.textContent || '';
+        // Decode HTML entities using a safer approach
+        var decodedText = html.replace(/&(#(?:x[0-9a-fA-F]+|\d+)|[a-zA-Z]+);/g, function (match, entity) {
+            if (entity[0] === '#') {
+                // Decode numeric entities
+                var codePoint = entity[1].toLowerCase() === 'x' ? parseInt(entity.slice(2), 16) : parseInt(entity.slice(1), 10);
+                return String.fromCodePoint(codePoint);
+            }
+            // Decode named entities
+            return {
+                amp: '&',
+                lt: '<',
+                gt: '>',
+                quot: '"',
+                apos: "'"
+            }[entity] || match;
+        });
         // Escape meta-characters to prevent XSS
         return decodedText.replace(/[&<>"']/g, function (char) {
             return {
