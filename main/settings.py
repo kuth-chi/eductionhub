@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import base64
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -26,12 +27,13 @@ if 'CODESPACE_NAME' in os.environ:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load private key
-with open(os.path.join(BASE_DIR, 'cert/private_key.pem'), 'rb') as f:
-    PRIVATE_KEY = f.read()
-
+PRIVATE_KEY = base64.b64decode(os.getenv("PRIVATE_KEY_B64", ""))
+# with open(os.path.join(BASE_DIR, 'cert/private_key.pem'), 'rb') as f:
+#     PRIVATE_KEY = f.read()
 # Load public key
-with open(os.path.join(BASE_DIR, 'cert/public_key.pem'), 'rb') as f:
-    PUBLIC_KEY = f.read()
+PUBLIC_KEY = base64.b64decode(os.getenv("PUBLIC_KEY_B64", ""))
+# with open(os.path.join(BASE_DIR, 'cert/public_key.pem'), 'rb') as f:
+#     PUBLIC_KEY = f.read()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
