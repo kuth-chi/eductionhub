@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth import authenticate, login, logout
 from user.models import User, Profile
 from user.forms.user_forms import RegisterForm, CustomerAuthenticationForm
@@ -60,7 +61,7 @@ def user_login(request):
             login(request, user)
 
             next_url = request.GET.get('next')
-            if not next_url or next_url.startswith('/accounts/login'):
+            if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
                 next_url = '/'
 
             code = request.COOKIES.get('authorization_code')
