@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 import qrcode
 import io
+import logging
 import base64
 from django.views import View
 from django.urls import reverse
@@ -13,13 +14,17 @@ from django.contrib.auth.decorators import login_required
 from user.views.experience import ExperienceObject 
 from django.contrib import messages 
 
+logger = logging.getLogger(__name__)
+
 # @login_required
 class ProfileView(View):
     def get(self, request, qr=None):
         template_name = 'profile/index.html'
         page_title = _("Profile")
 
-        user_profile = Profile.objects.get(user=request.user)
+        # user_profile = Profile.objects.get(user=request.user)
+        user_profile = get_object_or_404(Profile, user=request.user)
+
         experience_object = ExperienceObject(user=user_profile)
         experiences = experience_object.get_by_user()
         letter = get_object_or_404(Letter, user=request.user)
@@ -45,7 +50,7 @@ class ProfileView(View):
             "experiences": experiences,
             "profile": user_profile,
             "letter": letter.content,
-            "contact_profiles": ProfileContact.objects.filter(profile__user=request.user),
+            "contact_profiles": ProfileContact.objects.filter(profile__user=request.user, privacy=0),
             "qr_code_base64": qr_code_base64,
             "public_profile_url": public_profile_url,
             "privacy_choices": privacy_choices,
@@ -60,6 +65,7 @@ class ProfileView(View):
         Save or update an experience based on the provided request data.
         """
         if request.method == 'POST':
+            
             user = request.user
             experience_data = {
                 'title': request.POST.get('title'),
@@ -79,16 +85,16 @@ class ProfileView(View):
                 # Update the experience if an ID is provided
                 updated_experience = experience_object.update(experience_id)
                 if updated_experience:
-                    return redirect('profile:index')
+                    return redirect('profiles:profile')
                 else:
                     pass
             else:
                 
                 new_experience = experience_object.create()
                 if new_experience:
-                    return redirect('profile:index') 
+                    return redirect('profiles:profile') 
         
-        return redirect('profile:index')
+        return redirect('profiles:profile')
 
     def save_education(self, request, education):
         """
@@ -98,6 +104,7 @@ class ProfileView(View):
 
 class PublicProfileView(View):
     def get(self, request, id):
+        logger.info(f"Accessing public profile with id={id}")
         template_name = 'profile/public.html'
         page_title = _("Profile")
 
@@ -133,7 +140,7 @@ class EditContactView(View):
         contact.save()
 
         messages.success(request, "Contact updated!")
-        return redirect("profile:index")
+        return redirect("profiles:profile")
     
 class AddContactView(View):
     def post(self, request):
@@ -153,4 +160,4 @@ class AddContactView(View):
         )
 
         messages.success(request, "Contact added!")
-        return redirect("profile:index")
+        return redirect("profiles:profile")
