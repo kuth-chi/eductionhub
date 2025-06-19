@@ -14,4 +14,6 @@ urlpatterns = [
     path('verify-token/', verify_token_view),
     path('contact/edit/<uuid:uuid>/', profile.EditContactView.as_view(), name='edit_contact'),
     path('contact/add/', profile.AddContactView.as_view(), name='add_contact'),
+    # Beta
+    path('beta/', profile.profile_beta, name="beta_profile")
 ]

@@ -12,7 +12,7 @@ from schools.models.OnlineProfile import Platform
 from user.models import Letter, Profile, ProfileContact
 from django.utils.translation import gettext as _
 from user.views.experience import ExperienceObject 
-from django.contrib import messages 
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -178,3 +178,13 @@ class AddContactView(CreateView):
     def post(self, request, *args, **kwargs):
         # Prevent duplicate platform selection logic, if needed, could go here
         return super().post(request, *args, **kwargs)
+    
+
+# Beta testing
+def profile_beta(request):
+    template_name = "profile/profile-beta.html"
+    context = {
+        "page_title": "Beta profile",
+        "content": "Profile Beta content"
+    }
+    return render(request, template_name, context)
