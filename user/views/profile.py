@@ -177,11 +177,19 @@ class AddContactView(CreateView):
 
     def post(self, request, *args, **kwargs):
         # Prevent duplicate platform selection logic, if needed, could go here
+        """
+        Handles POST requests for adding a new profile contact.
+        
+        Delegates form processing to the parent class. Intended as an extension point for additional logic, such as preventing duplicate platform selection.
+        """
         return super().post(request, *args, **kwargs)
     
 
 # Beta testing
 def profile_beta(request):
+    """
+    Render the beta version of the profile page with a static title and content.
+    """
     template_name = "profile/profile-beta.html"
     context = {
         "page_title": "Beta profile",
