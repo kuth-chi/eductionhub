@@ -1,0 +1,25 @@
+{% extends 'profile/_base.html' %}
+{% load i18n custom_tags static %}
+
+{% block title %}
+{{title}}    
+{% endblock %}
+
+<!-- Head block -->
+ {% block head %}
+
+ {% endblock %}
+
+{% block body %}
+<div class="row">
+    <h2 class="text-2xl text-blue-950 dark:text-blue-200">{{ page_title }}</h2>
+    <p class="text-slate-700 dark:text-slate-200">{{ content }}</p>
+</div>
+{% endblock body %}
+
+{% block scripts %}
+
+
+{% endblock %}
+    
+    

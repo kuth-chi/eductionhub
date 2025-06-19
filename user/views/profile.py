@@ -3,6 +3,7 @@ import io
 import logging
 import base64
 from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
@@ -12,7 +13,7 @@ from schools.models.OnlineProfile import Platform
 from user.models import Letter, Profile, ProfileContact
 from django.utils.translation import gettext as _
 from user.views.experience import ExperienceObject 
-from django.contrib import messages 
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -177,4 +178,24 @@ class AddContactView(CreateView):
 
     def post(self, request, *args, **kwargs):
         # Prevent duplicate platform selection logic, if needed, could go here
+        """
+        Handles POST requests for adding a new profile contact.
+        
+        Delegates form processing to the parent class. Intended as an extension point for additional logic, such as preventing duplicate platform selection.
+        """
         return super().post(request, *args, **kwargs)
+    
+
+# Beta testing
+@login_required
+def profile_beta(request):
+    """
+    Render the beta version of the profile page with a static title and content.
+    """
+    template_name = "profile/profile-beta.html"
+    context = {
+        "title": "Profile Beta Page",
+        "page_title": "Beta profile",
+        "content": "Profile Beta content"
+    }
+    return render(request, template_name, context)
