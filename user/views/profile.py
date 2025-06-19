@@ -1,114 +1,117 @@
-from django.shortcuts import get_object_or_404, render, redirect
 import qrcode
 import io
 import logging
 import base64
-from django.views import View
-from django.urls import reverse
+from django.shortcuts import get_object_or_404, render, redirect
+from django.utils import timezone
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import UpdateView
+from django.views.generic.edit import CreateView
+from django.urls import reverse, reverse_lazy
 from schools.models.OnlineProfile import Platform
-from schools.models.schoolsModel import School
 from user.models import Letter, Profile, ProfileContact
-from user.models import Experience
 from django.utils.translation import gettext as _
-from django.contrib.auth.decorators import login_required
 from user.views.experience import ExperienceObject 
 from django.contrib import messages 
 
 logger = logging.getLogger(__name__)
 
 # @login_required
-class ProfileView(View):
-    def get(self, request, qr=None):
-        template_name = 'profile/index.html'
-        page_title = _("Profile")
+class ProfileDetailView(DetailView):
+    model = Profile
+    template_name = 'profile/index.html'
+    context_object_name = 'profile'
 
-        # user_profile = Profile.objects.get(user=request.user)
-        user_profile = get_object_or_404(Profile, user=request.user)
+    def get_object(self):
+        return get_object_or_404(Profile, user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user_profile = self.object
         experience_object = ExperienceObject(user=user_profile)
         experiences = experience_object.get_by_user()
-        letter = get_object_or_404(Letter, user=request.user)
+        letter = get_object_or_404(Letter, user=self.request.user)
 
-        # Build absolute public profile URL
-        public_profile_url = request.build_absolute_uri(
+        # Build public profile URL
+        public_profile_url = self.request.build_absolute_uri(
             reverse('profiles:public_profile', kwargs={'id': user_profile.uuid})
         )
 
-        # Generate QR code
+        # Generate QR Code
         qr_image = qrcode.make(public_profile_url)
         buffered = io.BytesIO()
         qr_image.save(buffered, format="PNG")
         qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
-        privacy_choices = ProfileContact.PrivacyChoices.choices 
-        contact_profiles = ProfileContact.objects.filter(profile__user=request.user)
 
+        # Contacts and platforms
+        contact_profiles = ProfileContact.objects.filter(profile__user=self.request.user)
+        privacy_choices = ProfileContact.PrivacyChoices.choices
         platforms = Platform.objects.all()
 
-        context = {
-            "Title": page_title,
+        # Add to context
+        context.update({
+            "Title": _("Profile"),
             "Header": "Profile",
             "experiences": experiences,
-            "profile": user_profile,
             "letter": letter.content,
-            "contact_profiles": ProfileContact.objects.filter(profile__user=request.user, privacy=0),
+            "contact_profiles": contact_profiles.filter(privacy=0),
             "qr_code_base64": qr_code_base64,
             "public_profile_url": public_profile_url,
             "privacy_choices": privacy_choices,
             "contact_profiles": contact_profiles,
             "platforms": platforms,
+            "now": timezone.now(),
+        })
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Optional POST handler for experience saving
+        """
+        if request.POST.get("form_type") == "experience":
+            return self.save_experience(request)
+        return redirect('profiles:profile')
+
+    def save_experience(self, request):
+        user = request.user
+        experience_data = {
+            'title': request.POST.get('title'),
+            'organization': request.POST.get('company'),
+            'start_date': request.POST.get('start_date'),
+            'end_date': request.POST.get('end_date'),
+            'responsibilities': request.POST.get('description'),
         }
 
-        return render(request, template_name, context)
-    
-    def save_experience(self, request):
-        """
-        Save or update an experience based on the provided request data.
-        """
-        if request.method == 'POST':
-            
-            user = request.user
-            experience_data = {
-                'title': request.POST.get('title'),
-                'organization': request.POST.get('company'),
-                'start_date': request.POST.get('start_date'),
-                'end_date': request.POST.get('end_date'),
-                'responsibilities': request.POST.get('description'),
-            }
-            
-            # Initialize the ExperienceObject with the user and experience data
-            experience_object = ExperienceObject(user=user, experience_request=experience_data)
+        experience_object = ExperienceObject(user=user, experience_request=experience_data)
+        experience_id = request.POST.get('uuid')
 
-            # Check if there's an 'uuid' to update an existing experience
-            experience_id = request.POST.get('uuid')  # Assuming 'uuid' is the identifier for updating
-            
-            if experience_id:  
-                # Update the experience if an ID is provided
-                updated_experience = experience_object.update(experience_id)
-                if updated_experience:
-                    return redirect('profiles:profile')
-                else:
-                    pass
-            else:
-                
-                new_experience = experience_object.create()
-                if new_experience:
-                    return redirect('profiles:profile') 
+        if experience_id:
+            updated_experience = experience_object.update(experience_id)
+            if updated_experience:
+                return redirect('profiles:profile')
+        else:
+            new_experience = experience_object.create()
+            if new_experience:
+                return redirect('profiles:profile')
         
         return redirect('profiles:profile')
 
-    def save_education(self, request, education):
-        """
-        A placeholder for saving education data, if you need it.
-        """
-        pass
+class PublicProfileDetailView(DetailView):
+    model = Profile
+    template_name = 'profile/public.html'
+    context_object_name = 'profile'
+    pk_url_kwarg = 'id'  # This maps 'id' from the URL to the object's 'pk' (uuid in this case)
 
-class PublicProfileView(View):
-    def get(self, request, id):
-        logger.info(f"Accessing public profile with id={id}")
-        template_name = 'profile/public.html'
-        page_title = _("Profile")
+    def get_object(self, queryset=None):
+        uuid = self.kwargs.get(self.pk_url_kwarg)
+        logger.info(f"Accessing public profile with id={uuid}")
+        return get_object_or_404(Profile, uuid=uuid)
 
-        user_profile = get_object_or_404(Profile, uuid=id)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user_profile = self.object
         experience_object = ExperienceObject(user=user_profile)
         experiences = experience_object.get_by_user()
         letter = get_object_or_404(Letter, user=user_profile.user)
@@ -117,47 +120,61 @@ class PublicProfileView(View):
         if user_profile.user.first_name and user_profile.user.last_name:
             full_name = f"{user_profile.user.first_name} {user_profile.user.last_name}"
 
-        context = {
-            "Title": page_title + " " + full_name,
+        context.update({
+            "Title": _("Profile") + " " + full_name,
             "Header": "Profile",
             "experiences": experiences,
             "letter": letter.content,
             "contact_profiles": ProfileContact.objects.filter(profile__user=user_profile.user, privacy=0),
-            "profile": user_profile, 
-            'platforms': Platform.objects.all()
-        }
+            "platforms": Platform.objects.all(),
+        })
 
-        return render(request, template_name, context)
+        return context
     
 
-class EditContactView(View):
-    def post(self, request, uuid):
-        contact = get_object_or_404(ProfileContact, uuid=uuid, profile__user=request.user)
+class EditContactView(UpdateView):
+    model = ProfileContact
+    fields = ['profile_url', 'username', 'privacy']
+    template_name = 'profile/edit_contact.html' 
+    pk_url_kwarg = 'uuid'
+    context_object_name = 'contact'
 
-        contact.profile_url = request.POST.get("profile_url")
-        contact.username = request.POST.get("username")
-        contact.privacy = request.POST.get("privacy")
-        contact.save()
+    def get_queryset(self):
+        user = self.request.user
+        print(f"DEBUG: Request method: {self.request.method}")
+        print(f"DEBUG: User: {user} (authenticated: {user.is_authenticated})")
+        qs = ProfileContact.objects.filter(profile__user=user)
+        print(f"DEBUG: Contacts count = {qs.count()}")
+        print(f"DEBUG: UUIDs = {[str(c.uuid) for c in qs]}")
+        return qs
 
-        messages.success(request, "Contact updated!")
-        return redirect("profiles:profile")
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Contact updated!"))
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("profiles:profile")
     
-class AddContactView(View):
-    def post(self, request):
-        platform_id = request.POST.get("platform")
-        profile_url = request.POST.get("profile_url")
-        username = request.POST.get("username")
-        privacy = request.POST.get("privacy")
+class AddContactView(CreateView):
+    model = ProfileContact
+    fields = ['platform', 'profile_url', 'username', 'privacy']
+    template_name = 'profile/add_contact.html'  # Optional if rendering via GET
 
+    def form_valid(self, form):
+        platform_id = self.request.POST.get("platform")
         platform = get_object_or_404(Platform, id=platform_id)
 
-        ProfileContact.objects.create(
-            profile=request.user.profile,
-            platform=platform,
-            profile_url=profile_url,
-            username=username,
-            privacy=privacy,
-        )
+        # Set fields that are not coming from the form
+        form.instance.profile = self.request.user.profile
+        form.instance.platform = platform
 
-        messages.success(request, "Contact added!")
-        return redirect("profiles:profile")
+        messages.success(self.request, _("Contact added!"))
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("profiles:profile")
+
+    def post(self, request, *args, **kwargs):
+        # Prevent duplicate platform selection logic, if needed, could go here
+        return super().post(request, *args, **kwargs)
