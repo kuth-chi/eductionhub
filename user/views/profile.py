@@ -3,6 +3,7 @@ import io
 import logging
 import base64
 from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
@@ -181,9 +182,11 @@ class AddContactView(CreateView):
     
 
 # Beta testing
+@login_required
 def profile_beta(request):
     template_name = "profile/profile-beta.html"
     context = {
+        "title": "Profile Beta Page",
         "page_title": "Beta profile",
         "content": "Profile Beta content"
     }
