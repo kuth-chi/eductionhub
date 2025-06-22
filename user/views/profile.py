@@ -10,6 +10,7 @@ from django.views.generic.edit import UpdateView
 from django.views.generic.edit import CreateView
 from django.urls import reverse, reverse_lazy
 from schools.models.OnlineProfile import Platform
+from shared.helper import QRCodeGenerator
 from user.models import Letter, Profile, ProfileContact
 from django.utils.translation import gettext as _
 from user.views.experience import ExperienceObject 
@@ -185,7 +186,6 @@ class AddContactView(CreateView):
         """
         return super().post(request, *args, **kwargs)
     
-
 # Beta testing
 @login_required
 def profile_beta(request):
@@ -193,9 +193,46 @@ def profile_beta(request):
     Render the beta version of the profile page with a static title and content.
     """
     template_name = "profile/profile-beta.html"
+
+    if not request.user.is_authenticated:
+        return redirect('profiles:login')
+    user = request.user
+    profile = get_object_or_404(Profile, user=user)
+
+    # Build public profile URL
+    public_profile_url = request.build_absolute_uri(
+        reverse('profiles:public_profile', kwargs={'id': profile.uuid})
+    )
+
+    # Generate QR Code
+    qr_generator = QRCodeGenerator(public_profile_url)
+    qr_code_base64 = qr_generator.generate_base64()
+
+    # Contacts and platforms
+    contact_profiles = ProfileContact.objects.filter(profile__user=user)
+    privacy_choices = ProfileContact.PrivacyChoices.choices
+    platforms = Platform.objects.all()
+
+    # Experiences
+    # experience_object = ExperienceObject(user=user)
+    # experiences = experience_object.get_by_user()
+    letter = get_object_or_404(Letter, user=user)
+
+
     context = {
-        "title": "Profile Beta Page",
+        "title":  _("Profile"),
         "page_title": "Beta profile",
-        "content": "Profile Beta content"
+        "content": "Profile Beta content",
+        "profile": profile,
+        "Header": "Profile",
+        # "experiences": experiences,
+        "letter": letter.content,
+        "contact_profiles": contact_profiles.filter(privacy=0),
+        "qr_code_base64": qr_code_base64,
+        "public_profile_url": public_profile_url,
+        "privacy_choices": privacy_choices,
+        "contact_profiles": contact_profiles,
+        "platforms": platforms,
+        "now": timezone.now(),
     }
     return render(request, template_name, context)
