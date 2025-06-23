@@ -16,7 +16,7 @@ django-rosetta==0.10.2
 django-storages==1.14.6
 djangorestframework==3.16.0
 gunicorn==23.0.0
-Markdown==3.8
+Markdown==3.8.2
 oauthlib==3.2.2
 pillow==11.2.1
 psycopg==3.2.9
