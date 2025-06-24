@@ -25,8 +25,8 @@ We also gather and share information about available scholarships to help studen
 ---
 
 ### 🚧 Phase 2: Data Collection & Expansion
-- [ ] Collect data from all provinces in Cambodia
-- [ ] Add more metadata (school contact info, student capacity, website, etc.)
+- [x] Collect data from all provinces in Cambodia
+- [x] Add more metadata (school contact info, student capacity, website, etc.)
 - [ ] Integrate verified sources (MoEYS, NGOs, etc.)
 - [ ] Support for different education levels (kindergarten, primary, secondary, university)
 - [ ] Gather detailed scholarship information (eligibility, deadline, sponsor, etc.)
