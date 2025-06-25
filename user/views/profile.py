@@ -25,6 +25,7 @@ class ProfileDetailView(DetailView):
     context_object_name = 'profile'
 
     def get_object(self):
+        # This ensures the Profile exists for the current user, or raises a 404
         return get_object_or_404(Profile, user=self.request.user)
 
     def get_context_data(self, **kwargs):
@@ -33,7 +34,11 @@ class ProfileDetailView(DetailView):
         user_profile = self.object
         experience_object = ExperienceObject(user=user_profile)
         experiences = experience_object.get_by_user()
-        letter = get_object_or_404(Letter, user=self.request.user)
+
+        # --- CHANGE HERE: Handle nullable Letter object ---
+        letter_obj = Letter.objects.filter(user=self.request.user).first()
+        letter_content = letter_obj.content if letter_obj else _("No letter content available.")
+        # ----------------------------------------------------
 
         # Build public profile URL
         public_profile_url = self.request.build_absolute_uri(
@@ -41,10 +46,15 @@ class ProfileDetailView(DetailView):
         )
 
         # Generate QR Code
-        qr_image = qrcode.make(public_profile_url)
-        buffered = io.BytesIO()
-        qr_image.save(buffered, format="PNG")
-        qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
+        try:
+            qr_image = qrcode.make(public_profile_url)
+            buffered = io.BytesIO()
+            qr_image.save(buffered, format="PNG")
+            qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
+        except Exception as e:
+            qr_code_base64 = None
+            print(f"Error generating QR code: {e}") # Log the error for debugging
+
 
         # Contacts and platforms
         contact_profiles = ProfileContact.objects.filter(profile__user=self.request.user)
@@ -56,12 +66,12 @@ class ProfileDetailView(DetailView):
             "Title": _("Profile"),
             "Header": "Profile",
             "experiences": experiences,
-            "letter": letter.content,
-            "contact_profiles": contact_profiles.filter(privacy=0),
+            "letter": letter_content, # Use the potentially empty or default letter_content
+            "contact_profiles": contact_profiles.filter(privacy=0), # Filter for public contacts
             "qr_code_base64": qr_code_base64,
             "public_profile_url": public_profile_url,
             "privacy_choices": privacy_choices,
-            "contact_profiles": contact_profiles,
+            "contact_profiles": contact_profiles, # This will include all contacts, public or not. You might want to adjust how you use this in the template if you display private ones.
             "platforms": platforms,
             "now": timezone.now(),
         })
@@ -96,7 +106,7 @@ class ProfileDetailView(DetailView):
             new_experience = experience_object.create()
             if new_experience:
                 return redirect('profiles:profile')
-        
+
         return redirect('profiles:profile')
 
 class PublicProfileDetailView(DetailView):
@@ -116,7 +126,9 @@ class PublicProfileDetailView(DetailView):
         user_profile = self.object
         experience_object = ExperienceObject(user=user_profile)
         experiences = experience_object.get_by_user()
-        letter = get_object_or_404(Letter, user=user_profile.user)
+        letter_obj = Letter.objects.filter(user=user_profile.user).first()
+        letter_content = letter_obj.content if letter_obj else _("No letter content available.")
+    
 
         full_name = "unknown"
         if user_profile.user.first_name and user_profile.user.last_name:
@@ -126,7 +138,7 @@ class PublicProfileDetailView(DetailView):
             "Title": _("Profile") + " " + full_name,
             "Header": "Profile",
             "experiences": experiences,
-            "letter": letter.content,
+            "letter": letter_content,
             "contact_profiles": ProfileContact.objects.filter(profile__user=user_profile.user, privacy=0),
             "platforms": Platform.objects.all(),
         })
@@ -216,7 +228,9 @@ def profile_beta(request):
     # Experiences
     # experience_object = ExperienceObject(user=user)
     # experiences = experience_object.get_by_user()
-    letter = get_object_or_404(Letter, user=user)
+    letter_obj = Letter.objects.filter(user=user).first()
+    letter_content = letter_obj.content if letter_obj else _("No letter content available.")
+    
 
 
     context = {
@@ -226,7 +240,7 @@ def profile_beta(request):
         "profile": profile,
         "Header": "Profile",
         # "experiences": experiences,
-        "letter": letter.content,
+        "letter": letter_content,
         "contact_profiles": contact_profiles.filter(privacy=0),
         "qr_code_base64": qr_code_base64,
         "public_profile_url": public_profile_url,
