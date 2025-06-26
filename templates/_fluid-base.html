@@ -15,6 +15,7 @@
         <link type="image/x-icon" href="{% static 'favicon.ico' %}" rel="shortcut icon">
         <link rel="manifest" href="{% static 'site.webmanifest' %}">
                 <!-- Add this -->
+        <link rel="manifest" href="{% static 'manifest.json' %}" />
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         {% endcompress %}
@@ -38,7 +39,6 @@
         {% endblock content %}
         <!-- End of HTML -->
         <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
         <script src="{% static 'js/app.js' %}"></script>
         {% block script %}
         {% endblock script %}
