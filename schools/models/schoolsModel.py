@@ -258,6 +258,26 @@ class Scholarship(models.Model):
 
 class FieldOfStudy(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    code = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    
+    level = models.CharField(
+        max_length=50,
+        choices=[
+            ('undergraduate', 'Undergraduate'),
+            ('graduate', 'Graduate'),
+            ('postgraduate', 'Postgraduate'),
+            ('phd', 'PhD'),
+        ],
+        blank=True,
+        null=True,
+    )
+    
+    description = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    schools = models.ManyToManyField('School', related_name='fields_of_study', blank=True)
 
     def __str__(self):
         return self.name
