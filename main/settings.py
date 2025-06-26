@@ -18,7 +18,7 @@ from datetime import timedelta
 DEBUG = True
 
 ALLOWED_HOSTS = [ "*" ]
-
+CORS_ALLOW_ALL_ORIGINS = True
 if 'CODESPACE_NAME' in os.environ:
     CSRF_TRUSTED_ORIGINS = [f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}']
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     # Third-party
+    "corsheaders",
     'rest_framework',
     'django_filters',
     'oauth2_provider',
@@ -86,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'user.middleware.profile.EnsureProfileMiddleware',
+    'api.middlewares.LogRequestMiddleware',
 ]
 
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -106,26 +108,6 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': timedelta(seconds=3600),
 }
 # OAuth2 Settingss
-OAUTH2_PROVIDER = {
-    'DEFAULT_SCOPES': ['read', 'write', 'groups'],
-    # Add your redirect URIs
-    'ALLOWED_REDIRECT_URIS': ['http://localhost:8100/callback'],
-}
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',      
-    ),
-}
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -227,6 +209,21 @@ STORAGES = {
             'location': STATIC_ROOT,
         },
     },
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',      
+    ),
 }
 
 # Cirtificate Settings

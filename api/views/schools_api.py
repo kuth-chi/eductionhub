@@ -12,7 +12,7 @@ from rest_framework import viewsets, status
 from rest_framework.renderers import JSONRenderer
 
 from schools.models.schoolsModel import School, SchoolType
-from api.serializers.school_serializers import SchoolSerializer, SchoolTypeSerializer
+from api.serializers.schools.base import SchoolSerializer, SchoolTypeSerializer
 
 
 class SchoolAPIView(APIView):

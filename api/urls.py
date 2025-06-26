@@ -5,6 +5,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from api.views.profiles.base import ProfileViewSet
 from api.views.school_type_api import SchoolTypeViewSet
 from api.views.schools_api import SchoolAPIView, SchoolViewSet
 
@@ -14,6 +15,7 @@ router = DefaultRouter()
 
 router.register(r'schools', SchoolViewSet, basename="schools")
 router.register(r'school-types', SchoolTypeViewSet, basename="school-types")
+router.register(r'profiles', ProfileViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from api.serializers.school_serializers import SchoolTypeSerializer
+from api.serializers.schools.base import SchoolTypeSerializer
 from schools.models.schoolsModel import SchoolType
 
 class SchoolTypeViewSet(viewsets.ViewSet):
