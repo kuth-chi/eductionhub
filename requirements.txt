@@ -38,7 +38,7 @@ psycopg-binary==3.2.9
 psycopg2-binary==2.9.10
 pycodestyle==2.14.0
 pycparser==2.22
-PyJWT==2.10.1
+PyJWT==2.9.0
 python-dotenv==1.1.1
 pytz==2025.2
 PyYAML==6.0.2
