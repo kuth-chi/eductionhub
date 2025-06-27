@@ -6,7 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# JavaScript
+node_modules
+
 # Distribution / packaging
+.http
 .Python
 build/
 develop-eggs/
