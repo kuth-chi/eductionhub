@@ -14,7 +14,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from schools.models.OnlineProfile import PlatformProfile
-from schools.models.schoolsModel import School, SchoolType
+from schools.models.schoolsModel import FieldOfStudy, School, SchoolType
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,6 @@ class SchoolDetailView(DetailView):
 
                 # Validate coordinate ranges
                 if -90 <= lat <= 90 and -180 <= lon <= 180:
-                    # Precompute bbox with 6 decimal places
                     bbox = {
                         'min_lon': round(lon - 0.005, 6),
                         'min_lat': round(lat - 0.003, 6),
@@ -114,27 +113,33 @@ class SchoolDetailView(DetailView):
         context["lat"] = lat
         context["lon"] = lon
         context["bbox"] = bbox
-        context['educational_levels'] = school.educational_levels.all()
-        context['types'] = school.type.all()
-        context['platforms'] = school.platforms.all()
-        context['platform_profiles'] = PlatformProfile.objects.filter(school=school)
+
+        # Handle nullable related fields gracefully
+        context['educational_levels'] = school.educational_levels.all() if hasattr(school, 'educational_levels') else []
+        context['types'] = school.type.all() if hasattr(school, 'type') else []
+        context['platforms'] = school.platforms.all() if hasattr(school, 'platforms') else []
+
+        context['platform_profiles'] = PlatformProfile.objects.filter(school=school) if school else []
+        context['programs'] = school.fields_of_study.all() if hasattr(school, 'fields_of_study') else []
+
         context['title'] = "School Information"
         context['active'] = "active"
         context['page_name'] = "school"
 
-        if school.cover_image:
+        if getattr(school, 'cover_image', None):
             context['cover_image_url'] = self.request.build_absolute_uri(school.cover_image.url)
 
         rec_qs = School.objects.exclude(id=school.id)
         filters = Q()
-        if school.educational_levels.exists():
+        if hasattr(school, 'educational_levels') and school.educational_levels.exists():
             filters |= Q(educational_levels__in=school.educational_levels.all())
-        if school.type.exists():
+        if hasattr(school, 'type') and school.type.exists():
             filters |= Q(type__in=school.type.all())
         if school.location:
             filters |= Q(location=school.location)
 
-        context['related_items'] = rec_qs.filter(filters).distinct()[:6]
+        context['related_items'] = rec_qs.filter(filters).distinct()[:8] if filters else []
+
         return context
     
 

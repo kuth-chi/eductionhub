@@ -126,20 +126,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-
-
-# Cache configuration with Redis (commented out but ready for use)
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": os.environ.get('AZURE_REDIS_CONNECTIONSTRING'),
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-#         },
-#     }
-# }
-# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',

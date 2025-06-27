@@ -25,9 +25,9 @@
         inset: 0;
         background: linear-gradient(180deg, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.9) 100%);
         backdrop-filter: blur(1px);
-        -webkit-backdrop-filter: blur(10px); 
-        pointer-events: none; 
-        z-index: -1; 
+        -webkit-backdrop-filter: blur(10px);
+        pointer-events: none;
+        z-index: -1;
         border-radius: inherit;
     }
     
@@ -36,250 +36,249 @@
     
 
 {% block content %}
-<!-- Background Cover Image -->
- <div class="container mx-auto">
-<div class="m-0 flex justify-center items-center z-10">
-    <div class="max-w-(--breakpoint-xl) ">
-        <div class="row items-center">
-            <div id="header" class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
-                <div class="relative max-h-full md:max-h-60 rounded-lg" style="background: url('{% if school.cover_image %}{{ school.cover_image.url }}{% else %} {% endif %}') center/cover no-repeat; width: 100%; max-height: 500px; min-height: 460px;">
-                    <div class="absolute blur-gradient-bg w-full h-full flex flex-col md:flex-row md:items-end items-center justify-center md:justify-normal space-x-4 md:space-x-14 modal-ux-header px-4 py-4 md:p-6 left-0 bottom-0 md:-bottom-14 translate-x-0 rounded-lg shadow-lg">
+<div class="m-0">
+    <div class="flex flex-col items-center justify-start gap-y-4 md:gap-y-8 w-full">
+        <div class="relative rounded-lg overflow-hidden mb-4 w-full px-2 md:px-4">
+            <div class="relative rounded-lg overflow-hidden" style="height:600px;">
+                <div class="absolute inset-0 z-10 bg-cover bg-center w-full h-full" style="background-image: url('{% if school.cover_image %}{{ school.cover_image.url }}{% endif %}');">
+                    <div class="absolute inset-0 z-20 blur-gradient-bg flex flex-col items-center justify-center md:bottom-0 md:flex-row md:items-end px-4 py-4 md:p-6">
+                        <div id="logo-container" class="flex flex-col items-center justify-center max-w-48">
+                            <div id="logo" class="relative mb-4">
+                                {% if school.logo %}
+                                    <img class="object-cover border-4 border-blue-500 dark:border-blue-400 h-48 w-48 rounded-full drop-shadow-lg animate-glow"
+                                        src="{{ school.logo.url }}"
+                                        alt="{{ school.name }} - {{ school.local_name }}">
+                                {% else %}
+                                    <div class="object-cover h-48 w-48 rounded-full bg-blue-200 text-white flex items-center justify-center text-4xl font-bold">
+                                        {{ school.name|upper|slice:":2" }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="py-0 md:py-6 text-gray-500 dark:text-gray-400 lang-charset"></div>
+                        </div>
 
-                        <!-- LOGO -->
-                        <div id="logo-container" class="">
-                            <div class="flex flex-col items-center">
-                                <div id='logo' class="w-full relative mb-4">
-                                    {% if school.logo %}
-                                        <img class="object-cover border-4 border-blue-500 dark:border-blue-400 h-48 w-48 rounded-full drop-shadow-lg animate-glow" src="{{ school.logo.url }}" alt="{{ school.name }} - {{ school.local_name }}">
-                                    {% else %}
-                                        <div class="object-cover h-48 w-48 rounded-full">{{ school.name|upper|slice:":2"}}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="py-0 md:py-6 text-gray-500 dark:text-gray-400 lang-charset"></div>
+                        <div class="p-6 flex flex-col items-start justify-start rounded-lg">
+                            {% if school.short_name %}
+                            <a href="#" class="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md dark:bg-red-700 dark:text-red-400 mb-2">
+                                <svg class="w-2.5 h-2.5 me-1.5" fill="currentColor" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17 11h-2.722L8 17.278a5.512 5.512 0 0 1-.9.722H17a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1ZM6 0H1a1 1 0 0 0-1 1v13.5a3.5 3.5 0 1 0 7 0V1a1 1 0 0 0-1-1ZM3.5 15.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM16.132 4.9 12.6 1.368a1 1 0 0 0-1.414 0L9 3.55v9.9l7.132-7.132a1 1 0 0 0 0-1.418Z" />
+                                </svg>
+                                {{ school.short_name }}
+                            </a>
+                            {% endif %}
+                            <h2 id="header-title" class="text-white text-3xl font-extrabold my-2 md:my-4 lang-charset">
+                                {% if request.LANGUAGE_CODE == 'en' %}
+                                    {{ school.name }}
+                                {% else %}
+                                    {{ school.local_name }}
+                                {% endif %}
+                            </h2>
+                            <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                                {% for item in school.educational_levels.all %}
+                                    <span class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                        {{ item.level_name }}
+                                    </span>
+                                {% empty %}
+                                {% endfor %}
+                                
+                            </div>
+                            <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                                {% for program in programs %}
+                                    <span class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-teal-500/10 dark:text-teal-200 border-teal-500/50">
+                                        {{ program.name }}
+                                    </span>
+                                {% empty %}
+                                {% endfor %}
+                                
                             </div>
                         </div>
-                    
-                        <!-- Header -->
-                        <div class="p-6 rounded-lg">
-                            <a href="#" class="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md dark:bg-red-700 dark:text-red-400 mb-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4 border-b border-gray-200 dark:border-gray-700 z-10">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+                <li class="me-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg text-gray-700 dark:text-gray-200" id="about-tab" data-tabs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false">{% translate "About" %}</button>
+                </li>
+            </ul>
+        </div>
+        <section class="bg-white dark:bg-gray-900 ">
+            <div class="py-8 px-4 mx-auto lg:py-12">
+                <div class="grid grid-cols-1 mb-6 lg:gap-8 lg:mt-5 lg:mb-6 md:grid-cols-3">
+                    <div class="col-span-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6">
+                        <div class="flex flex-col justify-between items-center mb-4 h-full">
+                            <div class="flex-grow w-full">
+                            <a href="#" class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 mb-2">
                                 <svg class="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
                                     <path d="M17 11h-2.722L8 17.278a5.512 5.512 0 0 1-.9.722H17a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1ZM6 0H1a1 1 0 0 0-1 1v13.5a3.5 3.5 0 1 0 7 0V1a1 1 0 0 0-1-1ZM3.5 15.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM16.132 4.9 12.6 1.368a1 1 0 0 0-1.414 0L9 3.55v9.9l7.132-7.132a1 1 0 0 0 0-1.418Z"/>
                                 </svg>
-                                {% if school.short_name %} 
-                                {{ school.short_name }} 
-                                {% endif %}
+                                {{ school.type.all|first }}
                             </a>
-                            <h2 id="header-title" class="text-white text-3xl font-extrabold my-2 md:my-4 lang-charset">
-                                {% if request.LANGUAGE_CODE == 'en' %}
-                                    {{ school.name }} 
-                                {% else %}
-                                    {{ school.local_name }} 
-                                {% endif %}
+                            <h2 class="text-gray-900 dark:text-white text-xl font-extrabold mb-2 lang-charset">
+                            {% translate "Story Of" %} {% if request.LANGUAGE_CODE == 'en' %} {{ school.name }} {% else %} {{ school.local_name }} {% endif %}
                             </h2>
-                            <div class="flex flex-col justify-start"> 
-                                <div>
-                                    {% for item in school.educational_levels.all %}
-                                        <span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">{{ item.level_name }}</span>
-                                    {% empty %}
-                                    {% endfor %}
-                                </div>
-                            </div>                                                       
-                        </div>
-                    </div>                
-                </div>
-            </div>
-            <div class="mb-4 border-b border-gray-200 dark:border-gray-700 z-10">
-                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
-                    <li class="me-2" role="presentation">
-                        <button class="inline-block p-4 border-b-2 rounded-t-lg text-gray-700 dark:text-gray-200" id="about-tab" data-tabs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false">{% translate "About" %}</button>
-                    </li>
-                </ul>
-            </div>
-            <!-- About Section -->
-            <section class="bg-white dark:bg-gray-900 ">
-                <div class="py-8 px-4 mx-auto lg:py-12">
-                    <div class="grid grid-cols-1 mb-6 lg:gap-8 lg:mt-5 lg:mb-6 md:grid-cols-3">
-                        <div class="col-span-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6">
-                            <div class="flex flex-col justify-between items-center mb-4 h-full">
-                                <div class="flex-grow w-full">
-                                <a href="#" class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 mb-2">
-                                    <svg class="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                        <path d="M17 11h-2.722L8 17.278a5.512 5.512 0 0 1-.9.722H17a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1ZM6 0H1a1 1 0 0 0-1 1v13.5a3.5 3.5 0 1 0 7 0V1a1 1 0 0 0-1-1ZM3.5 15.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM16.132 4.9 12.6 1.368a1 1 0 0 0-1.414 0L9 3.55v9.9l7.132-7.132a1 1 0 0 0 0-1.418Z"/>
-                                    </svg>
-                                    {{ school.type.all|first }}
+                            <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-4 lang-charset">{{ school.description }}</p>
+                            {% for p in platform_profiles %}
+                                {% if p.platform.name|lower == "website" %}
+                                    <a href="{{ p.profile_url }}" target="_blank" class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center">
+                                        Read more
+                                        <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                            {% empty %}
+                            
+                            {% endfor %} 
+                            </div>              
+                            <div class=" mt-6 bg-white rounded-lg dark:bg-gray-800" id="statistics" role="tabpanel" aria-labelledby="statistics-tab">
+                                <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-gray-900 dark:text-white">
+                                    <div class="flex flex-col">
+                                        <dt class="mb-2 text-xl font-extrabold">{{ school.founder }}</dt>
+                                        <dd class="text-gray-500 dark:text-gray-400">{% translate 'Founder' %}</dd>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <dt class="mb-2 text-xl font-extrabold lang-charset">{{ school.established }}</dt>
+                                        <dd class="text-gray-500 dark:text-gray-400">{% translate 'Established' %}</dd>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <dt class="mb-2 text-xl font-extrabold">{{ school.president }}</dt>
+                                        <dd class="text-gray-500 dark:text-gray-400">{% translate 'President' %}</dd>
+                                    </div>
+                                </dl>
+                            </div>  
+                        </div>                  
+                    </div>
+                    <div class=" bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 mt-6 md:mt-0 w-full">
+                        <div class="mb-4">
+                            {% if lat and lon and bbox %}
+                                <iframe
+                                    class="w-full rounded-lg grayscale-25 hover:grayscale-0 transition-all duration-300 ease-in-out"
+                                    height="300"
+                                    style="border:0"
+                                    loading="lazy"
+                                    allowfullscreen
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ bbox.min_lon }},{{ bbox.min_lat }},{{ bbox.max_lon }},{{ bbox.max_lat }}&layer=mapnik&marker={{ lat|floatformat:6 }},{{ lon|floatformat:6 }}"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                </iframe>
+                                <p style="display:none; color:red;">Failed to load map. Please try again later.</p>
+
+                                <a href="geo:{{ lat|floatformat:6 }},{{ lon|floatformat:6 }}"
+                                onclick="if(!window.navigator.userAgent.match(/(iPhone|Android)/)) this.href='https://www.openstreetmap.org/?mlat={{ lat|floatformat:6 }}&mlon={{ lon|floatformat:6 }}';"
+                                target="_blank"
+                                class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center mt-2">
+                                    <i class="bi bi-map mr-2"></i>
+                                    {% translate 'Open in Maps' %}
                                 </a>
-                                <h2 class="text-gray-900 dark:text-white text-xl font-extrabold mb-2 lang-charset">
-                                {% translate "Story Of" %} {% if request.LANGUAGE_CODE == 'en' %} {{ school.name }} {% else %} {{ school.local_name }} {% endif %}
-                                </h2>
-                                <p class="text-lg font-normal text-gray-500 dark:text-gray-400 mb-4 lang-charset">{{ school.description }}</p>
-                                {% for p in platform_profiles %}
-                                    {% if p.platform.name|lower == "website" %}
-                                        <a href="{{ p.profile_url }}" target="_blank" class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center">
-                                            Read more
-                                            <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                            </svg>
+                            {% else %}
+                                <p class="text-red-500">
+                                    {% if location_error %}
+                                        {{ location_error }}
+                                    {% else %}
+                                        No map available: Missing or invalid location data.
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <h2 class="text-gray-900 dark:text-white text-xl font-medium lang-charset mb-2">{% translate 'Profiles' %}</h2>
+                        <div class="mb-4">
+                            <div class="flex space-x-4 mb-4">
+                                {% for profile in platform_profiles %}
+                                    <a href="{{ profile.profile_url }}" target="_blank" title="{{ profile.username }}"
+                                        class="transition-all duration-300 hover:scale-105">
+                                        <img
+                                        src="https://www.google.com/s2/favicons?sz=64&domain_url={{ profile.platform.url }}"
+                                        class="w-10 h-10 border-2 rounded-full 
+                                                hover:border-blue-500 
+                                                dark:border-gray-800 
+                                                dark:hover:border-blue-200 
+                                                grayscale-50
+                                                dark:grayscale dark:hover:grayscale-0"
+                                        alt="{{ profile.platform.name }}">
+                                    </a>
+                                {% empty %}
+                                
+                                {% endfor %}
+                            </div>
+                            <hr class="opacity-0">
+                            <p class="text-gray-500 dark:text-gray-400 my-4">{% translate "Explore more" %}</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for btn in school.custom_buttons.all %}
+                                    {% if btn.is_visible %}
+                                        <a href="{{ btn.link }}" 
+                                        class="inline-flex items-center gap-2 hover:scale-105 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all duration-150 ease-in-out hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                        style="background-color: {{ btn.color }}; color: {{ btn.text_color }};">
+                                            {% if btn.icon %}
+                                                <i class="{{ btn.icon }} text-base"></i>
+                                            {% endif %}
+                                            {{ btn.name }}
                                         </a>
                                     {% endif %}
                                 {% empty %}
-                                
-                                {% endfor %} 
-                                </div>                       
-                                <!-- Footer -->
-                                <div class=" mt-6 bg-white rounded-lg dark:bg-gray-800" id="statistics" role="tabpanel" aria-labelledby="statistics-tab">
-                                    <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-gray-900 dark:text-white">
-                                        <div class="flex flex-col">
-                                            <dt class="mb-2 text-xl font-extrabold">{{ school.founder }}</dt>
-                                            <dd class="text-gray-500 dark:text-gray-400">{% translate 'Founder' %}</dd>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <dt class="mb-2 text-xl font-extrabold lang-charset">{{ school.established }}</dt>
-                                            <dd class="text-gray-500 dark:text-gray-400">{% translate 'Established' %}</dd>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <dt class="mb-2 text-xl font-extrabold">{{ school.president }}</dt>
-                                            <dd class="text-gray-500 dark:text-gray-400">{% translate 'President' %}</dd>
-                                        </div>
-                                    </dl>
-                                </div>   
-                            </div>                         
-                        </div>
-                        <div class=" bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 mt-6 md:mt-0 w-full">
-                            <div class="mb-4">
-                                {% if lat and lon and bbox %}
-                                    <iframe
-                                        class="w-full rounded-lg grayscale-25 hover:grayscale-0 transition-all duration-300 ease-in-out"
-                                        height="300"
-                                        style="border:0"
-                                        loading="lazy"
-                                        allowfullscreen
-                                        referrerpolicy="no-referrer-when-downgrade"
-                                        src="https://www.openstreetmap.org/export/embed.html?bbox={{ bbox.min_lon }},{{ bbox.min_lat }},{{ bbox.max_lon }},{{ bbox.max_lat }}&layer=mapnik&marker={{ lat|floatformat:6 }},{{ lon|floatformat:6 }}"
-                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                    </iframe>
-                                    <p style="display:none; color:red;">Failed to load map. Please try again later.</p>
-
-                                    <a href="geo:{{ lat|floatformat:6 }},{{ lon|floatformat:6 }}"
-                                    onclick="if(!window.navigator.userAgent.match(/(iPhone|Android)/)) this.href='https://www.openstreetmap.org/?mlat={{ lat|floatformat:6 }}&mlon={{ lon|floatformat:6 }}';"
-                                    target="_blank"
-                                    class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center mt-2">
-                                        <i class="bi bi-map mr-2"></i>
-                                        {% translate 'Open in Maps' %}
-                                    </a>
-                                {% else %}
-                                    <p class="text-red-500">
-                                        {% if location_error %}
-                                            {{ location_error }}
-                                        {% else %}
-                                            No map available: Missing or invalid location data.
-                                        {% endif %}
-                                    </p>
-                                {% endif %}
-                            </div>
-                            <h2 class="text-gray-900 dark:text-white text-xl font-medium lang-charset mb-2">{% translate 'Profiles' %}</h2>
-                            <div class="mb-4">
-                                <div class="flex space-x-4 mb-4">
-                                    {% for profile in platform_profiles %}
-                                        <a href="{{ profile.profile_url }}" target="_blank" title="{{ profile.username }}"
-                                            class="transition-all duration-300 hover:scale-105">
-                                            <img
-                                            src="https://www.google.com/s2/favicons?sz=64&domain_url={{ profile.platform.url }}"
-                                            class="w-10 h-10 border-2 rounded-full 
-                                                    hover:border-blue-500 
-                                                    dark:border-gray-800 
-                                                    dark:hover:border-blue-200 
-                                                    dark:grayscale dark:hover:grayscale-0"
-                                            alt="{{ profile.platform.name }}">
-                                        </a>
-                                    {% empty %}
                                     
-                                    {% endfor %}
-                                </div>
-                                <hr class="opacity-0">
-                                <p class="text-gray-500 dark:text-gray-400 my-4">Explore more</p>
-                                <div class="flex flex-wrap gap-2">
-                                    {% for btn in school.custom_buttons.all %}
-                                        {% if btn.is_visible %}
-                                            <a href="{{ btn.link }}" 
-                                            class="inline-flex items-center gap-2 hover:scale-105 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all duration-150 ease-in-out hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                                            style="background-color: {{ btn.color }}; color: {{ btn.text_color }};">
-                                                {% if btn.icon %}
-                                                    <i class="{{ btn.icon }} text-base"></i>
-                                                {% endif %}
-                                                {{ btn.name }}
-                                            </a>
-                                        {% endif %}
-                                    {% empty %}
-                                        
-                                    {% endfor %}
-                                </div>
+                                {% endfor %}
                             </div>
-
-                            <!-- 
-                            <a href="#" class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center">Redirect to
-                                <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                </svg>
-                            </a>
-                            -->
                         </div>
-                    </div>
-                </div>
-            </section>                        
-        </div>
-    </div>
-</div>
-    <!-- Search Results -->
-  <section class="bg-white dark:bg-gray-900 mt-4">
-    <div class="py-8 px-2 mx-auto max-w-(--breakpoint-xl) text-center lg:py-12 lg:px-4">
-        {% if related_items %}
-        <h3 class="text-xl dark:text-white text-md text-start lang-charset font-semibold mb-4">{% translate "You might also like" %}</h3>
-      <div class="grid gap-8 lg:gap-12 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
-        {% for s in related_items|slice:":8" %}
-            <div style="cursor: pointer;" class="relative w-full bg-white border text-center border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105"
-                onclick="window.location.href=`{% url 'schools:school-detail' s.pk %}`"
-                rel="noopener noreferrer" title="{{ s.name }}">
-                {% if s.logo %}
-                    <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square" 
-                    src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
-                {% else %}
-                    <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
-                        {{ s.short_name|slice:":1"|upper }}
-                    </div>
-                {% endif %}
-                <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
-                    {% if request.LANGUAGE_CODE == 'en' %}
-                        {{ s.name }}
-                    {% else %}
-                        {{ s.local_name }}
-                    {% endif %}
+
+                        </div>
                 </div>
             </div>
-        {% empty %}
-            <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-  </section>
-       
+        </section>                      
     </div>
 </div>
+<section class="bg-white dark:bg-gray-900 mt-4">
+    <div class="mx-auto text-center py-8 px-2  lg:py-12 lg:px-4">
+      {% if related_items %}
+          <h3 class="text-xl dark:text-white text-md text-start lang-charset font-semibold mb-4">
+          {% translate "You might also like" %}
+          </h3>
+          <div class="grid gap-8 lg:gap-12 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+          {% for s in related_items %}
+              <a href="{% url 'schools:school-detail' s.pk %}"
+              class="relative w-full bg-white border text-center border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105"
+              rel="noopener noreferrer" title="{{ s.name }}">
+
+              {% if s.logo %}
+                  <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square"
+                       src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
+              {% else %}
+                  <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
+                  {{ s.short_name|default:"?"|slice:":1"|upper }}
+                  </div>
+              {% endif %}
+
+              <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
+                  {% if request.LANGUAGE_CODE == 'en' %}
+                  {{ s.name }}
+                  {% else %}
+                  {{ s.local_name }}
+                  {% endif %}
+              </div>
+
+              </a>
+          {% empty %}
+              <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
+          {% endfor %}
+          </div>
+      {% endif %}
+    </div>
+
+</section>
     
  </div>
 {% endblock content %}
 
 
 {% block scripts %}
-<script> 
+{% comment %} <script> 
     const PAGE_NAME = "{{ page_name }}";
-</script>
+</script> {% endcomment %}
 {% endblock scripts %}
 
 
 {% block dock %}
     
 {% endblock dock %}
-    
-    
-    

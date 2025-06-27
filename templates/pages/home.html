@@ -1,5 +1,5 @@
 {% extends '_base.html' %}
-{% load ad_tags %}
+{% load static i18n ad_tags %}
 {% block title %}{{page_title|default:'No title'}}{% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
         <div class="col-start-1 col-end-3 w-full h-full dark:bg-gray-900 items-center rounded-2xl md:p-6">
             <div id="default-carousel" class="relative w-full" data-carousel="slide">
                 <!-- Carousel wrapper -->
-                <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+                <div class="relative h-auto overflow-hidden rounded-lg md:h-96">
                     {% if ads_by_type %}
                         {% for ad_type, ads in ads_by_type.items %}
                             {% for ad in ads|slice:":5" %}
@@ -62,7 +62,7 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                 stroke-width="2" d="M5 1 1 5l4 4" />
                         </svg>
-                        <span class="sr-only">Previous</span>
+                        <span class="sr-only">{% translate 'Previous' %}</span>
                     </span>
                 </button>
                 <button type="button"
@@ -75,11 +75,11 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                 stroke-width="2" d="m1 9 4-4-4-4" />
                         </svg>
-                        <span class="sr-only">Next</span>
+                        <span class="sr-only">{% translate 'Next' %}</span>
                     </span>
                 </button>
             </div>
-            <h3 class="text-2xl pt-2 text-slate-700 dark:text-slate-400">SUPPORTED US</h3>
+            <h3 class="text-2xl pt-2 text-slate-700 dark:text-slate-400">{% translate 'SUPPORTED US' %}</h3>
         </div>
 
         <!-- Right side -->
@@ -104,38 +104,6 @@
                             src="https://www.midvalleysouthkey.com/img/tenant/logo19Jul201911325123Oct2019225417.jpg" alt="">
                     </div>
                 </div>                
-
-                <!-- Recent scholarship -->
-                <div class="relative max-w-sm min-w-[220px] ease-in p-4 mt-4 md:mt-0 lg:block bg-blue-300 border border-gray-200 rounded-lg shadow md:p-4 dark:bg-gray-800 dark:border-gray-700 flex flex-col">
-                    <div class="flex-1 flex flex-row justify-between items-center text-gray-900 dark:text-white mb-4">
-                        <div class="text-sm font-simebold ">
-                            <i class="bi bi-clock me-2"></i><span>Recent Scholarship</span>
-                        </div>
-                        <a class=" rounded-lg py-1 px-2" href="#" title="View more">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </div>
-
-                    <ol class="flex flex-col w-full gap-2">
-                        {% if school_data %}
-                            {% for s in school_data|slice:":10" %}
-                            <li class="flex flex-row items-center px-4 py-3 text-base font-normal justify-between text-gray-50 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 dark:from-cyan-500/50 dark:to-blue-500/50">
-                                <a href="#">
-                                    <div>
-                                        {% if request.LANGUAGE_CODE == 'en' %}
-                                            {{ s.name }}
-                                        {% else %}
-                                            {{ s.local_name }}
-                                        {% endif %}
-                                    </div>
-                                <a>
-                            </li>
-                            {% empty %}{% endfor %}
-                        {% else %}
-                        {% endif %}
-                    </ol>
-                </div>
-                <!-- End Right-->
             </div>
         </div>
     </div>

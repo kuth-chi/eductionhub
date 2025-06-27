@@ -228,8 +228,8 @@ REST_FRAMEWORK = {
 
 # Cirtificate Settings
 # Path to your private and public keys for JWT
-JWT_PRIVATE_KEY_PATH = 'private_key.pem'
-JWT_PUBLIC_KEY_PATH = 'public_key.pem'
+JWT_PRIVATE_KEY_PATH = os.getenv("PRIVATE_KEY_B64", "")
+JWT_PUBLIC_KEY_PATH = os.getenv("PUBLIC_KEY_B64", "")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
