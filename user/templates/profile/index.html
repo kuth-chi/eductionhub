@@ -61,7 +61,7 @@
             <!-- If no contacts, show the Add button center-aligned -->
              <div>
             {% if contact_profiles %}
-                <ol class="flex flex-col space-y-1">
+                <ol class="flex flex-col space-y-1 overflow-auto">
                     {% for contact in contact_profiles %}
                         <li class="group rounded-lg px-4 py-3 transition duration-300 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30">
                             <div class="flex justify-between items-center gap-4">
@@ -94,7 +94,7 @@
                             <form id="edit-form-{{ contact.uuid }}"
                                 action="{% url 'profiles:edit_contact' uuid=contact.uuid %}"
                                 method="post"
-                                class="hidden mt-3 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                class="hidden mt-3 space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                 {% csrf_token %}
                                 
                                 <!-- Profile URL -->
@@ -165,45 +165,45 @@
                     + {% translate 'Add Contact' %}
                 </button>
             </div>
-                            <!-- Add Contact form (hidden by default) -->
-                <form id="add-contact-form"
-                    action="{% url 'profiles:add_contact' %}" method="post"
-                    class="hidden mt-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
-                    {% csrf_token %}
-                    
-                    <div>
-                        <label for="platform" class="block text-sm text-gray-700 dark:text-gray-300">Platform</label>
-                        <select name="platform" id="platform"
-                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                            {% for platform in platforms %}
-                                <option value="{{ platform.id }}">{{ platform.name }}</option>
-                           {% empty %}{% endfor %}
-                        </select>
-                    </div>
+            <!-- Add Contact form (hidden by default) -->
+            <form id="add-contact-form"
+                action="{% url 'profiles:add_contact' %}" method="post"
+                class="hidden mt-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="platform" class="block text-sm text-gray-700 dark:text-gray-300">Platform</label>
+                    <select name="platform" id="platform"
+                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                        {% for platform in platforms %}
+                            <option value="{{ platform.id }}">{{ platform.name }}</option>
+                        {% empty %}{% endfor %}
+                    </select>
+                </div>
 
-                    <div>
-                        <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
-                        <input type="url" name="profile_url" id="profile_url"
-                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                    </div>
+                <div>
+                    <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
+                    <input type="url" name="profile_url" id="profile_url"
+                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                </div>
 
-                    <div>
-                        <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
-                        <select name="privacy" id="privacy"
-                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                            {% for val, label in privacy_choices %}
-                                <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                <div>
+                    <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
+                    <select name="privacy" id="privacy"
+                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                        {% for val, label in privacy_choices %}
+                            <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit"
-                            class="mt-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded shadow">
-                            {% translate 'Add Contact' %}
-                        </button>
-                    </div>
-                </form>
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="mt-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded shadow">
+                        {% translate 'Add Contact' %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -248,6 +248,8 @@ document.addEventListener("DOMContentLoaded", function () {
     addContactBtn?.addEventListener("click", () => {
         if (addContactForm) {
             addContactForm.classList.toggle("hidden");
+            addContactBtn.classList.add("hidden");
+
         }
     });
 });
