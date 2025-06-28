@@ -149,19 +149,15 @@ class PublicProfileDetailView(DetailView):
 class EditContactView(UpdateView):
     model = ProfileContact
     fields = ['profile_url', 'username', 'privacy']
-    template_name = 'profile/edit_contact.html' 
-    pk_url_kwarg = 'uuid'
+    template_name = 'profile/edit_contact.html'
     context_object_name = 'contact'
+    pk_url_kwarg = 'uuid'  # Keep for clarity
 
-    def get_queryset(self):
-        user = self.request.user
-        print(f"DEBUG: Request method: {self.request.method}")
-        print(f"DEBUG: User: {user} (authenticated: {user.is_authenticated})")
-        qs = ProfileContact.objects.filter(profile__user=user)
-        print(f"DEBUG: Contacts count = {qs.count()}")
-        print(f"DEBUG: UUIDs = {[str(c.uuid) for c in qs]}")
-        return qs
-
+    def get_object(self, queryset=None):
+        """Fetch the object by UUID and ensure the contact belongs to the current user."""
+        uuid = self.kwargs.get(self.pk_url_kwarg)
+        contact = get_object_or_404(ProfileContact, uuid=uuid, profile__user=self.request.user)
+        return contact
 
     def form_valid(self, form):
         messages.success(self.request, _("Contact updated!"))

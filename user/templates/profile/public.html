@@ -11,48 +11,56 @@
  {% endblock %}
 
 {% block body %}
- <div class="container mx-auto">
+<div class="container mx-auto">
      <!-- Profile card -->
-     <div class="max-w-sm rounded-lg shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-full">
-         <div class="flex flex-col space-y-12 items-center pb-4 md:pb-6 pt-10">
-             <div class="flex flex-col items-center">
-                 {% if profile.photo %}
-                 <img class="w-48 h-48 mb-3 rounded-full object-cover shadow-lg"
-                 src="{{ profile.photo.url }}" alt="{{profile.first_name}} profile">
-                 {% else %}
-                 <img class="w-48 h-48 mb-3 rounded-full shadow-lg"
-                 src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="default user photo">
-                 {% endif %}
-                 <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{% if profile.user.first_name and profile.user.last_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username|default:'User' }}{% endif %}</h5>
-                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ profile.occupation|default:"None" }}</span>
-             </div>
-             <ol class="w-full mt-2 md:mt-8 p-4 md:p-8">
-                 {% for contact in contact_profiles %}
-                     <li class="mb-2 border border-solid border-gray-700/30 dark:border-gray-400/30 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30 rounded-lg p-2 duration-300">
-                        <div class="flex justify-between items-center">
-                            {% if contact.platform.icon %}
-                                <a href="{% if contact.platform.name == 'Telephone' %}tel:{{ contact.username }}{% else %}mailto:{{ contact.username }}{% endif %}" class="w-8 h-8 flex items-center gap-2">
-                                    <div class="w-8 h-8 p-2 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                                        <i class="bi bi-{{ contact.platform.icon }} text-xl text-gray-700 dark:text-gray-400"></i>
-                                    </div>
-                                    <span class="text-gray-900 dark:text-white">{% if contact.platform.name == 'Telephone' %}{{ contact.username }}{% else %}{{ contact.username }}{% endif %}</span>
-                                </a>
-
-                            {% else %}
-                            <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-2">
-                                <img class="w-8 h-8 rounded-full" src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}" alt="{{ contact.platform.name }}">
-                                <span class="text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
-                            </a>
-                            {% endif %}
-                        </div>
-                     </li>
-                 {% empty %}
-                     <p class="text-sm text-gray-500 dark:text-gray-400">No contacts available.</p>
-                 {% endfor %}
-             </ol>
-         </div>
-     </div>
-    
+    <div class="px-4">
+        <div class="flex flex-col items-center justify-center space-y-4 rounded-lg shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-full px-4 py-6 md:py-8">
+            <div class="flex flex-col space-y-8 items-center">
+                <div class="flex flex-col items-center">
+                    {% if profile.photo %}
+                    <img class="w-48 h-48 mb-3 rounded-full object-cover shadow-lg"
+                    src="{{ profile.photo.url }}" alt="{{profile.first_name}} profile">
+                    {% else %}
+                    <img class="w-48 h-48 mb-3 rounded-full shadow-lg"
+                    src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="default user photo">
+                    {% endif %}
+                    <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{% if profile.user.first_name and profile.user.last_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username|default:'User' }}{% endif %}</h5>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ profile.occupation|default:"None" }}</span>
+                </div>
+            <div>
+            <h3 class="h-3 text-gray-700 dark:text-gray-200 mb-4 md:mb-8">Contact me</h3>
+            {% if contact_profiles %}
+                <ol class="grid grid-cols-1 md:grid-cols-3 items-start justify-start space-y-1 mt-2">
+                    {% for contact in contact_profiles %}
+                        <li class="group rounded-lg py-2 px-4 transition duration-300 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30">
+                            <div class="flex justify-between items-center gap-4 flex-1">
+                                {% if contact.platform.icon %}
+                                    <a target="_blank" href="{% if contact.platform.name == 'Telephone' %}tel:{{ contact.username }}{% elif contact.platform.name == 'Email' %}mailto:{{ contact.username }}{% else %}{{ contact.profile_url }}{% endif %}"
+                                    class="flex items-center gap-3 group">
+                                        <div class="w-8 h-8 p-2 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                                            <i class="bi bi-{{ contact.platform.icon }} text-xl text-gray-700 dark:text-gray-400"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ contact.username }}</span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-3">
+                                        <img class="w-8 h-8 rounded-full grayscale hover:grayscale-0"
+                                            src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}"
+                                            alt="{{ contact.platform.name }} favicon">
+                                        <span class="text-sm text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {% translate "No contacts available" %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
  </div>
 {% endblock body %}
 
