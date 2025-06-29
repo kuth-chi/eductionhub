@@ -41,8 +41,8 @@
             
             
     </head>
-    <body class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-800 overflow-x-hidden">
-        <header class="sticky top-0 z-50">
+    <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
+        <header class="fixed top-0 left-0 z-20 w-full backdrop-blur-xl">
             {% include 'shared/_navbar.html' %}
         </header>
         <div id="toast-interactive" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 text-gray-500 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-400" role="alert">
@@ -75,9 +75,8 @@
                 </div>
             </div>
         </div>
-
         
-            <main class="pb-32 dark:bg-gray-900">   
+            <main class="flex-grow pt-20 pb-32 z-0">   
             {% block content %}
             {% endblock content %}
 
@@ -98,7 +97,7 @@
                 </div>
             </div>
         </main>
-        <footer class="sticky bottom-0 z-50">
+        <footer class="sticky bottom-0 z-1">
             {% include 'shared/_nav_bottom.html' %}
         </footer>
 
