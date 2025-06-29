@@ -36,12 +36,12 @@
     
 
 {% block content %}
-<div class="m-0">
+<div class="container mx-auto pb-8">
     <div class="flex flex-col items-center justify-start gap-y-4 md:gap-y-8 w-full">
-        <div class="relative rounded-lg overflow-hidden mb-4 w-full px-2 md:px-4">
-            <div class="relative rounded-lg overflow-hidden" style="height:600px;">
+        <div class="relative rounded-lg overflow-hidden mb-4 w-full px-2 md:px-0">
+            <div class="relative rounded-lg overflow-hidden" style="height:560px;">
                 <div class="absolute inset-0 z-10 bg-cover bg-center w-full h-full" style="background-image: url('{% if school.cover_image %}{{ school.cover_image.url }}{% endif %}');">
-                    <div class="absolute inset-0 z-20 blur-gradient-bg flex flex-col items-center justify-center md:bottom-0 md:flex-row md:items-end px-4 py-4 md:p-6">
+                    <div class="absolute inset-0 z-20 blur-gradient-bg flex flex-col items-center justify-center md:bottom-0 md:flex-row md:justify-items-end px-4 py-4 md:p-6 min-w-full space-x-4">
                         <div id="logo-container" class="flex flex-col items-center justify-center max-w-48">
                             <div id="logo" class="relative mb-4">
                                 {% if school.logo %}
@@ -104,9 +104,9 @@
                 </li>
             </ul>
         </div>
-        <section class="bg-white dark:bg-gray-900 ">
-            <div class="py-8 px-4 mx-auto lg:py-12">
-                <div class="grid grid-cols-1 mb-6 lg:gap-8 lg:mt-5 lg:mb-6 md:grid-cols-3">
+        <section class="bg-white dark:bg-gray-900 rounded-xl">
+            <div class="p-4 md:p-8 mx-auto">
+                <div class="grid grid-cols-1 lg:gap-8 md:grid-cols-3">
                     <div class="col-span-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6">
                         <div class="flex flex-col justify-between items-center mb-4 h-full">
                             <div class="flex-grow w-full">
@@ -228,45 +228,44 @@
             </div>
         </section>                      
     </div>
-</div>
-<section class="bg-white dark:bg-gray-900 mt-4">
-    <div class="mx-auto text-center py-8 px-2  lg:py-12 lg:px-4">
-      {% if related_items %}
-          <h3 class="text-xl dark:text-white text-md text-start lang-charset font-semibold mb-4">
-          {% translate "You might also like" %}
-          </h3>
-          <div class="grid gap-8 lg:gap-12 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-          {% for s in related_items %}
-              <a href="{% url 'schools:school-detail' s.pk %}"
-              class="relative w-full bg-white border text-center border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105"
-              rel="noopener noreferrer" title="{{ s.name }}">
+    <section class="bg-white dark:bg-gray-900 mt-4 rounded-xl">
+        <div class="mx-auto text-center p-4 md:p-8">
+        {% if related_items %}
+            <h3 class="text-xl dark:text-white text-md text-start lang-charset font-semibold mb-4 md:mb-8 px-2 py-4">
+            {% translate "You might also like" %}
+            </h3>
+            <div class="grid gap-8 lg:gap-12 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+            {% for s in related_items %}
+                <a href="{% url 'schools:school-detail' s.pk %}"
+                class="relative w-full bg-white border text-center border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 ease-in-out transform hover:scale-105"
+                rel="noopener noreferrer" title="{{ s.name }}">
 
-              {% if s.logo %}
-                  <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square"
-                       src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
-              {% else %}
-                  <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
-                  {{ s.short_name|default:"?"|slice:":1"|upper }}
-                  </div>
-              {% endif %}
+                {% if s.logo %}
+                    <img class="w-full p-4 md:p-8 object-cover rounded-lg hover:brightness-105 aspect-square"
+                        src="{{ s.logo.url }}" alt="{{ s.name|default:'School image' }}">
+                {% else %}
+                    <div class="h-full w-full bg-gray-300/70 dark:bg-blue-500/70 flex items-center justify-center rounded-lg text-blue-400 dark:text-blue-500 text-2xl font-bold">
+                    {{ s.short_name|default:"?"|slice:":1"|upper }}
+                    </div>
+                {% endif %}
 
-              <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
-                  {% if request.LANGUAGE_CODE == 'en' %}
-                  {{ s.name }}
-                  {% else %}
-                  {{ s.local_name }}
-                  {% endif %}
-              </div>
+                <div class="h4 bottom-0 px-2 pb-4 rounded-lg text-slate-700 dark:text-white text-md text-center lang-charset">
+                    {% if request.LANGUAGE_CODE == 'en' %}
+                    {{ s.name }}
+                    {% else %}
+                    {{ s.local_name }}
+                    {% endif %}
+                </div>
 
-              </a>
-          {% empty %}
-              <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
-          {% endfor %}
-          </div>
-      {% endif %}
-    </div>
+                </a>
+            {% empty %}
+                <p class="text-gray-700 dark:text-blue-400 text-2xl text-center w-full">No schools available.</p>
+            {% endfor %}
+            </div>
+        {% endif %}
+        </div>
 
-</section>
+    </section>
     
  </div>
 {% endblock content %}
