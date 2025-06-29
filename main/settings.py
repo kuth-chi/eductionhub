@@ -59,6 +59,13 @@ INSTALLED_APPS = [
     'compressor',
     'rosetta',  # http://127.0.0.1:8000/rosetta/pick/?rosetta
     'drf_yasg',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # AllAuth
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.telegram',
     # My apps
     'user',
     'administrator',
@@ -73,7 +80,7 @@ INSTALLED_APPS = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'oauth2_provider.backends.OAuth2Backend',
-
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'user.middleware.profile.EnsureProfileMiddleware',
+    "allauth.account.middleware.AccountMiddleware", # allauth
     'api.middlewares.LogRequestMiddleware',
 ]
 
@@ -120,6 +128,7 @@ TEMPLATES = [
                 'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -138,6 +147,7 @@ if DEBUG:
 AUTH_USER_MODEL = 'user.User'
 # User Login 2Auth
 # LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL='profiles:profile'
 LOGIN_URL = '/accounts/login/'
 
 
@@ -226,6 +236,59 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+            'openid',
+            'https://www.googleapis.com/auth/calendar.readonly'
+        ],
+        'APP': {
+            'client_id': os.getenv("GOOGLE_AUTH_CLIENT_ID"),
+            'secret': os.getenv("GOOGLE_AUTH_SECRET"),
+            # 'key': ''
+        },
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+            'prompt': 'consent'
+        }
+    },
+    'facebook': {
+        'METHOD': 'oauth2',  # Set to 'js_sdk' to use the Facebook connect SDK
+        'SDK_URL': '//connect.facebook.net/{locale}/sdk.js',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name'
+        ],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': 'path.to.callable',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v13.0',
+        'GRAPH_API_URL': 'https://graph.facebook.com/v13.0',
+    },
+    'telegram': {
+        'APP': {
+            'client_id': os.getenv('TELEGRAM_BOT_ID'),
+
+            # NOTE: For the secret, be sure to provide the complete bot token,
+            # which typically includes the bot ID as a prefix.
+            'secret': os.getenv('TELEGRAM_BOT_TOKEN'),
+        },
+        'AUTH_PARAMS': {'auth_date_validity': 100},
+    }
+}
+
 # Cirtificate Settings
 # Path to your private and public keys for JWT
 JWT_PRIVATE_KEY_PATH = os.getenv("PRIVATE_KEY_B64", "")
@@ -235,3 +298,7 @@ JWT_PUBLIC_KEY_PATH = os.getenv("PUBLIC_KEY_B64", "")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+APP_URL = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else [os.getenv("APP_URL")]
+
+SOCIALACCOUNT_LOGIN_ON_GET = True

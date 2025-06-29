@@ -80,7 +80,7 @@
                                         <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ contact.username }}</span>
                                     </a>
                                 {% else %}
-                                    <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-2">
+                                    <a href="{{ contact.profile_url }}" target="_blank" class="flex items-center gap-3">
                                         <img class="w-8 h-8 rounded-full grayscale hover:grayscale-0"
                                             src="https://www.google.com/s2/favicons?sz=64&domain_url={{ contact.platform.url }}"
                                             alt="{{ contact.platform.name }} favicon">
@@ -102,7 +102,7 @@
                             <form id="edit-form-{{ contact.uuid }}"
                                 action="{% url 'profiles:edit_contact' uuid=contact.uuid %}"
                                 method="post"
-                                class="hidden mt-3 space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-auto border border-gray-200 dark:border-gray-700">
+                                class="hidden mt-3 space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-auto border border-gray-200 dark:border-gray-700 px-4 md:px-8">
                                 {% csrf_token %}
                                 
                                 <!-- Profile URL -->
@@ -144,15 +144,15 @@
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex justify-end gap-2 pt-2">
-                                    <button type="submit"
-                                            class="px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded shadow">
-                                        {% translate "Save" %}
-                                    </button>
+                                <div class="flex justify-end gap-4 pt-2">
                                     <button type="button"
                                             onclick="toggleEditForm('{{ contact.uuid }}')"
                                             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:underline">
                                         {% translate "Cancel" %}
+                                    </button>
+                                    <button type="submit"
+                                            class="px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 rounded shadow">
+                                        {% translate "Save" %}
                                     </button>
                                 </div>
                             </form>
@@ -175,8 +175,8 @@
             </div>
 
             <!-- Add Contact form (hidden by default) -->
-             <div id="add-contact-form"
-                    class="hidden mt-4 space-y-3 py-4 pb-14 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
+            <div id="add-contact-form"
+                    class="hidden mt-4 space-y-3 py-4 pb-20 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
                 <form action="{% url 'profiles:add_contact' %}" method="post">
                     {% csrf_token %}
                     <h4 class="h4 text-lg text-gray-700 dark:text-gray-200">{% translate "Add New Contact" %}</h4>

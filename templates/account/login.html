@@ -1,0 +1,36 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n static %}
+{% load allauth account %}
+
+{% block head_title %}{% trans "Access Education Hub" %}{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-8 w-full max-w-md">
+    <a href="/" class="flex flex-col items-center text-2xl font-semibold text-gray-900 dark:text-white space-y-4">
+        <img class="w-20 h-20 mr-2" src="{% static 'assets/img/android-chrome-192x192.png' %}" alt="Education hub logo login">
+            
+        <h1 class="text-2xl font-bold text-center text-gray-900 dark:text-white">
+            {% trans "Access Education Hub" %}
+        </h1>
+    </a>
+    <!-- Social Login Buttons -->
+    <div class="space-y-4">
+      {% include "accounts/social_login.html" %}
+    </div>
+
+    {% comment %} <!-- Optional Sign Up Link -->
+    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mt-6">
+      {% blocktrans %}Don't have an account? <a href="{{ signup_url }}" class="text-blue-600 hover:underline dark:text-blue-400">Sign up</a>.{% endblocktrans %}
+    </p> {% endcomment %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_body %}
+  {{ block.super }}
+  {% if PASSKEY_LOGIN_ENABLED %}
+    {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+  {% endif %}
+{% endblock %}

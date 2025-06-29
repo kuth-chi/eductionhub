@@ -38,7 +38,7 @@ def user_register(request):
 
 
 def user_login(request):
-    template_name = 'accounts/sign-in.html'
+    template_name = 'account/login.html'
 
     if request.method == 'POST':
         username = request.POST.get("username")
