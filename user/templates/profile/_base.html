@@ -32,19 +32,19 @@
         {% block head %}{% endblock %}
 
     </head>
-    <body class="h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
+    <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
         <!-- Navbar -->
-        <div class="fixed top-0 left-0 z-10 w-full">
+        <div class="fixed top-0 left-0 z-20 w-full backdrop-blur-xl">
             {% include 'shared/_navbar.html' %}
         </div>
         
-        <div class="flex-grow pt-24 pb-32 z-0 flex justify-center items-start">
+        <div class="flex-grow pt-24 pb-32 z-0">
             {% block body %}
             {% endblock body %}
         </div>
     
         <!-- Footer -->
-         <div class="fixed bottom-0 left-0 z-10 w-full"> 
+         <div class="fixed bottom-0 left-0 z-1 w-full "> 
             {% include 'shared/_nav_bottom.html' %}
         </div>
         <!-- End of HTML -->
