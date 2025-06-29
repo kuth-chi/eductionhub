@@ -283,7 +283,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
             # NOTE: For the secret, be sure to provide the complete bot token,
             # which typically includes the bot ID as a prefix.
-            'secret': os.getenv('TELEGRAM_BOT_TOKEN'),
+            'secret': os.getenv('TELEGRAM_LOGIN_PUBLIC_KEY'),
         },
         'AUTH_PARAMS': {'auth_date_validity': 100},
     }
