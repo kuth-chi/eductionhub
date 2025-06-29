@@ -28,9 +28,9 @@
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ profile.occupation|default:"None" }}</span>
                 </div>
             <div>
-            <h3 class="h-3 text-gray-700 dark:text-gray-200 mb-4 md:mb-8">Contact me</h3>
+            <h3 class="h-4 my-4 text-gray-700 dark:text-gray-200 md:my-8">Contact me</h3>
             {% if contact_profiles %}
-                <ol class="grid grid-cols-1 md:grid-cols-3 items-start md:items-center justify-start md:justify-between space-y-1 mt-2">
+                <ol class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 items-start md:items-center justify-start md:justify-between space-y-1 mt-2">
                     {% for contact in contact_profiles %}
                         <li class="group rounded-lg py-2 px-4 transition duration-300 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30">
                             <div class="flex justify-between items-center gap-4 flex-1">
@@ -50,6 +50,14 @@
                                         <span class="text-sm text-gray-900 dark:text-white">{{ contact.platform.name }}</span>
                                     </a>
                                 {% endif %}
+                                 <!-- Edit Button -->
+                                <button type="button"
+                                        class="text-sm bg-primary-500/50 dark:bg-primary-700/50 text-gray-200 hover:underline md:opacity-0 hover:opacity-100 duration-500 transition-all"
+                                >
+                                    <svg class="w-6 h-6 text-gray-700 dark:text-white/80 dark:hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                                    </svg>
+                                </button>
                             </div>
                         </li>
                     {% endfor %}

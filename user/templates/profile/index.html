@@ -11,10 +11,10 @@
  {% endblock %}
 
 {% block body %}
-<div class="flex items-center justify-start overflow-y-auto">
+<div class="container mx-auto">
     <!-- Profile card -->
-    <div class="w-full rounded-lg border shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 py-6 md:p-8 overflow-hidden">
-        <div class="flex flex-col space-y-12 items-center">
+    <div class="w-fit rounded-lg border shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 py-4 md:py-8 overflow-auto">
+        <div class="flex flex-col space-y-4 md:space-y-8 items-center">
             <div class="flex flex-col items-center gap-4">
                 <div class="relative w-48 h-48">
                     <!-- Photo -->
@@ -60,10 +60,16 @@
             </div>
             <!-- If no contacts, show the Add button center-aligned -->
              <div>
+            <h3 class="h-3 text-gray-700 dark:text-gray-200 mb-4 md:mb-8">{% if contact_profiles|length > 1 %}
+                {% translate "Contacts" %}
+                {% else %}
+                    {% translate "Contact" %}
+                {% endif %}
+            </h3>
             {% if contact_profiles %}
-                <ol class="flex flex-col space-y-1 overflow-auto">
+                <ol class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 items-start md:items-center justify-start md:justify-between space-y-1 mt-2">
                     {% for contact in contact_profiles %}
-                        <li class="group rounded-lg px-4 py-3 transition duration-300 md:hover:bg-blue-200 dark:md:hover:bg-gray-700/30">
+                        <li class="group rounded-lg px-4 py-3 transition duration-300 hover:bg-blue-200 dark:hover:bg-gray-700/30">
                             <div class="flex justify-between items-center gap-4">
                                 {% if contact.platform.icon %}
                                     <a target="_blank" href="{% if contact.platform.name == 'Telephone' %}tel:{{ contact.username }}{% elif contact.platform.name == 'Email' %}mailto:{{ contact.username }}{% else %}{{ contact.profile_url }}{% endif %}"
@@ -84,9 +90,11 @@
                                 
                                 <!-- Edit Button -->
                                 <button type="button"
-                                        class="text-sm text-blue-600 hover:underline"
+                                        class="text-sm bg-primary-500/50 dark:bg-primary-700/50 text-gray-200 hover:underline md:opacity-0 hover:opacity-100 duration-500 transition-all"
                                         onclick="toggleEditForm('{{ contact.uuid }}')">
-                                    Edit
+                                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                                    </svg>
                                 </button>
                             </div>
 
@@ -94,7 +102,7 @@
                             <form id="edit-form-{{ contact.uuid }}"
                                 action="{% url 'profiles:edit_contact' uuid=contact.uuid %}"
                                 method="post"
-                                class="hidden mt-3 space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                class="hidden mt-3 space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-auto border border-gray-200 dark:border-gray-700">
                                 {% csrf_token %}
                                 
                                 <!-- Profile URL -->
@@ -165,41 +173,47 @@
                     + {% translate 'Add Contact' %}
                 </button>
             </div>
+
             <!-- Add Contact form (hidden by default) -->
             <form id="add-contact-form"
                 action="{% url 'profiles:add_contact' %}" method="post"
-                class="hidden mt-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
+                class="hidden mt-4 space-y-3 py-4 pb-14 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 md:px-4">
                 {% csrf_token %}
-                
-                <div>
-                    <label for="platform" class="block text-sm text-gray-700 dark:text-gray-300">Platform</label>
-                    <select name="platform" id="platform"
-                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                        {% for platform in platforms %}
-                            <option value="{{ platform.id }}">{{ platform.name }}</option>
-                        {% empty %}{% endfor %}
-                    </select>
-                </div>
+                <h4 class="h4 text-lg text-gray-700 dark:text-gray-200">{% translate "Add New Contact" %}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-x-4">
+                    <div>
+                        <label for="platform" class="block text-sm text-gray-700 dark:text-gray-300">Platform</label>
+                        <select name="platform" id="platform"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                            {% for platform in platforms %}
+                                <option value="{{ platform.id }}">{{ platform.name }}</option>
+                            {% empty %}{% endfor %}
+                        </select>
+                    </div>
 
-                <div>
-                    <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
-                    <input type="url" name="profile_url" id="profile_url"
-                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                </div>
+                    <div>
+                        <label for="profile_url" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Profile' %} URL</label>
+                        <input type="url" name="profile_url" id="profile_url"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                    </div>
 
-                <div>
-                    <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
-                    <select name="privacy" id="privacy"
-                        class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
-                        {% for val, label in privacy_choices %}
-                            <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                    <div>
+                        <label for="privacy" class="block text-sm text-gray-700 dark:text-gray-300">{% translate 'Privacy' %}</label>
+                        <select name="privacy" id="privacy"
+                            class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                            {% for val, label in privacy_choices %}
+                                <option value="{{ val }}" {% if contact.privacy == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-
-                <div class="flex justify-end">
+                <div class="flex items-center justify-end space-x-2">
+                    <button id="cancelAddContactBtn" type="button"
+                        class="mt-2 px-4 py-2 text-gray-700 dark:text-gray-200 bg-blue-600/0 hover:bg-yellow-500/20 rounded shadow">
+                        {% translate 'Cancel' %}
+                    </button>
                     <button type="submit"
-                        class="mt-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded shadow">
+                        class="mt-2 px-3 py-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded shadow">
                         {% translate 'Add Contact' %}
                     </button>
                 </div>
@@ -228,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const qrWrapper = document.getElementById("qr-wrapper");
     const addContactBtn = document.getElementById("toggle-contact-form");
     const addContactForm = document.getElementById("add-contact-form");
+    const cancelAddContactBtn = document.getElementById("cancelAddContactBtn");
 
     let showingQR = false;
 
@@ -252,6 +267,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
     });
+
+    cancelAddContactBtn?.addEventListener("click", () => {
+        addContactForm.classList.toggle("hidden");
+        addContactBtn.classList.remove("hidden");
+    })
 });
 
 
