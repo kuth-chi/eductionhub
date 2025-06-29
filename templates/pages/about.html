@@ -1,0 +1,74 @@
+{% extends '_base.html' %}
+{% load i18n static %}
+
+{% block title %}{{ page_title|default:'About Us' }}{% endblock %}
+
+{% block content %}
+ <!-- Header -->
+  <header class="bg-gray-300 dark:bg-gray-900 shadow">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      <h1 class="text-4xl font-extrabold text-blue-800 dark:text-blue-200">About Education Hub</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-500 mt-2">Transforming access to education through centralized, student-first information.</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <section class="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-8 sm:p-12">
+      
+      <!-- Intro -->
+      <h2 class="text-3xl font-bold text-blue-700 mb-4">Empowering Informed Decisions in Education</h2>
+      <p class="text-lg text-gray-700 dark:text-gray-400 mb-6">
+        <strong>Education Hub</strong> is more than just a platform — it's a movement to democratize educational access. We exist to bridge the gap between ambition and opportunity by providing a unified resource where students and families can explore schools, programs, scholarships, career paths, and more — all in one place.
+      </p>
+
+      <!-- Mission -->
+      <h3 class="text-2xl font-semibold text-blue-600 mb-3">Our Mission</h3>
+      <p class="text-lg text-gray-700 dark:text-gray-400 mb-6">
+        To simplify the educational journey for every student by centralizing trusted, accurate, and up-to-date information — empowering them to make decisions that shape their future with clarity and confidence.
+      </p>
+
+      <!-- The Problem We Solve -->
+      <h3 class="text-2xl font-semibold text-blue-600 mb-3">Why We Exist</h3>
+      <p class="text-lg text-gray-700 dark:text-gray-400 mb-6">
+        In many communities, students face a lack of accessible, reliable information about schools, scholarships, or career pathways. As a result, important decisions — like which major to choose, which school to attend, or what career to pursue — are often made blindly. <strong>Education Hub exists to fix that.</strong>
+      </p>
+
+      <!-- Our Solution -->
+      <h3 class="text-2xl font-semibold text-blue-600 mb-3">What We Offer</h3>
+      <ul class="list-disc list-inside text-lg text-gray-700 dark:text-gray-400 space-y-2 mb-6">
+        <li><strong>Comprehensive School Listings:</strong> Discover verified information about public and private schools, universities, and institutions across the country.</li>
+        <li><strong>Scholarship Opportunities:</strong> Find and apply for local and international scholarships, grants, and financial aid programs.</li>
+        <li><strong>Career & Major Guidance:</strong> Explore majors and how they align with your dream career through practical advice, trends, and tools.</li>
+        <li><strong>Student Stories:</strong> Learn from real experiences shared by students who’ve walked the same path.</li>
+        <li><strong>Tools & Resources:</strong> Use smart filters, compare programs, and get recommendations tailored to your interests and academic profile.</li>
+      </ul>
+
+      <!-- Vision -->
+      <h3 class="text-2xl font-semibold text-blue-600 mb-3">Our Vision</h3>
+      <p class="text-lg text-gray-700 dark:text-gray-400 mb-6">
+        A future where every student — regardless of geography or background — has the guidance and information they need to choose the right path. We envision a digital ecosystem where educational data is not a barrier but a bridge to opportunity.
+      </p>
+
+      <!-- Impact -->
+      <h3 class="text-2xl font-semibold text-blue-600 mb-3">Who We Serve</h3>
+      <p class="text-lg text-gray-700 dark:text-gray-400 mb-6">
+        From curious high school students exploring their first steps, to parents guiding their children, and even educators and institutions seeking outreach — Education Hub is designed for everyone who believes in the power of informed choice.
+      </p>
+
+      <!-- Call to Action -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-8">
+        <h4 class="text-xl font-semibold text-blue-700 mb-2">Be Part of the Change</h4>
+        <p class="text-lg text-gray-700 mb-4">
+          Are you a student, parent, educator, or partner in education? Join us. Together, we can make education more transparent, accessible, and inspiring for all.
+        </p>
+        <a href="/contact" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
+          Contact Us & Collaborate
+        </a>
+      </div>
+
+    </section>
+  </main>
+{% endblock content %}
+{% block script %}
+{% endblock script %}

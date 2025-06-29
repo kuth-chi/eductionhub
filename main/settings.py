@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'api',
     'organization',
     'search',
+    'web'
 ]
 
 AUTHENTICATION_BACKENDS = [

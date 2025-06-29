@@ -52,6 +52,7 @@ urlpatterns += i18n_patterns(
     path("organizations/", include("organization.urls", namespace="organization")),
     path("schools/", include("schools.urls", namespace="schools")),
     path("app/", include("health_check.urls", namespace="health_check")),
+    path("pages/", include("web.urls", namespace="web")),
     # language switcher
     path('set_language/', set_language, name='set_language'),
 )
