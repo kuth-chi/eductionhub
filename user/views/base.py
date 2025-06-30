@@ -10,12 +10,13 @@ import hashlib
 from django.http import JsonResponse
 from django.http import response
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from user.views.utils import generate_jwt, verify_jwt
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from schools.models.schoolsModel import ScholarshipType, School, SchoolType, Scholarship
 
-
+@login_required
 def index(request, type=None):
     if type:
         try:

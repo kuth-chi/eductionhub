@@ -38,20 +38,19 @@
             {% include 'shared/_navbar.html' %}
         </div>
         
-        <div class="flex-grow pt-20 pb-32 z-0">
+        <div class="flex-grow pt-24 pb-32 z-0">
             {% block body %}
             {% endblock body %}
         </div>
     
         <!-- Footer -->
-         <div class="fixed bottom-0 left-0 z-1 w-full "> 
+         <div class="fixed bottom-0 left-0 z-1 w-full"> 
             {% include 'shared/_nav_bottom.html' %}
         </div>
         <!-- End of HTML -->
-        <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
-        <script src="{% static 'js/htmx.min.js' %}"></script>
+       <script src="{% static 'libs/flowbite/dist/flowbite.min.js' %}"></script>
         <script src="{% static 'js/app.js' %}"></script>
-        <script src="{% static 'libs/animejs/anime.min.js' %}"></script>
+        
         {% block scripts %}
         {% endblock %}
     </body>

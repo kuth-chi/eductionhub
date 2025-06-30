@@ -166,13 +166,21 @@
                                 </iframe>
                                 <p style="display:none; color:red;">Failed to load map. Please try again later.</p>
 
-                                <a href="geo:{{ lat|floatformat:6 }},{{ lon|floatformat:6 }}"
-                                onclick="if(!window.navigator.userAgent.match(/(iPhone|Android)/)) this.href='https://www.openstreetmap.org/?mlat={{ lat|floatformat:6 }}&mlon={{ lon|floatformat:6 }}';"
-                                target="_blank"
-                                class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center mt-2">
-                                    <i class="bi bi-map mr-2"></i>
-                                    {% translate 'Open in Maps' %}
+                                <a href="#" target="_blank"
+                                    onclick="
+                                        const lat = '{{ lat|floatformat:6 }}';
+                                        const lon = '{{ lon|floatformat:6 }}';
+                                        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+                                        const geoUrl = `geo:${lat},${lon}`;
+                                        const googleMapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+                                        const targetUrl = isMobile ? geoUrl : googleMapsUrl;
+                                        window.open(targetUrl, '_blank');
+                                        return false;"
+                                    class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center mt-2">
+                                        <i class="bi bi-map mr-2"></i>
+                                        {% translate 'Open in Maps' %}
                                 </a>
+
                             {% else %}
                                 <p class="text-red-500">
                                     {% if location_error %}
