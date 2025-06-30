@@ -172,9 +172,9 @@
                                         const lon = '{{ lon|floatformat:6 }}';
                                         const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
                                         const geoUrl = `geo:${lat},${lon}`;
-                                        const fallbackUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}`;
                                         const googleMapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
-                                        window.location.href = isMobile ? geoUrl : googleMapsUrl;
+                                        const targetUrl = isMobile ? geoUrl : googleMapsUrl;
+                                        window.open(targetUrl, '_blank');
                                         return false;"
                                     class="text-blue-600 dark:text-blue-500 hover:underline font-medium text-lg inline-flex items-center mt-2">
                                         <i class="bi bi-map mr-2"></i>
