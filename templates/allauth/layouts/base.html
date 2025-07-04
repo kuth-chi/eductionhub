@@ -40,12 +40,12 @@
     <body class="flex flex-col min-h-screen overflow-x-hidden justify-center bg-gray-50 dark:bg-gray-800">
         {% block body %}
             {% if messages %}
-                <div>
+                {% comment %} <div>
                     <strong>{% trans "Messages:" %}</strong>
                     <ul>
                         {% for message in messages %}<li>{{ message }}</li>{% endfor %}
                     </ul>
-                </div>
+                </div> {% endcomment %}
             {% endif %}
             
             {% block content %}

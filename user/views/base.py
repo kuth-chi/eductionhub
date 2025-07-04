@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from schools.models.schoolsModel import ScholarshipType, School, SchoolType, Scholarship
 
-@login_required
+@login_required(login_url="/accounts/login/")
 def index(request, type=None):
     if type:
         try:
@@ -38,7 +38,7 @@ def index(request, type=None):
 
     return render(request, "pages/home.html", context)
 
-
+@login_required(login_url="/accounts/login/")
 def scholarship(request, type=None):
     
     if type:

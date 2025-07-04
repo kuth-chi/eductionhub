@@ -15,7 +15,7 @@
     <!-- Profile card -->
     <div class="w-full h-full rounded-lg border shadow bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-8 py-8 md:py-14 overflow-auto">
         <div class="flex flex-col space-y-4 md:space-y-8 items-center justify-start h-full w-full">
-            <div class="flex-1 items-center gap-4">
+            <div class="flex flex-col items-center justify-center gap-y-4">
                 <div class="relative w-48 h-48">
                     <!-- Photo -->
                     <div id="photo-wrapper" class="absolute inset-0 flex justify-center items-center transition-all duration-300 ease-in-out">
@@ -67,7 +67,7 @@
                 {% endif %}
             </h3>
             {% if contact_profiles %}
-                <ol class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 items-start md:items-center justify-start md:justify-between space-y-1 mt-2">
+                <ol class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 items-start md:items-center justify-start md:justify-between space-y-1 mt-2 border-white-200 px-4 py-4 rounded-lg dark:border-gray-700/50">
                     {% for contact in contact_profiles %}
                         <li class="group rounded-lg px-4 py-3 transition duration-300 hover:bg-gray-500/20 dark:hover:bg-gray-700/50">
                             <div class="flex justify-between items-center gap-4">

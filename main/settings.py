@@ -238,6 +238,8 @@ REST_FRAMEWORK = {
 }
 
 # Provider specific settings
+TELEGRAM_BOT_ID = os.getenv('TELEGRAM_BOT_ID')
+TELEGRAM_LOGIN_PUBLIC_KEY = os.getenv('TELEGRAM_LOGIN_PUBLIC_KEY')
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -280,11 +282,11 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     'telegram': {
         'APP': {
-            'client_id': os.getenv('TELEGRAM_BOT_ID'),
+            'client_id': TELEGRAM_BOT_ID,
 
             # NOTE: For the secret, be sure to provide the complete bot token,
             # which typically includes the bot ID as a prefix.
-            'secret': os.getenv('TELEGRAM_LOGIN_PUBLIC_KEY'),
+            'secret': TELEGRAM_LOGIN_PUBLIC_KEY,
         },
         'AUTH_PARAMS': {'auth_date_validity': 100},
     }
@@ -301,5 +303,5 @@ JWT_PUBLIC_KEY_PATH = os.getenv("PUBLIC_KEY_B64", "")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APP_URL = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else [os.getenv("APP_URL")]
-
+OPEN_AI_API_SECRET=os.getenv("OPEN_AI_KEY")
 SOCIALACCOUNT_LOGIN_ON_GET = True
