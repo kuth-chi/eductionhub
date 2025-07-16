@@ -139,7 +139,7 @@ class School(models.Model):
     type = models.ManyToManyField("SchoolType", verbose_name=_('type'))
     platforms = models.ManyToManyField("Platform", related_name="school_platforms", through="PlatformProfile", verbose_name=_('platforms'))
     educational_levels = models.ManyToManyField("EducationalLevel", related_name="school_educational_levels", blank=True, verbose_name=_("school level"))
-    degree_levels = models.ManyToManyField("EducationalDegree", related_name="school_educational_degrees", blank=True, verbose_name=_("school eduction degree"))
+    degree_levels = models.ManyToManyField("EducationDegree", related_name="school_education_degrees", blank=True, verbose_name=_("school eduction degree"))
     organization = models.ForeignKey("organization.Organization", on_delete=models.CASCADE, blank=True, null=True)
     # Tracking Fields
     slug = models.SlugField(max_length=75, blank=True, verbose_name=_('slug'))
@@ -209,7 +209,7 @@ class SchoolBranchInformation(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ["order_number"]
+        ordering = ["name", "created_at"]
         verbose_name = "School branch"
         verbose_name_plural = "School branches"
 

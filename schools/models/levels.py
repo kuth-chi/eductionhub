@@ -44,11 +44,12 @@ class EducationDegree(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.level_name)
+            self.slug = slugify(self.degree_name)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.level_name
+        return self.degree_name
+
     
     class Meta:
         ordering = ("degree_name", "-created_date", "updated_date")

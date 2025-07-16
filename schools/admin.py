@@ -82,13 +82,14 @@ class FieldOfStudyAdmin(admin.ModelAdmin):
 
 @admin.register(EducationDegree)
 class EducationDegreeAdmin(admin.ModelAdmin):
-    list_display = ('degree_name', 'code', 'level', 'created_at')
-    search_fields = ('name', 'code', 'description')
-    list_filter = ('level', 'created_at')
+    list_display = ('degree_name', 'color', 'description', 'created_date')
+    search_fields = ('degree_name', 'color', 'description')
+    list_filter = ('color', 'created_date')
 
 admin.site.register(SchoolType, SchoolTypeAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(EducationalLevel, EducationalLevelAdmin)
+# admin.site.register(EducationDegree, EducationDegreeAdmin)
 admin.site.site_header = _("Education Hub Admin System" ) 
 admin.site.site_title = _("Education Administrator System")
 admin.site.index_title = _("Welcome to Education Hub Admin System")
