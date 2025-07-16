@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
 from schools.models.OnlineProfile import Platform, PlatformProfile
-from schools.models.levels import EducationalLevel
+from schools.models.levels import EducationDegree, EducationalLevel
 from schools.models.schoolsModel import FieldOfStudy, ScholarshipType, SchoolScholarship, SchoolType, School, SchoolCustomizeButton
 
 # Register your models here.
@@ -77,6 +77,12 @@ class ScholarshipTypeAdmin(admin.ModelAdmin):
 @admin.register(FieldOfStudy)
 class FieldOfStudyAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'level', 'created_at')
+    search_fields = ('name', 'code', 'description')
+    list_filter = ('level', 'created_at')
+
+@admin.register(EducationDegree)
+class EducationDegreeAdmin(admin.ModelAdmin):
+    list_display = ('degree_name', 'code', 'level', 'created_at')
     search_fields = ('name', 'code', 'description')
     list_filter = ('level', 'created_at')
 

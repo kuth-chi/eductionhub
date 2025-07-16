@@ -66,10 +66,31 @@ class Country(models.Model):
         unique_together = ['name', 'code']
 
 
+class State(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    slug = models.SlugField(max_length=255, blank=True, unique=True)
+    local_name = models.CharField(max_length=128, blank=True)
+    code = models.CharField(max_length=10, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name.lower() + "-" + self.code)
+        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _('state')
+        verbose_name_plural = _('states')
+        ordering = ['name']
+        unique_together = ['name', 'code']
 
 
 class Address(models.Model):
     """ Represents address model """
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, verbose_name=_("unique identifier"))
     name = models.CharField(max_length=128, blank=True, verbose_name=_('name'))
     street = models.CharField(max_length=255, blank=True, verbose_name=_('street'))
     city = models.CharField(max_length=128, blank=True, verbose_name=_('city'))
@@ -118,6 +139,7 @@ class School(models.Model):
     type = models.ManyToManyField("SchoolType", verbose_name=_('type'))
     platforms = models.ManyToManyField("Platform", related_name="school_platforms", through="PlatformProfile", verbose_name=_('platforms'))
     educational_levels = models.ManyToManyField("EducationalLevel", related_name="school_educational_levels", blank=True, verbose_name=_("school level"))
+    degree_levels = models.ManyToManyField("EducationalDegree", related_name="school_educational_degrees", blank=True, verbose_name=_("school eduction degree"))
     organization = models.ForeignKey("organization.Organization", on_delete=models.CASCADE, blank=True, null=True)
     # Tracking Fields
     slug = models.SlugField(max_length=75, blank=True, verbose_name=_('slug'))
@@ -140,6 +162,59 @@ class School(models.Model):
         ordering = ['name']
         verbose_name = _("school")
         verbose_name_plural = _("schools")
+
+
+class PhoneContact(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    slug = models.SlugField(max_length=255, blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name.lower() + "-" + self.code)
+        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _('contact')
+        verbose_name_plural = _('contact')
+        ordering = ['name']
+
+
+class SchoolBranchInformation(models.Model):
+    name = models.CharField(max_length=75, verbose_name=_("name"))
+    street = models.CharField(max_length=255, blank=True, verbose_name=_('street'))
+    city = models.CharField(max_length=128, blank=True, verbose_name=_('city'))
+    zip_code = models.CharField(max_length=10, blank=True, verbose_name=_('zip code'))
+    state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="state_branch")
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="country_branch")
+    location = models.CharField(max_length=255, blank=True, verbose_name=_('location'))
+    contact = models.ForeignKey(PhoneContact, on_delete=models.CASCADE, related_name="contact_info_branch")
+    # Reference field
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="school_branch")
+
+    # Utilize field
+    slug = models.SlugField(max_length=255, blank=True, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_delete = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name) + "-" + (str(uuid.uuid4())[:6])
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["order_number"]
+        verbose_name = "School branch"
+        verbose_name_plural = "School branches"
+
+    def __str__(self):
+        return f"{self.name} ({self.school.name})"
 
 
 class SchoolCustomizeButton(models.Model):
@@ -240,6 +315,7 @@ class Scholarship(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    is_delete = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -275,6 +351,8 @@ class FieldOfStudy(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     schools = models.ManyToManyField('School', related_name='fields_of_study', blank=True)
+    is_active = models.BooleanField(default=True)
+    is_delete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
