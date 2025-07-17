@@ -53,5 +53,5 @@ class EducationDegree(models.Model):
     
     class Meta:
         ordering = ("degree_name", "-created_date", "updated_date")
-        verbose_name = _("education level")
-        verbose_name_plural = _("education levels")
+        verbose_name = _("education degree")
+        verbose_name_plural = _("education degrees")
