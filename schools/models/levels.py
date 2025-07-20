@@ -70,6 +70,7 @@ class EducationDegree(models.Model):
         return self.degree_name
 
     class Meta:
+<<<<<<< HEAD
         ordering = ("order", "degree_name", "-created_date", "updated_date")
         verbose_name = _("education degree")
         verbose_name_plural = _("education degrees")
@@ -318,3 +319,8 @@ class SchoolMajorOffering(models.Model):
         ordering = ['school', 'major']
         verbose_name = _("School Major Offering")
         verbose_name_plural = _("School Major Offerings")
+=======
+        ordering = ("degree_name", "-created_date", "updated_date")
+        verbose_name = _("education degree")
+        verbose_name_plural = _("education degrees")
+>>>>>>> main
