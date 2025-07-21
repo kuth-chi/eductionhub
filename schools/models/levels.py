@@ -70,8 +70,7 @@ class EducationDegree(models.Model):
         return self.degree_name
 
     class Meta:
-<<<<<<< HEAD
-        ordering = ("order", "degree_name", "-created_date", "updated_date")
+        ordering = ("degree_name", "-created_date", "updated_date")
         verbose_name = _("education degree")
         verbose_name_plural = _("education degrees")
 
@@ -163,7 +162,7 @@ class SchoolBranch(models.Model):
     # Headquarters identification
     is_headquarters = models.BooleanField(default=False, verbose_name=_("Is Headquarters"))
     headquarters_branch = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
-                                         related_name='sub_branches', verbose_name=_("Headquarters Branch"))
+                                            related_name='sub_branches', verbose_name=_("Headquarters Branch"))
     
     # Location and contact
     address = models.TextField(verbose_name=_("Address"))
@@ -303,8 +302,8 @@ class SchoolMajorOffering(models.Model):
     application_deadline = models.DateField(null=True, blank=True, verbose_name=_("Application Deadline"))
     admission_requirements = models.TextField(blank=True, verbose_name=_("Admission Requirements"))
     gpa_requirement = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, 
-                                        validators=[MinValueValidator(0.0), MaxValueValidator(4.0)], 
-                                        verbose_name=_("Minimum GPA Requirement"))
+                                           validators=[MinValueValidator(0.0), MaxValueValidator(4.0)], 
+                                           verbose_name=_("Minimum GPA Requirement"))
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -319,8 +318,3 @@ class SchoolMajorOffering(models.Model):
         ordering = ['school', 'major']
         verbose_name = _("School Major Offering")
         verbose_name_plural = _("School Major Offerings")
-=======
-        ordering = ("degree_name", "-created_date", "updated_date")
-        verbose_name = _("education degree")
-        verbose_name_plural = _("education degrees")
->>>>>>> main
