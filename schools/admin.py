@@ -259,9 +259,9 @@ class FieldOfStudyAdmin(admin.ModelAdmin):
 
 @admin.register(EducationDegree)
 class EducationDegreeAdmin(admin.ModelAdmin):
-    list_display = ('degree_name', 'level', 'duration_years', 'credit_hours', 'order', 'is_active')
+    list_display = ('degree_name', 'level', 'duration_years', 'credit_hours', 'order', 'is_active', 'created_date', 'updated_date') # You can keep it here
     search_fields = ('degree_name', 'description')
-    list_filter = ('level', 'duration_years', 'is_active', 'created_date')
+    list_filter = ('level', 'duration_years', 'is_active', 'created_date') # You can keep it here
     ordering = ('order', 'degree_name')
     fieldsets = (
         ('Basic Information', {
@@ -277,7 +277,7 @@ class EducationDegreeAdmin(admin.ModelAdmin):
             'fields': ('is_active', 'is_deleted')
         }),
         ('Metadata', {
-            'fields': ('uuid', 'created_date', 'updated_date'),
+            'fields': ('uuid',), # Removed 'created_date' from here
             'classes': ('collapse',)
         })
     )
