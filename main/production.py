@@ -6,6 +6,7 @@ from main.settings import BASE_DIR
 
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+CUSTOM_DOMAIN = os.getenv('CUSTOM_DOMAIN')
 ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CORS_ALLOWED_ORIGINS = [
@@ -14,9 +15,16 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.blob\.core\.windows\.net$",
+    r"^https://(\w+\.)*educationhub\.io$",
+    r"^http://(\w+\.)*educationhub\.io$", 
 ]
 
-
+if CUSTOM_DOMAIN:
+    ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
+    CSRF_TRUSTED_ORIGINS.append('https://' + CUSTOM_DOMAIN)
+if WEBSITE_HOSTNAME:
+    CORS_ALLOWED_ORIGINS.append(f"https://{WEBSITE_HOSTNAME}")
+    
 CORS_ALLOW_ALL_ORIGINS = False
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
