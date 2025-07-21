@@ -148,7 +148,6 @@
             >
           </li>
           <li>
-            {% comment %}
             <a
               href="{% url 'profiles:logout' %}"
               {%
@@ -162,7 +161,7 @@
           </li>
         </ul>
       </div>
-      {% else %} {% comment %}
+      {% else %}
       <a
         href="{% url 'profiles:login' %}"
         {%
