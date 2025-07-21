@@ -7,6 +7,7 @@ from main.settings import BASE_DIR
 
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CUSTOM_DOMAIN = os.getenv('CUSTOM_DOMAIN')
+WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME')
 ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net"]
 CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
 CORS_ALLOWED_ORIGINS = [
