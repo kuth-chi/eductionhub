@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import action
 
 from schools.models.schoolsModel import School, SchoolType
 from api.serializers.schools.base import SchoolSerializer, SchoolTypeSerializer
@@ -109,3 +110,32 @@ class SchoolViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except School.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=["get"], url_path="analytics")
+    def analytics(self, request, pk=None):
+        """
+        Returns analytics for a school, including counts of branches, degree offerings, major offerings, custom buttons, platform profiles, scholarships, and college associations.
+        """
+        try:
+            school = School.objects.get(pk=pk)
+            total_branches = school.school_branch.count() if hasattr(school, 'school_branch') else 0
+            total_degree_offerings = school.degree_offerings.count() if hasattr(school, 'degree_offerings') else 0
+            total_major_offerings = school.major_offerings.count() if hasattr(school, 'major_offerings') else 0
+            total_custom_buttons = school.custom_buttons.count() if hasattr(school, 'custom_buttons') else 0
+            total_platform_profiles = school.platform_profiles_school.count() if hasattr(school, 'platform_profiles_school') else 0
+            # SchoolScholarship is not a related_name, so we query directly
+            from schools.models.schoolsModel import SchoolScholarship
+            total_scholarships = SchoolScholarship.objects.filter(school=school).count()
+            total_college_associations = school.college_associations.count() if hasattr(school, 'college_associations') else 0
+            data = {
+                "total_branches": total_branches,
+                "total_degree_offerings": total_degree_offerings,
+                "total_major_offerings": total_major_offerings,
+                "total_custom_buttons": total_custom_buttons,
+                "total_platform_profiles": total_platform_profiles,
+                "total_scholarships": total_scholarships,
+                "total_college_associations": total_college_associations,
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except School.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
