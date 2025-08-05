@@ -9,7 +9,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import CreateView
 from django.urls import reverse, reverse_lazy
-from schools.models.OnlineProfile import Platform
+from schools.models.online_profile import Platform
 from shared.helper import QRCodeGenerator
 from user.models import Letter, Profile, ProfileContact
 from django.utils.translation import gettext as _

@@ -138,5 +138,8 @@
     "**/*.pyc": true,
     "**/.next": true,
     "**/.git": true
-  }
+  },
+  "pylint.args": [
+    "    \"python.linting.pylintArgs\": [         \"--load-plugins=pylint_django\"     ],"
+  ]
 } 

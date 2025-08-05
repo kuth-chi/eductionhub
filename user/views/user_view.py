@@ -8,16 +8,18 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth import authenticate, login, logout
 from user.models import User, Profile
 from user.forms.user_forms import RegisterForm, CustomerAuthenticationForm
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 # Create your views here.
 def user_register(request):
     template_name = "accounts/register.html"
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
-        
+
         # Check if password and confirm password match
         if not username or not password or not confirm_password:
             messages.error(request, "Please fill in all fields")
@@ -30,20 +32,19 @@ def user_register(request):
                 user = User.objects.create_user(username=username, password=password)
                 user.save()
                 messages.success(request, "Account created successfully")
-                return redirect('profiles:login')
+                return redirect("profiles:login")
     else:
         form = RegisterForm()
     return render(request, template_name)
 
 
-
 def user_login(request):
-    template_name = 'account/login.html'
+    template_name = "account/login.html"
 
-    if request.method == 'POST':
+    if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        
+
         # Rate-limiting: get failed attempts from cache
         cache_key = f"login_attempts_{username}"
         attempts = cache.get(cache_key, 0)
@@ -60,22 +61,22 @@ def user_login(request):
             Profile.objects.get_or_create(user=user)
             login(request, user)
 
-            next_url = request.GET.get('next')
+            next_url = request.GET.get("next")
             if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
-                next_url = '/'
+                next_url = "/"
 
-            code = request.COOKIES.get('authorization_code')
-            state = request.COOKIES.get('state')
+            code = request.COOKIES.get("authorization_code")
+            state = request.COOKIES.get("state")
             if code and state:
-                if not next_url.startswith('http'):
-                    next_url = f"http://localhost:8100{next_url}"
+                if not next_url.startswith("http"):
+                    next_url = f"http://localhost:8000{next_url}"
                 next_url = f"{next_url}?code={code}&state={state}"
 
-            return redirect(next_url)
+            return redirect(f"/sync-jwt/?next={next_url}")
         else:
             # Increment failed attempts
             cache.set(cache_key, attempts + 1, timeout=300)  # expire after 5 minutes
-            messages.error(request, 'Invalid Username or Password')
+            messages.error(request, "Invalid Username or Password")
 
     return render(request, template_name)
 
@@ -83,4 +84,18 @@ def user_login(request):
 # def user_logout(request):
 def user_logout(request):
     logout(request)
-    return redirect('profiles:login')
+    return redirect("profiles:login")
+
+
+def sync_jwt(request):
+    if not request.user.is_authenticated:
+        return redirect("/accounts/login/")
+    refresh = RefreshToken.for_user(request.user)
+    next_url = request.GET.get("next", "/")
+    if not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}
+    ):
+        next_url = "/"
+    return redirect(
+        f"/sync-token?access={refresh.access_token}&refresh={refresh}&next={next_url}"
+    )

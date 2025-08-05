@@ -10,6 +10,9 @@ __pycache__/
 node_modules
 
 # Distribution / packaging
+.github
+.mypy_cache
+.vscode
 .http
 .Python
 build/
