@@ -19,11 +19,10 @@ Scholarship = apps.get_model("schools", "Scholarship")
 SchoolScholarship = apps.get_model("schools", "SchoolScholarship")
 SchoolCustomizeButton = apps.get_model("schools", "SchoolCustomizeButton")
 Address = apps.get_model("schools", "Address")
-PhoneContact = apps.get_model("schools", "PhoneContact")
+SchoolBranchContactInfo = apps.get_model("schools", "SchoolBranchContactInfo")
 
 from api.serializers.schools.base import (
     EducationalLevelSerializer,
-    CollegeSerializer,
     MajorSerializer,
     EducationDegreeSerializer,
     SchoolDegreeOfferingSerializer,
@@ -35,9 +34,10 @@ from api.serializers.schools.base import (
     SchoolScholarshipSerializer,
     SchoolCustomizeButtonSerializer,
     AddressSerializer,
-    PhoneContactSerializer,
+    SchoolBranchContactInfoSerializer,
 )
 from api.serializers.schools.branch import SchoolBranchSerializer
+from api.serializers.schools.college_serializers import CollegeSerializer
 
 
 class EducationalLevelViewSet(viewsets.ModelViewSet):
@@ -120,9 +120,9 @@ class AddressViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-class PhoneContactViewSet(viewsets.ModelViewSet):
-    queryset = PhoneContact.objects.all()
-    serializer_class = PhoneContactSerializer
+class SchoolBranchContactInfoViewSet(viewsets.ModelViewSet):
+    queryset = SchoolBranchContactInfo.objects.all()
+    serializer_class = SchoolBranchContactInfoSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 

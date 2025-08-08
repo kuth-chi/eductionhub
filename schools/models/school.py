@@ -2,6 +2,7 @@ import decimal
 import os
 import re
 import uuid
+from venv import create
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
@@ -14,13 +15,8 @@ class SchoolType(DefaultField):
     """This class represents a school type"""
 
     type = models.CharField(max_length=128, unique=True, db_index=True, blank=False)
-    description = models.TextField(
-        blank=True, default=_("Description about the school type")
-    )
-    icon = models.CharField(
-        max_length=128,
-        blank=True,
-    )
+    description = models.TextField(blank=True, default=_("Description about the school type"))
+    icon = models.CharField(max_length=128, blank=True, null=True, help_text=_("Icon class for the school type (e.g., 'university')"))
 
     def __str__(self):
         return str(self.type)
@@ -63,6 +59,20 @@ class Address(models.Model):
 
     # References
     schools = models.ManyToManyField("schools.School", related_name="school_addresses")
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        "user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -218,16 +228,23 @@ class School(models.Model):
     organization = models.ForeignKey(
         "organization.Organization", on_delete=models.CASCADE, blank=True, null=True
     )
-    # Tracking Fields
+
+
     slug = models.SlugField(max_length=75, blank=True, verbose_name=_("slug"))
-    uuid = models.UUIDField(
-        unique=True, default=uuid.uuid4, verbose_name=_("unique identifier")
-    )
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, verbose_name=_("unique identifier"))
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    self_data = models.CharField(
-        max_length=128, blank=True, db_index=True, verbose_name=_("self data field")
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
     )
 
     def save(self, *args, **kwargs):
@@ -246,14 +263,47 @@ class School(models.Model):
         verbose_name_plural = _("schools")
 
 
-class PhoneContact(models.Model):
+class SchoolBranchContactInfo(models.Model):
     name = models.CharField(max_length=128, unique=True)
-    phone_number = models.CharField(max_length=15, unique=True)
+    contact_value = models.CharField(max_length=15, unique=True)
     slug = models.SlugField(max_length=255, blank=True, unique=True)
+    contact_type = models.CharField(
+        max_length=50,
+        choices=[
+            ("phone", _("Phone")),
+            ("email", _("Email")),
+            ("website", _("Website")),
+            ("social_media", _("Social Media")),
+        ],
+        default="phone",
+        verbose_name=_("contact type"),
+    )
+    # ForeignKey
+    branch = models.ForeignKey(
+        "schools.SchoolBranch",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="contact_info",
+        verbose_name=_("branch"),
+    )
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name.lower() + "-" + self.phone_number)
+            self.slug = slugify(self.name.lower() + "-" + self.contact_value)
         super().save(*args, **kwargs)
         return super().save(*args, **kwargs)
 
@@ -261,8 +311,8 @@ class PhoneContact(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = _("contact")
-        verbose_name_plural = _("contact")
+        verbose_name = _("School Branch Contact Info")
+        verbose_name_plural = _("School Branch Contact Info")
         ordering = ["name"]
 
 
@@ -300,10 +350,9 @@ class SchoolBranch(models.Model):
     website = models.URLField(blank=True, verbose_name=_("Website"))
 
     # Academic offerings
-    degrees_offered = models.ManyToManyField("schools.EducationDegree", related_name="branch_degrees", blank=True)
-    colleges = models.ManyToManyField("schools.College", related_name="branch_colleges", blank=True)
-    majors_offered = models.ManyToManyField("schools.Major", related_name="branch_majors", blank=True)
-    school = models.ForeignKey("schools.School", on_delete=models.CASCADE, blank=True, null=True, related_name="branches", verbose_name=_("School"))
+    degrees_offered = models.ManyToManyField("schools.EducationDegree", related_name="school_branches", blank=True)
+    majors_offered = models.ManyToManyField("schools.Major", related_name="school_branches", blank=True)
+    school = models.ForeignKey("schools.School", on_delete=models.CASCADE, blank=True, null=True, related_name="school_branches", verbose_name=_("School"))
     # Branch details
     established_year = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Established Year"))
     student_capacity = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Student Capacity"))
@@ -311,6 +360,14 @@ class SchoolBranch(models.Model):
 
     # Metadata
     slug = models.SlugField(max_length=255, blank=True, unique=True, verbose_name=_("slug"))
+    created_by = models.ForeignKey(
+        "user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_branches",
+        verbose_name=_("Created By"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -389,6 +446,13 @@ class FieldOfStudy(models.Model):
     )
     is_active = models.BooleanField(default=True)
     is_delete = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def __str__(self):
         return self.name
@@ -400,6 +464,18 @@ class SchoolScholarship(models.Model):
     scholarship = models.ForeignKey("schools.Scholarship", on_delete=models.CASCADE)
     updated_date = models.DateTimeField(auto_now=True)
     created_date = models.DateTimeField(auto_now_add=True)
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def __str__(self):
         return f"{self.school.name} - {self.scholarship.name}"
@@ -417,6 +493,18 @@ class OrganizationScholarship(models.Model):
     scholarship = models.ForeignKey("schools.Scholarship", on_delete=models.CASCADE)
     updated_date = models.DateTimeField(auto_now=True)
     created_date = models.DateTimeField(auto_now_add=True)
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def __str__(self):
         return f"{self.organization.name} - {self.scholarship.name}"

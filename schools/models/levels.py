@@ -1,4 +1,5 @@
 import uuid
+from venv import create
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.db import models
@@ -118,17 +119,12 @@ class EducationDegree(models.Model):
 class College(models.Model):
     """Represents colleges within educational institutions"""
 
-    uuid = models.UUIDField(
-        unique=True, default=uuid.uuid4, verbose_name=_("unique ID")
-    )
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, verbose_name=_("unique ID"))
     name = models.CharField(max_length=255, verbose_name=_("College Name"))
-    short_name = models.CharField(
-        max_length=50, blank=True, verbose_name=_("Short Name")
-    )
+    short_name = models.CharField(max_length=50, blank=True, verbose_name=_("Short Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
 
-    # Metadata
-        # Contact and location
+    # Contact and location
     email = models.EmailField(blank=True, verbose_name=_("Email"))
     phone = models.CharField(max_length=20, blank=True, verbose_name=_("Phone"))
     website = models.URLField(blank=True, verbose_name=_("Website"))
@@ -136,16 +132,24 @@ class College(models.Model):
 
     # Academic focus
     focus_areas = models.TextField(blank=True, verbose_name=_("Focus Areas"))
-    established_year = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("Established Year")
-    )
-    slug = models.SlugField(
-        max_length=255, blank=True, unique=True, verbose_name=_("slug")
-    )
+    established_year = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Established Year"))
+
+    # Relationships
+    branches = models.ManyToManyField("schools.SchoolBranch", related_name="colleges", blank=True, verbose_name=_("Branches"))
+    degrees = models.ManyToManyField(EducationDegree, related_name="colleges", blank=True, verbose_name=_("Degrees"))
+    
+    # Metadata
+    slug = models.SlugField(max_length=255, blank=True, unique=True, verbose_name=_("slug"))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_colleges",
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -172,21 +176,11 @@ class Major(models.Model):
     description = models.TextField(blank=True, verbose_name=_("Description"))
 
     # Academic details
-    credit_hours = models.PositiveIntegerField(
-        default=120, verbose_name=_("Required Credit Hours")
-    )
-    duration_years = models.PositiveIntegerField(
-        default=4, verbose_name=_("Duration (Years)")
-    )
+    credit_hours = models.PositiveIntegerField(default=120, verbose_name=_("Required Credit Hours"))
+    duration_years = models.PositiveIntegerField(default=4, verbose_name=_("Duration (Years)"))
 
     # Relationships
-    degree = models.ForeignKey(
-        EducationDegree,
-        on_delete=models.CASCADE,
-        related_name="majors",
-        null=True,
-        blank=True,
-    )
+    degrees = models.ManyToManyField(EducationDegree, related_name="majors", blank=True, verbose_name=_("Degrees"))
     colleges = models.ManyToManyField(College, related_name="majors", blank=True)
 
     # Career and industry focus

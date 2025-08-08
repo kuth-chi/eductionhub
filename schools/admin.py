@@ -15,6 +15,7 @@ from schools.models.levels import (
 )
 from schools.models.school import (
     FieldOfStudy,
+    SchoolBranchContactInfo,
     SchoolScholarship,
     SchoolType,
     School,
@@ -147,26 +148,29 @@ class MajorAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "code",
-        "degree",
+        "get_degrees",  # show degree names with a custom method
         "credit_hours",
         "duration_years",
         "is_active",
     )
     search_fields = ("name", "code", "description", "career_paths")
-    list_filter = ("degree", "duration_years", "is_active", "created_at")
+    list_filter = ("duration_years", "is_active", "created_at")
     readonly_fields = ("uuid", "created_at", "updated_at")
-    filter_horizontal = ("colleges",)
+    filter_horizontal = ("colleges", "degrees") 
+
     fieldsets = (
         ("Basic Information", {"fields": ("name", "code", "description", "slug")}),
-        ("Academic Details", {"fields": ("degree", "credit_hours", "duration_years")}),
+        ("Academic Details", {"fields": ("credit_hours", "duration_years", "degrees")}),
         ("Career & Industry", {"fields": ("career_paths", "industry_focus")}),
         ("Relationships", {"fields": ("colleges",)}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
-        (
-            "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
-        ),
+        ("Metadata", {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)}),
     )
+
+    @admin.display(description="Degrees")
+    def get_degrees(self, obj):
+        return ", ".join([deg.degree_name for deg in obj.degrees.all()])
+
 
 
 @admin.register(SchoolBranch)
@@ -179,29 +183,22 @@ class SchoolBranchAdmin(admin.ModelAdmin):
         "established_year",
         "is_active",
     )
-    search_fields = ("name", "short_name", "city", "country", "description")
+    search_fields = ("name", "short_name", "city__name", "country__name", "description")
     list_filter = ("is_headquarters", "established_year", "is_active", "created_at")
     readonly_fields = ("uuid", "created_at", "updated_at")
-    filter_horizontal = ("degrees_offered", "colleges", "majors_offered")
+
+    filter_horizontal = ("degrees_offered", "majors_offered")  # model fields stay same
+
     fieldsets = (
-        (
-            "Basic Information",
-            {"fields": ("name", "short_name", "description", "slug")},
-        ),
-        ("Headquarters Status", {"fields": ("is_headquarters", "headquarters_branch")}),
-        ("Location", {"fields": ("address", "city", "state", "country", "zip_code")}),
+        ("Basic Information", {"fields": ("name", "short_name", "description", "is_headquarters")}),
+        ("Address", {"fields": ("address", "village", "city", "state", "country", "zip_code", "location")}),
         ("Contact Information", {"fields": ("phone", "email", "website")}),
-        (
-            "Academic Offerings",
-            {"fields": ("degrees_offered", "colleges", "majors_offered")},
-        ),
-        ("Branch Details", {"fields": ("established_year", "student_capacity")}),
+        ("Academic Offerings", {"fields": ("degrees_offered", "majors_offered")}),
+        ("Branch Details", {"fields": ("school", "established_year", "student_capacity")}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
-        (
-            "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
-        ),
+        ("Metadata", {"fields": ("slug", "uuid", "created_at", "updated_at"), "classes": ("collapse", "bg-primary",)}),
     )
+
 
 
 @admin.register(SchoolDegreeOffering)
@@ -365,32 +362,38 @@ class EducationDegreeAdmin(admin.ModelAdmin):
         "is_active",
         "created_date",
         "updated_date",
-    )  # You can keep it here
+    )
     search_fields = ("degree_name", "description")
-    list_filter = (
-        "level",
-        "duration_years",
-        "is_active",
-        "created_date",
-    )  # You can keep it here
+    list_filter = ("level", "duration_years", "is_active", "created_date")
     ordering = ("order", "degree_name")
+    readonly_fields = ("uuid",)
+
     fieldsets = (
-        (
-            "Basic Information",
-            {"fields": ("degree_name", "description", "badge", "color", "slug")},
-        ),
+        ("Basic Information", {"fields": ("degree_name", "description", "badge", "color", "slug")}),
         ("Academic Details", {"fields": ("level", "duration_years", "credit_hours")}),
         ("Hierarchy", {"fields": ("order", "parent_degree")}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
-        (
-            "Metadata",
-            {
-                "fields": ("uuid",),  # Removed 'created_date' from here
-                "classes": ("collapse",),
-            },
-        ),
+        ("Metadata", {"fields": ("uuid",), "classes": ("collapse",)}),
     )
 
+
+@admin.register(SchoolBranchContactInfo)
+class SchoolBranchContactInfoAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "contact_value",
+        "contact_type",
+        "branch",
+        "is_active",
+        "is_deleted",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = ("contact_type", "is_active", "is_deleted", "branch")
+    search_fields = ("name", "contact_value", "slug")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at", "updated_at")
+    prepopulated_fields = {"slug": ("name",)}
 
 admin.site.register(SchoolType, SchoolTypeAdmin)
 admin.site.register(School, SchoolAdmin)

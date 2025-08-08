@@ -12,7 +12,7 @@ from .school import (
     SchoolCustomizeButton,
     SchoolBranch,
     Address,
-    PhoneContact,
+    SchoolBranchContactInfo,
     OrganizationScholarship,
 )
 from .online_profile import Platform, PlatformProfile
@@ -31,7 +31,7 @@ __all__ = [
     "SchoolScholarship",
     "SchoolCustomizeButton",
     "Address",
-    "PhoneContact",
+    "SchoolBranchContactInfo",
     "OrganizationScholarship",
     "Platform",
     "PlatformProfile",

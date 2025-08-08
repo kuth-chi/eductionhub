@@ -123,6 +123,13 @@ class Scholarship(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     is_delete = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -165,6 +172,14 @@ class ScholarshipType(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    created_by = models.ForeignKey("user.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created_by",
+        verbose_name="Created By",
+    )
 
     def __str__(self):
         return self.name

@@ -1,6 +1,8 @@
+from httpx import get
 from rest_framework import serializers
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import default_storage
 
 # Application
 from api.serializers.schools.branch import SchoolBranchSerializer
@@ -22,7 +24,7 @@ from schools.models.school import (
     SchoolCustomizeButton,
     SchoolBranch,
     Address,
-    PhoneContact,
+    SchoolBranchContactInfo,
 )
 
 
@@ -139,6 +141,20 @@ class PlatformProfileSerializer(serializers.ModelSerializer):
         )
 
 
+class SchoolListSerializer(serializers.ModelSerializer):
+    branch_count = serializers.SerializerMethodField()
+    college_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = School
+        fields = ("uuid", "name", "logo", "branch_count", "college_count")
+
+    def get_branch_count(self, obj):
+        return getattr(obj, "branch_total", obj.school_branches.count())
+    def get_college_count(self, obj):
+        return getattr(obj, "college_count", obj.school_branches.filter(colleges__isnull=False).count())
+    
+
 class SchoolSerializer(serializers.ModelSerializer):
     """Serializer for School model"""
 
@@ -165,7 +181,7 @@ class SchoolSerializer(serializers.ModelSerializer):
     )
 
     branches = SchoolBranchSerializer(many=True, read_only=True)
-    branch_count = serializers.SerializerMethodField(read_only=True)
+    branch_count = serializers.SerializerMethodField()
     college_count = serializers.SerializerMethodField(read_only=True)
     major_count = serializers.SerializerMethodField(read_only=True)
     degree_count = serializers.SerializerMethodField(read_only=True)
@@ -205,7 +221,7 @@ class SchoolSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_branch_count(self, obj):
-        return SchoolBranch.objects.filter(school=obj).count()
+        return obj.school_branches.count()
 
     def get_college_count(self, obj):
         from schools.models.levels import SchoolCollegeAssociation
@@ -250,7 +266,7 @@ class SchoolSerializer(serializers.ModelSerializer):
             "updated_date",
             "slug",
             "is_active",
-            "self_data",
+            # "self_data",
             "type",
             "educational_levels",
             "platform_profiles",
@@ -307,13 +323,6 @@ class SchoolSerializer(serializers.ModelSerializer):
 
 
 # --- Additional Serializers for full API coverage ---
-
-
-class CollegeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = College
-        fields = "__all__"
-
 
 class MajorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -381,7 +390,7 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PhoneContactSerializer(serializers.ModelSerializer):
+class SchoolBranchContactInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PhoneContact
+        model = SchoolBranchContactInfo
         fields = "__all__"
