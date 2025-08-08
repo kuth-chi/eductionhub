@@ -2,19 +2,15 @@
 Base function to handle page
 """
 from urllib.parse import urlparse
-import requests
-import random
-import string
-import base64
-import hashlib
 from django.http import JsonResponse
-from django.http import response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from schools.models.scholarship import Scholarship
 from user.views.utils import generate_jwt, verify_jwt
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from schools.models.schoolsModel import ScholarshipType, School, SchoolType, Scholarship
+from schools.models.school import School, SchoolType
+from schools.models.scholarship import Scholarship, ScholarshipType
+from django.utils.translation import gettext as _
 
 @login_required(login_url="/accounts/login/")
 def index(request, type=None):

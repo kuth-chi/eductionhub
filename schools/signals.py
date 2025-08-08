@@ -2,9 +2,9 @@ import os
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from schools.models import schoolsModel
+from schools.models import school
 
-@receiver(post_save, sender=schoolsModel.School)
+@receiver(post_save, sender=school.School)
 def delete_old_logo_on_update(sender, instance, **kwargs):
     if not instance.pk:
         return
@@ -17,7 +17,7 @@ def delete_old_logo_on_update(sender, instance, **kwargs):
         if os.path.isfile(old_logo.path):
             old_logo.delete(save=False)
             
-@receiver(post_delete, sender=schoolsModel.School)
+@receiver(post_delete, sender=school.School)
 def delete_logo_on_delete(sender, instance, **kwargs):
     if instance.logo:
         if os.path.isfile(instance.logo.path):

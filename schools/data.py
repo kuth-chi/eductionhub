@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
-from schools.models.schoolsModel import School, SchoolType
+from schools.models.school import School, SchoolType
 
 
 def get_school_type_api(request):

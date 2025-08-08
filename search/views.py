@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.views.generic import ListView
-from schools.models.schoolsModel import School
+from schools.models.school import School
 import logging
 
 logger = logging.getLogger(__name__)
