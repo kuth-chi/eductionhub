@@ -13,8 +13,8 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from schools.models.OnlineProfile import PlatformProfile
-from schools.models.schoolsModel import FieldOfStudy, School, SchoolType
+from schools.models.online_profile import PlatformProfile
+from schools.models.school import FieldOfStudy, School, SchoolType
 
 logger = logging.getLogger(__name__)
 
