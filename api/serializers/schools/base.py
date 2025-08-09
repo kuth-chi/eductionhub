@@ -1,4 +1,3 @@
-from httpx import get
 from rest_framework import serializers
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
@@ -10,7 +9,6 @@ from schools.models.school import School, SchoolType
 from schools.models.online_profile import PlatformProfile, Platform
 from schools.models.levels import EducationalLevel
 from schools.models.levels import (
-    College,
     Major,
     EducationDegree,
     SchoolDegreeOffering,
@@ -22,7 +20,6 @@ from schools.models.school import (
     FieldOfStudy,
     SchoolScholarship,
     SchoolCustomizeButton,
-    SchoolBranch,
     Address,
     SchoolBranchContactInfo,
 )
