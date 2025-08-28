@@ -117,11 +117,21 @@ MIDDLEWARE = [
     "api.middlewares.SocialAuthMiddleware",  # Social auth handling
 ]
 
+# URL configuration
+APPEND_SLASH = False  # Disable automatic slash appending to prevent POST data loss
+
+# Session and Cookie settings
 SESSION_COOKIE_NAME = "auth_server_sessionid"
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Cookie size settings for JWT tokens
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 ROOT_URLCONF = "main.urls"
 
@@ -234,6 +244,11 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+    ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "api.authentication.UserAgentBoundJWTAuthentication",
@@ -269,7 +284,7 @@ SIMPLE_JWT = {
     "VERIFYING_KEY": base64.b64decode(os.getenv("PUBLIC_KEY_B64", "")),
     "JWT_PRIVATE_KEY": PRIVATE_KEY,
     "JWT_PUBLIC_KEY": PUBLIC_KEY,
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Increased for testing
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     # "ACCESS_TOKEN_LIFETIME": timedelta(seconds=3600),
     # "REFRESH_TOKEN_LIFETIME": timedelta(days=1),

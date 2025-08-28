@@ -3,23 +3,31 @@ import os
 import re
 import uuid
 from datetime import date
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
 
+
 def ad_poster_upload_path(instance, filename):
     """Generate a file path for new ad poster uploads."""
-    ext = filename.split('.')[-1]
-    title = re.sub(r'[^a-zA-Z0-9_-]', '', instance.campaign_title) or "unnamed-poster"
+    ext = filename.split('.')[-1] if '.' in filename else 'jpg'
+    title = re.sub(r'[^a-zA-Z0-9_-]', '',
+                   instance.campaign_title or "unnamed") or "unnamed-poster"
     filename = f"{title}-{uuid.uuid4()}.{ext}"
     return os.path.join('uploads/admanager/posters/', filename)
+
 
 class AdSpace(models.Model):
     """
     Defines where an ad can be placed (e.g., homepage banner, sidebar).
     """
-    name = models.CharField(max_length=100, unique=True, verbose_name=_("Ad space name"))
-    slug = models.SlugField(unique=True, verbose_name=_("Slug identifier (e.g. homepage-banner)"))
+    name = models.CharField(max_length=100, unique=True,
+                            verbose_name=_("Ad space name"))
+    slug = models.SlugField(unique=True, verbose_name=_(
+        "Slug identifier (e.g. homepage-banner)"))
+    objects = models.Manager()
 
     def __str__(self):
         return self.name
@@ -31,6 +39,7 @@ class AdType(models.Model):
     """
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
+    objects = models.Manager()
 
     def __str__(self):
         return self.name
@@ -40,11 +49,15 @@ class AdManager(models.Model):
     """
     Represents an ad campaign. Can target multiple ad spaces.
     """
-    uuid = models.UUIDField(unique=True, default=uuid.uuid4, verbose_name=_("unique identifier"))
-    campaign_title = models.CharField(max_length=75, verbose_name=_("Campaign title"))
-    ad_type = models.ForeignKey(AdType, null=True, blank=True, on_delete=models.SET_NULL)
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4,
+                            verbose_name=_("unique identifier"))
+    campaign_title = models.CharField(
+        max_length=75, verbose_name=_("Campaign title"))
+    ad_type = models.ForeignKey(
+        AdType, null=True, blank=True, on_delete=models.SET_NULL)
 
-    tags = models.JSONField(default=list, help_text="Tags to match user interest")
+    tags = models.JSONField(
+        default=list, help_text="Tags to match user interest")
 
     start_datetime = models.DateField(null=True)
     end_datetime = models.DateField(null=True)
@@ -52,34 +65,78 @@ class AdManager(models.Model):
     is_active = models.BooleanField(default=True)
     active_ad_period = models.DurationField(null=True, blank=True)
     limited_overdue = models.IntegerField(null=True, blank=True)
-    poster = models.ImageField(upload_to=ad_poster_upload_path, null=True, blank=True, help_text="Main image or media for the ad")
+    poster = models.ImageField(upload_to=ad_poster_upload_path, null=True,
+                               blank=True, help_text="Main image or media for the ad")
 
     update_datetime = models.DateTimeField(auto_now=True)
     create_datetime = models.DateTimeField(auto_now_add=True)
 
+    objects = models.Manager()
+
+    def clean(self):
+        """Validate the ad manager instance."""
+        super().clean()
+        if self.start_datetime and self.end_datetime:
+            if self.start_datetime > self.end_datetime:
+                raise ValidationError({
+                    'end_datetime': _('End date must be after start date.')
+                })
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean."""
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    @property
+    def is_currently_active(self):
+        """Check if the ad is currently active based on date range and status."""
+        if not self.is_active:
+            return False
+
+        today = date.today()
+
+        # Check if within date range
+        if self.start_datetime and today < self.start_datetime:
+            return False
+        if self.end_datetime and today > self.end_datetime:
+            return False
+
+        return True
+
     def __str__(self):
-        return self.campaign_title
+        return self.campaign_title or ""
 
 
 class AdPlacement(models.Model):
-    ad = models.ForeignKey('AdManager', on_delete=models.CASCADE, related_name='placements')
-    ad_space = models.ForeignKey('AdSpace', on_delete=models.CASCADE, related_name='placements')
+    ad = models.ForeignKey(
+        'ads.AdManager', on_delete=models.CASCADE, related_name='placements')
+    ad_space = models.ForeignKey(
+        'ads.AdSpace', on_delete=models.CASCADE, related_name='placements')
 
-    position = models.PositiveIntegerField(default=0, help_text="Order of ad in space")
-    is_primary = models.BooleanField(default=False, help_text="Mark if this is the primary ad for space")
+    position = models.PositiveIntegerField(
+        default=0, help_text="Order of ad in space")
+    is_primary = models.BooleanField(
+        default=False, help_text="Mark if this is the primary ad for space")
+
+    objects = models.Manager()
 
     class Meta:
         unique_together = ('ad', 'ad_space')
         ordering = ['position']
 
     def save(self, *args, **kwargs):
-        if not self.position and self.ad_space_id:
-            max_position = AdPlacement.objects.filter(ad_space=self.ad_space).aggregate(Max('position'))['position__max'] or 0
+        if not self.position and self.ad_space:
+            max_position = AdPlacement.objects.filter(
+                ad_space=self.ad_space).aggregate(Max('position'))['position__max'] or 0
             self.position = max_position + 1
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.ad.campaign_title} in {self.ad_space.name}"
+        ad_title = str(
+            self.ad.campaign_title) if self.ad and self.ad.campaign_title else ""
+        space_name = str(
+            self.ad_space.name) if self.ad_space and self.ad_space.name else ""
+        return f"{ad_title} in {space_name}"
 
 
 class UserProfile(models.Model):
@@ -89,6 +146,7 @@ class UserProfile(models.Model):
     user_id = models.CharField(max_length=255, unique=True)
     interests = models.JSONField(default=list)  # e.g. ["tech", "sports"]
     last_active = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
 
 class UserBehavior(models.Model):
@@ -100,6 +158,7 @@ class UserBehavior(models.Model):
     page_slug = models.CharField(max_length=255)
     category = models.CharField(max_length=255, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
 
 
 class AdImpression(models.Model):
@@ -112,6 +171,7 @@ class AdImpression(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     user_agent = models.TextField(blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    objects = models.Manager()
 
 
 class AdClick(models.Model):
@@ -122,12 +182,15 @@ class AdClick(models.Model):
     user_id = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     referrer = models.TextField(blank=True)
+    objects = models.Manager()
+
 
 def normalize_positions(ad_space):
     """
     Reassigns sequential position numbers to AdPlacements in a given AdSpace.
     """
-    placements = AdPlacement.objects.filter(ad_space=ad_space).order_by('position')
+    placements = AdPlacement.objects.filter(
+        ad_space=ad_space).order_by('position')
     for i, placement in enumerate(placements):
         placement.position = i + 1
         placement.save()

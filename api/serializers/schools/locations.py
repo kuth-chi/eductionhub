@@ -113,7 +113,7 @@ class CountrySimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Country
-        fields = ["id", "name", "local_name", "code", "flag_emoji"]
+        fields = ["id", "uuid", "name", "local_name", "code", "flag_emoji"]
 
 
 class StateSimpleSerializer(serializers.ModelSerializer):
@@ -123,7 +123,7 @@ class StateSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = State
-        fields = ["id", "name", "local_name", "code", "country"]
+        fields = ["id", "uuid", "name", "local_name", "code", "country"]
 
 
 class CitySimpleSerializer(serializers.ModelSerializer):
@@ -133,7 +133,7 @@ class CitySimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = City
-        fields = ["id", "name", "local_name", "code", "state", "is_capital"]
+        fields = ["id", "uuid", "name", "local_name", "code", "state", "is_capital"]
 
 
 class VillageSimpleSerializer(serializers.ModelSerializer):
@@ -143,4 +143,4 @@ class VillageSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Village
-        fields = ["id", "name", "local_name", "code", "city"]
+        fields = ["id", "uuid", "name", "local_name", "code", "city"]

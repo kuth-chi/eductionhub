@@ -1,10 +1,13 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
+
+from allauth.socialaccount.models import SocialAccount
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import serializers
+
 from user.models.profile import Profile
-from allauth.socialaccount.models import SocialAccount
+
 
 def sanitize_extra_data(data):
     """Recursively convert datetime objects to ISO strings for JWT compatibility."""
@@ -15,6 +18,7 @@ def sanitize_extra_data(data):
     elif isinstance(data, datetime):
         return data.isoformat()
     return data
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -32,8 +36,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         request = self.context.get("request", None)
 
         # Issue tokens
-        access_token = self.get_token(self.user)
-        refresh_token = RefreshToken.for_user(self.user)
+        # This returns a RefreshToken
+        refresh_token = self.get_token(self.user)
+        # Get the access token from refresh token
+        access_token = refresh_token.access_token
 
         # Get or create user profile
         profile, _ = Profile.objects.get_or_create(
@@ -55,21 +61,22 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "photo": profile.photo.url if profile.photo else None,
         }
 
-        # Inject custom claims into both tokens
+        # Inject custom claims into both tokens - keep minimal for size
         common_claims = {
-            "profile": profile_data,
-            "permissions": list(self.user.get_all_permissions()),
-            "roles": [g.name for g in self.user.groups.all()],
-            "social_accounts": [
-                {
-                    "provider": sa.provider,
-                    "uid": sa.uid,
-                    "extra_data": sanitize_extra_data(sa.extra_data),
-                }
-                for sa in SocialAccount.objects.filter(user=self.user)
-            ],
+            "profile": {
+                "id": str(profile.uuid),
+                "first_name": profile.user.first_name,
+                "last_name": profile.user.last_name,
+                "email": profile.user.email,
+                "is_active": profile.user.is_active,
+            },
+            # Include essential permissions/roles to keep token size manageable
+            "is_staff": self.user.is_staff,
+            "is_superuser": self.user.is_superuser,
+            # Store role names from Django groups and RBAC roles
+            "roles": self._get_user_roles(),
+            "permissions": self._get_essential_permissions(),
         }
-
 
         for token in [access_token, refresh_token]:
             for key, value in common_claims.items():
@@ -89,3 +96,73 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["refresh"] = str(refresh_token)
 
         return data
+
+    def _get_user_roles(self):
+        """Get all roles for the user from groups and RBAC system."""
+        roles = []
+
+        # Get roles from Django groups
+        roles.extend([g.name for g in self.user.groups.all()])
+
+        # Get roles from RBAC system if available
+        try:
+            from organization.models.employee import Employee
+            from rbac.models.role_assignment import RoleAssignment
+
+            employee = Employee.objects.get(user=self.user)
+            rbac_roles = [
+                assignment.role.name
+                for assignment in RoleAssignment.objects.filter(
+                    employee=employee,
+                    is_active=True,
+                    is_deleted=False
+                )
+            ]
+            roles.extend(rbac_roles)
+        except (ImportError, Employee.DoesNotExist):
+            pass
+
+        # Remove duplicates and return
+        return list(set(roles))
+
+    def _get_essential_permissions(self):
+        """Get essential permissions for quick token-based checks."""
+        permissions = {
+            'can_delete_schools': False,
+            'can_manage_colleges': False,
+            'can_manage_branches': False,
+            'can_view_analytics': False,
+        }
+
+        # Superuser has all permissions
+        if self.user.is_superuser:
+            return {key: True for key in permissions.keys()}
+
+        # Get user roles
+        user_roles = self._get_user_roles()
+
+        # Set permissions based on roles
+        if 'SuperAdmin' in user_roles:
+            permissions.update({
+                'can_delete_schools': True,
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+                'can_view_analytics': True,
+            })
+        elif 'Administrator' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+                'can_view_analytics': True,
+            })
+        elif 'Manager' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+            })
+        elif 'Staff' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+            })
+
+        return permissions

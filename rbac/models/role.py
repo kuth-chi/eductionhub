@@ -21,6 +21,7 @@ class Role(models.Model):
     organization = models.ForeignKey(
     Organization, on_delete=models.CASCADE, null=True, blank=True, related_name='roles'
     )
+    objects = models.Manager()
 
 
     class Meta:
@@ -28,4 +29,4 @@ class Role(models.Model):
         unique_together = ('name', 'organization', 'is_active')
     
     def __str__(self):
-        return self.name
+        return str(self.name)

@@ -28,6 +28,8 @@ class Employee(models.Model):
     is_deleted = models.BooleanField(default=False)
     # CHECK: If you want to use RoleAssignment in Employee, ensure it's imported correctly
     role_assignments: 'models.Manager[RoleAssignment]'
+    
+    objects = models.Manager()
 
     class Meta:
         unique_together = ('user', 'organization')

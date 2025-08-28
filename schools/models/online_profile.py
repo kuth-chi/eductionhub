@@ -5,7 +5,6 @@
 import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from schools.models.base import DefaultField
 from schools.models.school import School
 
 
@@ -21,6 +20,7 @@ class Platform(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     self_data = models.CharField(max_length=128, blank=True, db_index=True, verbose_name=_("self data field"))
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.name)
@@ -37,6 +37,7 @@ class PlatformProfile(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    objects = models.Manager()
 
     def __str__(self):
         return f"{self.school.name} on {self.platform.name}"

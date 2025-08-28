@@ -1,6 +1,9 @@
 from django.db import models
 from schools.models.base import DefaultField
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from .models import City, State, Country
 
 class Country(DefaultField):
     """Country model for global location hierarchy"""
@@ -24,7 +27,9 @@ class Country(DefaultField):
         ordering = ["name"]
 
     def __str__(self):
-        return self.name
+        if self.name:
+            return self.name
+        return "unknown"
 
 
 class State(DefaultField):
@@ -71,6 +76,7 @@ class City(DefaultField):
 
     @property
     def country(self):
+        """Get the country of this city"""
         return self.state.country
 
 
@@ -82,6 +88,7 @@ class Village(DefaultField):
     code = models.CharField(max_length=10, blank=True, help_text="Village code")
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name="villages")
     is_active = models.BooleanField(default=True)
+    objects = models.Manager()
 
     class Meta:
         verbose_name = "Village"
@@ -94,8 +101,9 @@ class Village(DefaultField):
 
     @property
     def state(self):
-        return self.city.state
+        return getattr(self.city, "state")
 
     @property
     def country(self):
-        return self.city.country
+        return getattr(self.city, "country")
+

@@ -2,13 +2,10 @@ import decimal
 import os
 import re
 import uuid
-from venv import create
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
-from geo.models import Country, State
 from schools.models.base import DefaultField
-from geo.models import City, Village, State, Country
 
 
 class SchoolType(DefaultField):
@@ -17,6 +14,8 @@ class SchoolType(DefaultField):
     type = models.CharField(max_length=128, unique=True, db_index=True, blank=False)
     description = models.TextField(blank=True, default=_("Description about the school type"))
     icon = models.CharField(max_length=128, blank=True, null=True, help_text=_("Icon class for the school type (e.g., 'university')"))
+    # Explicit default manager for type checkers (Pylint E1101: no-member)
+    objects = models.Manager()
 
     def __str__(self):
         return str(self.type)
@@ -113,49 +112,25 @@ class Address(models.Model):
 class School(models.Model):
     """Represents for School models"""
 
-    logo = models.ImageField(
-        upload_to=school_logo_upload_path, null=True, blank=True, verbose_name=_("logo")
-    )
-    cover_image = models.ImageField(
-        upload_to=school_cover_image_upload_path,
-        null=True,
-        blank=True,
-        verbose_name=_("photo"),
-    )
+    logo = models.ImageField(upload_to=school_logo_upload_path, null=True, blank=True, verbose_name=_("logo"))
+    cover_image = models.ImageField(upload_to=school_cover_image_upload_path, null=True, blank=True, verbose_name=_("photo"))
     name = models.CharField(max_length=75, blank=True, verbose_name=_("name"))
-    local_name = models.CharField(
-        max_length=128, blank=True, verbose_name=_("local name")
-    )
-    short_name = models.CharField(
-        max_length=25, blank=True, verbose_name=_("short name")
-    )
+    local_name = models.CharField(max_length=128, blank=True, verbose_name=_("local name"))
+    short_name = models.CharField(max_length=25, blank=True, verbose_name=_("short name"))
     code = models.CharField(max_length=15, blank=True, verbose_name=_("code"))
     description = models.TextField(blank=True, default=_("The school description"))
     established = models.DateField(null=True, blank=True, verbose_name=_("established"))
     founder = models.CharField(max_length=125, blank=True, verbose_name=_("founder"))
-    president = models.CharField(
-        max_length=125, blank=True, verbose_name=_("president")
-    )
-    endowment = models.DecimalField(
-        max_digits=18,
-        decimal_places=2,
-        blank=True,
-        default=decimal.Decimal("0.00"),
+    president = models.CharField(max_length=125, blank=True, verbose_name=_("president"))
+    endowment = models.DecimalField(max_digits=18, decimal_places=2, blank=True, default=decimal.Decimal("0.00"),
         verbose_name=_("endowment"),
     )
     # Address fields
-    street_address = models.CharField(
-        max_length=255, blank=True, verbose_name=_("street address")
-    )
-    address_line_2 = models.CharField(
-        max_length=255, blank=True, verbose_name=_("address line 2")
-    )
-    box_number = models.CharField(
-        max_length=50, blank=True, verbose_name=_("box number")
-    )
-    postal_code = models.CharField(
-        max_length=20, blank=True, verbose_name=_("postal code")
-    )
+    street_address = models.CharField(max_length=255, blank=True, verbose_name=_("street address"))
+    address_line_2 = models.CharField(max_length=255, blank=True, verbose_name=_("address line 2"))
+    box_number = models.CharField(max_length=50, blank=True, verbose_name=_("box number"))
+    postal_code = models.CharField(max_length=20, blank=True, verbose_name=_("postal code"))
+
 
     # Geo relationships
     country = models.ForeignKey(
@@ -194,9 +169,7 @@ class School(models.Model):
     # Legacy location field (for backward compatibility)
     location = models.CharField(max_length=255, blank=True, verbose_name=_("location"))
 
-    motto = models.CharField(
-        max_length=250, blank=True, verbose_name=_("motto"), default=_("N/A")
-    )
+    motto = models.CharField(max_length=250, blank=True, verbose_name=_("motto"), default=_("N/A"))
     tuition = models.DecimalField(
         max_digits=18,
         decimal_places=2,
@@ -246,6 +219,8 @@ class School(models.Model):
         related_name="%(class)s_created_by",
         verbose_name="Created By",
     )
+
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -303,11 +278,13 @@ class SchoolBranchContactInfo(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name.lower() + "-" + self.contact_value)
+            self.slug = slugify((str(self.name or "")).lower() + "-" + (str(self.contact_value or "")))
         super().save(*args, **kwargs)
         return super().save(*args, **kwargs)
 
     def __str__(self):
+        if not self.name:
+            return _("Unnamed Contact Info")
         return self.name
 
     class Meta:
@@ -336,7 +313,7 @@ class SchoolBranch(models.Model):
 
     # Location and contact
     address = models.TextField(verbose_name=_("Address"))
-    village = models.ForeignKey("geo.village", on_delete=models.CASCADE, blank=True, null=True, related_name="branches")
+    village = models.ForeignKey("geo.Village", on_delete=models.CASCADE, blank=True, null=True, related_name="branches")
     city = models.ForeignKey("geo.City", on_delete=models.CASCADE, blank=True, null=True, related_name="branches")
     state = models.ForeignKey("geo.State", on_delete=models.CASCADE, blank=True, null=True, related_name="branches")
     country = models.ForeignKey("geo.Country", on_delete=models.CASCADE, blank=True, null=True, related_name="branches")
@@ -372,6 +349,7 @@ class SchoolBranch(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -379,7 +357,8 @@ class SchoolBranch(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({'HQ' if self.is_headquarters else 'Branch'})"
+        name = self.name if self.name else _("Unnamed Branch")
+        return f"{str(name)} ({'HQ' if self.is_headquarters else 'Branch'})"
 
     class Meta:
         ordering = ["-is_headquarters", "name"]
@@ -414,6 +393,7 @@ class SchoolCustomizeButton(models.Model):
     is_visible = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
 
     class Meta:
         ordering = ["order_number"]
@@ -455,6 +435,8 @@ class FieldOfStudy(models.Model):
     )
 
     def __str__(self):
+        if not self.name:
+            return _("Unnamed Field of Study")
         return self.name
 
 
@@ -476,6 +458,7 @@ class SchoolScholarship(models.Model):
         related_name="%(class)s_created_by",
         verbose_name="Created By",
     )
+    objects = models.Manager()
 
     def __str__(self):
         return f"{self.school.name} - {self.scholarship.name}"
@@ -511,4 +494,4 @@ class OrganizationScholarship(models.Model):
 
     class Meta:
         verbose_name = _("Scholarship by organization")
-        verbose_name_plural = _("Scholarship by organization")
+        verbose_name_plural = _("Scholarship by organizations")

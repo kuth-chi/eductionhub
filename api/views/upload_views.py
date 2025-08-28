@@ -22,13 +22,32 @@ def upload_file(request):
     """
     Handle file uploads for school logos, cover images, etc.
     """
+    # Add debugging before any authentication checks
+    logger.info("=== UPLOAD REQUEST DEBUG ===")
+    logger.info(f"Request method: {request.method}")
+    logger.info(f"Request path: {request.path}")
+    logger.info(f"User authenticated: {request.user.is_authenticated}")
+    logger.info(f"User: {request.user}")
+    logger.info(
+        f"Authorization header: {request.META.get('HTTP_AUTHORIZATION', 'NOT PRESENT')}")
+    logger.info(
+        f"All headers starting with HTTP_: {[k for k in request.META.keys() if k.startswith('HTTP_')]}")
+    for key in request.META.keys():
+        if key.startswith('HTTP_'):
+            logger.info(f"  {key}: {request.META[key]}")
+    logger.info("=== END UPLOAD DEBUG ===")
+
     try:
         logger.info(f"Upload request received from user: {request.user}")
         logger.info(f"Request FILES keys: {list(request.FILES.keys())}")
         logger.info(f"Request POST keys: {list(request.POST.keys())}")
         logger.info(f"Request headers: {dict(request.headers)}")
-        logger.info(f"User agent: {request.META.get('HTTP_USER_AGENT', 'Not found')}")
-        logger.info(f"Remote addr: {request.META.get('REMOTE_ADDR', 'Not found')}")
+        logger.info(
+            f"Authorization header: {request.headers.get('Authorization', 'NOT PRESENT')}")
+        logger.info(
+            f"User agent: {request.META.get('HTTP_USER_AGENT', 'Not found')}")
+        logger.info(
+            f"Remote addr: {request.META.get('REMOTE_ADDR', 'Not found')}")
         logger.info(f"User authenticated: {request.user.is_authenticated}")
         logger.info(
             f"User ID: {request.user.id if request.user.is_authenticated else 'N/A'}"

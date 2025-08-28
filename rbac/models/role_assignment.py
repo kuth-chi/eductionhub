@@ -19,6 +19,8 @@ class RoleAssignment(models.Model):
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
 
+    objects = models.Manager()
+
     class Meta:
         unique_together = ('employee', 'role', 'key', 'value')
         indexes = [models.Index(fields=['key', 'value'])]

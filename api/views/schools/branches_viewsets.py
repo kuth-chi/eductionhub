@@ -6,8 +6,8 @@ from rest_framework.decorators import action
 
 from django.apps import apps
 
-from api.serializers.schools.branch import SchoolBranchSerializer
-from schools.models.levels import SchoolBranch
+from api.serializers.schools.branch_serializers import SchoolBranchSerializer
+from schools.models.school import SchoolBranch
 
 class SchoolBranchViewSet(viewsets.ModelViewSet):
     queryset = SchoolBranch.objects.all()

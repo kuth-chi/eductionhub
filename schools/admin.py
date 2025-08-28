@@ -1,26 +1,18 @@
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
+
+from schools.models.levels import (CandidateQualification, College,
+                                   DocumentRequirement, EducationalLevel,
+                                   EducationDegree, Major,
+                                   SchoolCollegeAssociation,
+                                   SchoolDegreeOffering, SchoolMajorOffering)
 from schools.models.online_profile import Platform, PlatformProfile
 from schools.models.scholarship import ScholarshipType
-from schools.models.levels import (
-    EducationDegree,
-    EducationalLevel,
-    College,
-    Major,
-    SchoolBranch,
-    SchoolDegreeOffering,
-    SchoolCollegeAssociation,
-    SchoolMajorOffering,
-)
-from schools.models.school import (
-    FieldOfStudy,
-    SchoolBranchContactInfo,
-    SchoolScholarship,
-    SchoolType,
-    School,
-    SchoolCustomizeButton,
-)
+from schools.models.school import (FieldOfStudy, School, SchoolBranch,
+                                   SchoolBranchContactInfo,
+                                   SchoolCustomizeButton, SchoolScholarship,
+                                   SchoolType)
 
 
 # Register your models here.
@@ -47,7 +39,8 @@ class SchoolAdmin(admin.ModelAdmin):
         "logo_preview",
         "cover_preview",
     )
-    search_fields = ("name", "local_name", "short_name", "description", "location")
+    search_fields = ("name", "local_name", "short_name",
+                     "description", "location")
     list_filter = ("established", "type")
     readonly_fields = (
         "logo_preview",
@@ -133,12 +126,15 @@ class CollegeAdmin(admin.ModelAdmin):
             "Basic Information",
             {"fields": ("name", "short_name", "description", "slug")},
         ),
-        ("Contact Information", {"fields": ("email", "phone", "website", "address")}),
+        ("Contact Information", {
+         "fields": ("email", "phone", "website", "address")}),
+        ("School Information", {"fields": ("branches", "degrees")}),
         ("Academic Focus", {"fields": ("focus_areas", "established_year")}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
         (
             "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
+            {"fields": ("uuid", "created_at", "updated_at"),
+             "classes": ("collapse",)},
         ),
     )
 
@@ -156,21 +152,23 @@ class MajorAdmin(admin.ModelAdmin):
     search_fields = ("name", "code", "description", "career_paths")
     list_filter = ("duration_years", "is_active", "created_at")
     readonly_fields = ("uuid", "created_at", "updated_at")
-    filter_horizontal = ("colleges", "degrees") 
+    filter_horizontal = ("colleges", "degrees")
 
     fieldsets = (
-        ("Basic Information", {"fields": ("name", "code", "description", "slug")}),
-        ("Academic Details", {"fields": ("credit_hours", "duration_years", "degrees")}),
+        ("Basic Information", {
+         "fields": ("name", "code", "description", "slug")}),
+        ("Academic Details", {
+         "fields": ("credit_hours", "duration_years", "degrees")}),
         ("Career & Industry", {"fields": ("career_paths", "industry_focus")}),
         ("Relationships", {"fields": ("colleges",)}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
-        ("Metadata", {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)}),
+        ("Metadata", {"fields": ("uuid", "created_at",
+         "updated_at"), "classes": ("collapse",)}),
     )
 
     @admin.display(description="Degrees")
     def get_degrees(self, obj):
         return ", ".join([deg.degree_name for deg in obj.degrees.all()])
-
 
 
 @admin.register(SchoolBranch)
@@ -183,22 +181,29 @@ class SchoolBranchAdmin(admin.ModelAdmin):
         "established_year",
         "is_active",
     )
-    search_fields = ("name", "short_name", "city__name", "country__name", "description")
-    list_filter = ("is_headquarters", "established_year", "is_active", "created_at")
+    search_fields = ("name", "short_name", "city__name",
+                     "country__name", "description")
+    list_filter = ("is_headquarters", "established_year",
+                   "is_active", "created_at")
     readonly_fields = ("uuid", "created_at", "updated_at")
 
-    filter_horizontal = ("degrees_offered", "majors_offered")  # model fields stay same
+    # model fields stay same
+    filter_horizontal = ("degrees_offered", "majors_offered")
 
     fieldsets = (
-        ("Basic Information", {"fields": ("name", "short_name", "description", "is_headquarters")}),
-        ("Address", {"fields": ("address", "village", "city", "state", "country", "zip_code", "location")}),
+        ("Basic Information", {
+         "fields": ("name", "short_name", "description", "is_headquarters")}),
+        ("Address", {"fields": ("address", "village", "city",
+         "state", "country", "zip_code", "location")}),
         ("Contact Information", {"fields": ("phone", "email", "website")}),
-        ("Academic Offerings", {"fields": ("degrees_offered", "majors_offered")}),
-        ("Branch Details", {"fields": ("school", "established_year", "student_capacity")}),
+        ("Academic Offerings", {
+         "fields": ("degrees_offered", "majors_offered")}),
+        ("Branch Details", {"fields": ("school",
+         "established_year", "student_capacity")}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
-        ("Metadata", {"fields": ("slug", "uuid", "created_at", "updated_at"), "classes": ("collapse", "bg-primary",)}),
+        ("Metadata", {"fields": ("slug", "uuid", "created_at",
+         "updated_at"), "classes": ("collapse", "bg-primary",)}),
     )
-
 
 
 @admin.register(SchoolDegreeOffering)
@@ -218,7 +223,8 @@ class SchoolDegreeOfferingAdmin(admin.ModelAdmin):
         ("Relationship", {"fields": ("school", "degree", "branch")}),
         (
             "Offering Details",
-            {"fields": ("is_available", "enrollment_capacity", "current_enrollment")},
+            {"fields": ("is_available", "enrollment_capacity",
+                        "current_enrollment")},
         ),
         (
             "Academic Details",
@@ -231,7 +237,8 @@ class SchoolDegreeOfferingAdmin(admin.ModelAdmin):
         ("Status", {"fields": ("is_active",)}),
         (
             "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
+            {"fields": ("uuid", "created_at", "updated_at"),
+             "classes": ("collapse",)},
         ),
     )
 
@@ -267,7 +274,8 @@ class SchoolCollegeAssociationAdmin(admin.ModelAdmin):
         ),
         (
             "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
+            {"fields": ("uuid", "created_at", "updated_at"),
+             "classes": ("collapse",)},
         ),
     )
 
@@ -295,14 +303,16 @@ class SchoolMajorOfferingAdmin(admin.ModelAdmin):
         ("Relationship", {"fields": ("school", "major", "degree", "branch")}),
         (
             "Offering Details",
-            {"fields": ("is_available", "enrollment_capacity", "current_enrollment")},
+            {"fields": ("is_available", "enrollment_capacity",
+                        "current_enrollment")},
         ),
         (
             "Academic Details",
             {"fields": ("credit_hours", "duration_years", "tuition_fee")},
         ),
         ("Specializations", {"fields": ("specializations", "concentrations")}),
-        ("Career & Industry", {"fields": ("career_outcomes", "industry_partners")}),
+        ("Career & Industry", {
+         "fields": ("career_outcomes", "industry_partners")}),
         (
             "Application & Admission",
             {
@@ -316,7 +326,8 @@ class SchoolMajorOfferingAdmin(admin.ModelAdmin):
         ("Status", {"fields": ("is_active",)}),
         (
             "Metadata",
-            {"fields": ("uuid", "created_at", "updated_at"), "classes": ("collapse",)},
+            {"fields": ("uuid", "created_at", "updated_at"),
+             "classes": ("collapse",)},
         ),
     )
 
@@ -339,7 +350,8 @@ class ScholarshipTypeAdmin(admin.ModelAdmin):
         "is_athletic",
         "created_at",
     )
-    list_filter = ("is_active", "is_need_based", "is_merit_based", "is_athletic")
+    list_filter = ("is_active", "is_need_based",
+                   "is_merit_based", "is_athletic")
     search_fields = ("name", "description")
     ordering = ("name",)
 
@@ -369,8 +381,10 @@ class EducationDegreeAdmin(admin.ModelAdmin):
     readonly_fields = ("uuid",)
 
     fieldsets = (
-        ("Basic Information", {"fields": ("degree_name", "description", "badge", "color", "slug")}),
-        ("Academic Details", {"fields": ("level", "duration_years", "credit_hours")}),
+        ("Basic Information", {"fields": ("degree_name",
+         "description", "badge", "color", "slug")}),
+        ("Academic Details", {
+         "fields": ("level", "duration_years", "credit_hours")}),
         ("Hierarchy", {"fields": ("order", "parent_degree")}),
         ("Status", {"fields": ("is_active", "is_deleted")}),
         ("Metadata", {"fields": ("uuid",), "classes": ("collapse",)}),
@@ -395,6 +409,7 @@ class SchoolBranchContactInfoAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     prepopulated_fields = {"slug": ("name",)}
 
+
 admin.site.register(SchoolType, SchoolTypeAdmin)
 admin.site.register(School, SchoolAdmin)
 admin.site.register(EducationalLevel, EducationalLevelAdmin)
@@ -402,3 +417,65 @@ admin.site.register(EducationalLevel, EducationalLevelAdmin)
 admin.site.site_header = _("Education Hub Admin System")
 admin.site.site_title = _("Education Administrator System")
 admin.site.index_title = _("Welcome to Education Hub Admin System")
+
+
+@admin.register(DocumentRequirement)
+class DocumentRequirementAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "major",
+        "is_mandatory",
+        "is_active",
+        "created_at",
+    )
+    search_fields = ("name", "description", "major__name")
+    list_filter = ("is_mandatory", "is_active",
+                   "is_deleted", "major", "created_at")
+    readonly_fields = ("uuid", "created_at", "updated_at")
+    fieldsets = (
+        ("Basic Information", {
+         "fields": ("name", "description", "accepted_formats")}),
+        ("Relationships", {"fields": ("major",)}),
+        ("Status", {"fields": ("is_mandatory", "is_active", "is_deleted")}),
+        ("Metadata", {"fields": ("uuid", "created_at",
+         "updated_at"), "classes": ("collapse",)}),
+    )
+
+
+@admin.register(CandidateQualification)
+class CandidateQualificationAdmin(admin.ModelAdmin):
+    list_display = (
+        "major",
+        "required_degree",
+        "min_gpa",
+        "min_english_score",
+        "is_active",
+        "created_at",
+    )
+    search_fields = (
+        "major__name",
+        "required_degree__degree_name",
+        "qualifications",
+    )
+    list_filter = (
+        "is_active",
+        "is_deleted",
+        "required_degree",
+        "major",
+        "created_at",
+    )
+    readonly_fields = ("uuid", "created_at", "updated_at")
+    fieldsets = (
+        (
+            "Requirements",
+            {"fields": ("required_subjects", "required_degree", "major")},
+        ),
+        (
+            "Scores & Eligibility",
+            {"fields": ("min_gpa", "min_english_score", "age_range")},
+        ),
+        ("Details", {"fields": ("qualifications",)}),
+        ("Status", {"fields": ("is_active", "is_deleted")}),
+        ("Metadata", {"fields": ("uuid", "created_at",
+         "updated_at"), "classes": ("collapse",)}),
+    )
