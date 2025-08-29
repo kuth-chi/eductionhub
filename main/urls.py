@@ -9,7 +9,6 @@ from user.views import base
 from django.views.i18n import set_language
 from rest_framework import permissions
 from rest_framework_simplejwt.views import TokenObtainPairView
-from api.views.auth import CustomTokenRefreshView
 from api.views.social_callback import social_login_callback, social_login_status
 
 
@@ -29,7 +28,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("super-user/", admin.site.urls),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("api/v1/", include("api.urls", namespace="api")),
     # swagger
     path(

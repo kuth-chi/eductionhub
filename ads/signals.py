@@ -1,6 +1,8 @@
 from datetime import date
-from django.db.models.signals import pre_save, post_delete, post_save
+
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
+
 from .models import AdManager, AdPlacement, normalize_positions
 
 
@@ -8,7 +10,7 @@ from .models import AdManager, AdPlacement, normalize_positions
 def ad_manager_pre_save(sender, instance, **kwargs):
     # Set duration if start and end dates are provided
     if instance.start_datetime and instance.end_datetime:
-        instance.duraactive_ad_period = instance.end_datetime - instance.start_datetime
+        instance.active_ad_period = instance.end_datetime - instance.start_datetime
 
     # Auto-deactivate if overdue exceeds limit
     if instance.end_datetime and instance.limited_overdue is not None:

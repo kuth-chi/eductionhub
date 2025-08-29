@@ -5,7 +5,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from api.serializers.schools.base import PlatformSerializer, PlatformProfileSerializer
+from api.serializers.schools.base import PlatformSerializer
+from api.serializers.social_platforms.platform_profile_serializers import PlatformProfileSerializer
 from schools.models.online_profile import Platform, PlatformProfile
 
 

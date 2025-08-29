@@ -1,9 +1,20 @@
 """ViewSets for schools-related models (College, Major, Degree, etc.)"""
 
+from django.apps import apps
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from django.apps import apps
+from api.serializers.schools.base import (AddressSerializer,
+                                          FieldOfStudySerializer,
+                                          ScholarshipSerializer,
+                                          ScholarshipTypeSerializer,
+                                          SchoolBranchContactInfoSerializer,
+                                          SchoolCollegeAssociationSerializer,
+                                          SchoolCustomizeButtonSerializer,
+                                          SchoolDegreeOfferingSerializer,
+                                          SchoolMajorOfferingSerializer,
+                                          SchoolScholarshipSerializer)
+from api.serializers.schools.branch_serializers import SchoolBranchSerializer
 
 EducationalLevel = apps.get_model("schools", "EducationalLevel")
 Major = apps.get_model("schools", "Major")
@@ -11,7 +22,8 @@ College = apps.get_model("schools", "College")
 EducationDegree = apps.get_model("schools", "EducationDegree")
 SchoolBranch = apps.get_model("schools", "SchoolBranch")
 SchoolDegreeOffering = apps.get_model("schools", "SchoolDegreeOffering")
-SchoolCollegeAssociation = apps.get_model("schools", "SchoolCollegeAssociation")
+SchoolCollegeAssociation = apps.get_model(
+    "schools", "SchoolCollegeAssociation")
 SchoolMajorOffering = apps.get_model("schools", "SchoolMajorOffering")
 FieldOfStudy = apps.get_model("schools", "FieldOfStudy")
 ScholarshipType = apps.get_model("schools", "ScholarshipType")
@@ -20,50 +32,6 @@ SchoolScholarship = apps.get_model("schools", "SchoolScholarship")
 SchoolCustomizeButton = apps.get_model("schools", "SchoolCustomizeButton")
 Address = apps.get_model("schools", "Address")
 SchoolBranchContactInfo = apps.get_model("schools", "SchoolBranchContactInfo")
-
-from api.serializers.schools.base import (
-    EducationalLevelSerializer,
-    MajorSerializer,
-    EducationDegreeSerializer,
-    SchoolDegreeOfferingSerializer,
-    SchoolCollegeAssociationSerializer,
-    SchoolMajorOfferingSerializer,
-    FieldOfStudySerializer,
-    ScholarshipSerializer,
-    ScholarshipTypeSerializer,
-    SchoolScholarshipSerializer,
-    SchoolCustomizeButtonSerializer,
-    AddressSerializer,
-    SchoolBranchContactInfoSerializer,
-)
-from api.serializers.schools.branch import SchoolBranchSerializer
-from api.serializers.schools.college_serializers import CollegeSerializer
-
-
-class EducationalLevelViewSet(viewsets.ModelViewSet):
-    queryset = EducationalLevel.objects.filter(is_active=True).order_by(
-        "order", "level_name"
-    )
-    serializer_class = EducationalLevelSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-
-class CollegeViewSet(viewsets.ModelViewSet):
-    queryset = College.objects.all()
-    serializer_class = CollegeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-
-class MajorViewSet(viewsets.ModelViewSet):
-    queryset = Major.objects.all()
-    serializer_class = MajorSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-
-class EducationDegreeViewSet(viewsets.ModelViewSet):
-    queryset = EducationDegree.objects.all()
-    serializer_class = EducationDegreeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class SchoolDegreeOfferingViewSet(viewsets.ModelViewSet):

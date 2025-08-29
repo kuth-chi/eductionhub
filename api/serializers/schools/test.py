@@ -36,5 +36,4 @@ class SimpleSchoolSerializer(serializers.ModelSerializer):
             "updated_date",
             "slug",
             "is_active",
-            "self_data",
         )

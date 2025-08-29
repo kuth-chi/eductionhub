@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import base64
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -117,11 +117,21 @@ MIDDLEWARE = [
     "api.middlewares.SocialAuthMiddleware",  # Social auth handling
 ]
 
+# URL configuration
+APPEND_SLASH = False  # Disable automatic slash appending to prevent POST data loss
+
+# Session and Cookie settings
 SESSION_COOKIE_NAME = "auth_server_sessionid"
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Cookie size settings for JWT tokens
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 ROOT_URLCONF = "main.urls"
 
@@ -234,6 +244,11 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+    ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "api.authentication.UserAgentBoundJWTAuthentication",
@@ -257,8 +272,10 @@ REST_FRAMEWORK = {
         ]
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "1000/hour",  # Unauthenticated users (increased for development)
-        "user": "10000/hour",  # Authenticated users (increased for development)
+        # Unauthenticated users (increased for development)
+        "anon": "1000/hour",
+        # Authenticated users (increased for development)
+        "user": "10000/hour",
     },
 }
 
@@ -269,7 +286,7 @@ SIMPLE_JWT = {
     "VERIFYING_KEY": base64.b64decode(os.getenv("PUBLIC_KEY_B64", "")),
     "JWT_PRIVATE_KEY": PRIVATE_KEY,
     "JWT_PUBLIC_KEY": PUBLIC_KEY,
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Increased for testing
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     # "ACCESS_TOKEN_LIFETIME": timedelta(seconds=3600),
     # "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -344,4 +361,24 @@ APP_URL = (
 )
 OPEN_AI_API_SECRET = os.getenv("OPEN_AI_KEY")
 IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")
+
+# Django Allauth Configuration
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Updated Allauth settings (new format)
+# Replaces ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+# Replaces ACCOUNT_EMAIL_REQUIRED and ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+# Skip email verification for social accounts
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Define custom adapter for social login redirects
+SOCIALACCOUNT_ADAPTER = 'api.adapters.CustomSocialAccountAdapter'
+WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "http://localhost:3000")
