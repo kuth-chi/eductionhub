@@ -20,26 +20,23 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
 
-      - name: Create and start virtual environment
+      - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./*
+        run: zip -r release.zip . -x "venv/*" ".git/*" ".github/*" "__pycache__/*" "*.pyc"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,14 +48,13 @@ jobs:
         with:
           name: python-app
 
-      - name: Upload and extract output.tar.gz
-        run: |
-          if [ -f output.tar.gz ]; then
-            echo "Extracting output.tar.gz"
-            tar -xvzf output.tar.gz -C /home/site/wwwroot
-          else
-            echo "output.tar.gz not found!"
-          fi
+      # Restart app first (avoids 409 conflict from previous deployments)
+      - name: Restart Azure Web App
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.30.0
+          inlineScript: |
+            az webapp restart --name education-hub --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -67,9 +63,11 @@ jobs:
           app-name: 'education-hub'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_97317126A6E4494281984A0ACBBE7F0A }}
           package: release.zip
-        
 
       - name: Display URL of deployed app
-        run: | 
+        run: |
           echo "Deployed app URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+
+
+
 
