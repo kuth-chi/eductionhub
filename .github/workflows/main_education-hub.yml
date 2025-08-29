@@ -54,7 +54,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az webapp restart --name education-hub --resource-group <YOUR_RESOURCE_GROUP>
+            az webapp restart --name education-hub --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
