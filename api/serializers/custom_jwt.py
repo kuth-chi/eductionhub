@@ -20,6 +20,129 @@ def sanitize_extra_data(data):
     return data
 
 
+class CustomJWTSerializer:
+    """Custom JWT serializer for creating tokens with enhanced user data."""
+
+    @classmethod
+    def get_token(cls, user):
+        """Create a custom JWT token with all user information."""
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
+        # Get or create user profile
+        profile, _ = Profile.objects.get_or_create(
+            user=user,
+            defaults={
+                "first_name": user.first_name or "",
+                "last_name": user.last_name or "",
+                "email": user.email or "",
+            },
+        )
+
+        # Add custom claims to access token
+        access_token["user_id"] = user.id
+        access_token["profile"] = {
+            "id": str(profile.uuid),
+            "first_name": user.first_name or "",
+            "last_name": user.last_name or "",
+            "email": user.email or "",
+            "photo": profile.photo.url if profile.photo else None,
+            "last_login": user.last_login.isoformat() if user.last_login else None,
+            "is_active": user.is_active,
+        }
+
+        # Add permissions and roles
+        access_token["permissions"] = cls._get_essential_permissions(user)
+        access_token["roles"] = cls._get_user_roles(user)
+        access_token["is_staff"] = user.is_staff
+        access_token["is_superuser"] = user.is_superuser
+
+        # Add social accounts
+        social_accounts = SocialAccount.objects.filter(user=user)
+        access_token["social_accounts"] = [
+            {
+                "provider": sa.provider,
+                "uid": sa.uid,
+                "extra_data": sanitize_extra_data(sa.extra_data),
+            }
+            for sa in social_accounts
+        ]
+
+        return access_token
+
+    @classmethod
+    def _get_user_roles(cls, user):
+        """Get all roles for the user from groups and RBAC system."""
+        roles = []
+
+        # Get roles from Django groups
+        roles.extend([g.name for g in user.groups.all()])
+
+        # Get roles from RBAC system if available
+        try:
+            from organization.models.employee import Employee
+            from rbac.models.role_assignment import RoleAssignment
+
+            employee = Employee.objects.get(user=user)
+            rbac_roles = [
+                assignment.role.name
+                for assignment in RoleAssignment.objects.filter(
+                    employee=employee,
+                    is_active=True,
+                    is_deleted=False
+                )
+            ]
+            roles.extend(rbac_roles)
+        except (ImportError, Employee.DoesNotExist):
+            pass
+
+        # Remove duplicates and return
+        return list(set(roles))
+
+    @classmethod
+    def _get_essential_permissions(cls, user):
+        """Get essential permissions for quick token-based checks."""
+        permissions = {
+            'can_delete_schools': False,
+            'can_manage_colleges': False,
+            'can_manage_branches': False,
+            'can_view_analytics': False,
+        }
+
+        # Superuser has all permissions
+        if user.is_superuser:
+            return {key: True for key in permissions.keys()}
+
+        # Get user roles
+        user_roles = cls._get_user_roles(user)
+
+        # Set permissions based on roles
+        if 'SuperAdmin' in user_roles:
+            permissions.update({
+                'can_delete_schools': True,
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+                'can_view_analytics': True,
+            })
+        elif 'Administrator' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+                'can_view_analytics': True,
+            })
+        elif 'Manager' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+                'can_manage_branches': True,
+            })
+        elif 'Staff' in user_roles:
+            permissions.update({
+                'can_manage_colleges': True,
+            })
+
+        return permissions
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

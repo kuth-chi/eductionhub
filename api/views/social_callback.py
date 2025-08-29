@@ -1,10 +1,19 @@
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from rest_framework_simplejwt.tokens import RefreshToken
-from user.models.profile import Profile
-from allauth.socialaccount.models import SocialAccount
+import base64
 import json
+
+from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
+from django.shortcuts import redirect
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from api.serializers.custom_jwt import CustomJWTSerializer
+from user.models.profile import Profile
+
+WEB_CLIENT_URL = settings.WEB_CLIENT_URL if hasattr(
+    settings, 'WEB_CLIENT_URL') else "http://localhost:3000"
 
 
 @login_required
@@ -15,12 +24,10 @@ def social_login_callback(request):
     try:
         user = request.user
 
-        # Create JWT tokens
+        # Use the custom JWT serializer to create tokens with all user data
+        jwt_serializer = CustomJWTSerializer()
         refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
-
-        # Add user_id for middleware authentication
-        access_token["user_id"] = user.id
+        access_token = jwt_serializer.get_token(user)
 
         # Get or create profile
         profile, created = Profile.objects.get_or_create(
@@ -32,25 +39,7 @@ def social_login_callback(request):
             },
         )
 
-        # Add custom claims to access token
-        access_token["profile"] = {
-            "id": str(profile.uuid),
-            "first_name": user.first_name or "",
-            "last_name": user.last_name or "",
-            "email": user.email or "",
-            "photo": profile.photo.url if profile.photo else None,
-        }
-        access_token["permissions"] = list(user.get_all_permissions())
-        access_token["roles"] = [group.name for group in user.groups.all()]
-
-        # Get social accounts
-        social_accounts = SocialAccount.objects.filter(user=user)
-        access_token["social_accounts"] = [
-            {"provider": sa.provider, "uid": sa.uid, "extra_data": sa.extra_data}
-            for sa in social_accounts
-        ]
-
-        # Prepare response data
+        # Prepare response data with all necessary information
         auth_data = {
             "refresh": str(refresh),
             "access": str(access_token),
@@ -60,32 +49,50 @@ def social_login_callback(request):
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
             },
             "profile": {
-                "id": str(profile.uuid),
+                "uuid": str(profile.uuid),
                 "first_name": profile.first_name,
                 "last_name": profile.last_name,
                 "email": profile.email,
                 "photo": profile.photo.url if profile.photo else None,
+                "last_login": user.last_login.isoformat() if user.last_login else None,
             },
+            "permissions": list(user.get_all_permissions()),
+            "roles": [group.name for group in user.groups.all()],
+            "social_accounts": [
+                {
+                    "provider": sa.provider,
+                    "uid": sa.uid,
+                    "extra_data": sa.extra_data,
+                }
+                for sa in SocialAccount.objects.filter(user=user)
+            ],
         }
 
         # Encode auth data for URL parameter
-        import base64
+        auth_data_encoded = base64.b64encode(
+            json.dumps(auth_data).encode()).decode()
 
-        auth_data_encoded = base64.b64encode(json.dumps(auth_data).encode()).decode()
+        # Get the frontend redirect URL from query parameters
+        frontend_url = request.GET.get(
+            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
 
-        # Redirect to frontend with auth data
-        frontend_url = request.GET.get("redirect_uri", "http://localhost:3000")
-        redirect_url = f"{frontend_url}/auth/callback?auth_data={auth_data_encoded}"
+        # Add auth_data to the frontend URL
+        separator = "&" if "?" in frontend_url else "?"
+        redirect_url = f"{frontend_url}{separator}auth_data={auth_data_encoded}"
 
         return redirect(redirect_url)
 
     except Exception as e:
-        # Return error response
-        return JsonResponse(
-            {"error": str(e), "message": "Social login failed"}, status=500
-        )
+        # Redirect to frontend with error
+        frontend_url = request.GET.get(
+            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
+        separator = "&" if "?" in frontend_url else "?"
+        error_url = f"{frontend_url}{separator}error={str(e)}"
+        return redirect(error_url)
 
 
 @login_required
@@ -130,7 +137,7 @@ def social_login_status(request):
             }
         )
 
-    except Profile.DoesNotExist:
+    except ObjectDoesNotExist:
         return JsonResponse({"authenticated": True, "profile": None})
     except Exception as e:
         return JsonResponse({"authenticated": False, "error": str(e)}, status=401)

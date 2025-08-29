@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import base64
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -272,8 +272,10 @@ REST_FRAMEWORK = {
         ]
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "1000/hour",  # Unauthenticated users (increased for development)
-        "user": "10000/hour",  # Authenticated users (increased for development)
+        # Unauthenticated users (increased for development)
+        "anon": "1000/hour",
+        # Authenticated users (increased for development)
+        "user": "10000/hour",
     },
 }
 
@@ -359,4 +361,24 @@ APP_URL = (
 )
 OPEN_AI_API_SECRET = os.getenv("OPEN_AI_KEY")
 IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")
+
+# Django Allauth Configuration
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Updated Allauth settings (new format)
+# Replaces ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+# Replaces ACCOUNT_EMAIL_REQUIRED and ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+# Skip email verification for social accounts
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Define custom adapter for social login redirects
+SOCIALACCOUNT_ADAPTER = 'api.adapters.CustomSocialAccountAdapter'
+WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "http://localhost:3000")

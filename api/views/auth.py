@@ -14,6 +14,7 @@ from datetime import timedelta
 from typing import Union, cast
 
 import jwt
+from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
 from django.core.exceptions import ObjectDoesNotExist
@@ -24,12 +25,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_api_settings
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
+                                                             OutstandingToken)
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 from user_agents import parse
 
-from allauth.socialaccount.models import SocialAccount
 from api.serializers.custom_jwt import CustomTokenObtainPairSerializer
 from user.models.profile import Profile  # pylint: disable=no-member
 
@@ -49,8 +51,10 @@ def _get_max_age(value: Union[timedelta, int], fallback_seconds: int) -> int:
 
 def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
     same_site = "Lax"
-    access_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME", timedelta(minutes=5)), 300)
-    refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME", timedelta(days=7)), 7 * 24 * 3600)
+    access_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
+        "ACCESS_TOKEN_LIFETIME", timedelta(minutes=5)), 300)
+    refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
+        "REFRESH_TOKEN_LIFETIME", timedelta(days=7)), 7 * 24 * 3600)
 
     # In development, set domain to None to allow cookies to work with localhost
     cookie_domain = None if DEBUG else None
@@ -133,7 +137,8 @@ class SocialLoginJWTView(APIView):
             token["roles"] = [group.name for group in user.groups.all()]
             token["social_accounts"] = [
                 {"provider": sa.provider, "uid": sa.uid, "extra_data": sa.extra_data}
-                for sa in SocialAccount.objects.filter(user=user)  # type: ignore[attr-defined]  # pylint: disable=no-member
+                # type: ignore[attr-defined]  # pylint: disable=no-member
+                for sa in SocialAccount.objects.filter(user=user)
             ]
             token["ua"] = request.META.get("HTTP_USER_AGENT", "")
             token["ip"] = get_client_ip(request)
@@ -162,8 +167,10 @@ class LogoutView(APIView):
 
     def post(self, request):
         response = Response({"detail": "Logged out successfully"})
-        for token in OutstandingToken.objects.filter(user=request.user):  # type: ignore[attr-defined]  # pylint: disable=no-member
-            BlacklistedToken.objects.get_or_create(token=token)  # type: ignore[attr-defined]  # pylint: disable=no-member
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        for token in OutstandingToken.objects.filter(user=request.user):
+            # type: ignore[attr-defined]  # pylint: disable=no-member
+            BlacklistedToken.objects.get_or_create(token=token)
 
         response.delete_cookie("access_token", path="/")
         response.delete_cookie("refresh_token", path="/")
@@ -181,7 +188,8 @@ class AuthStatusView(APIView):
     def get(self, request):
         try:
             profile = Profile.objects.get(user=request.user)
-            social_accounts = SocialAccount.objects.filter(user=request.user)  # type: ignore[attr-defined]  # pylint: disable=no-member
+            # type: ignore[attr-defined]  # pylint: disable=no-member
+            social_accounts = SocialAccount.objects.filter(user=request.user)
 
             ua_string = request.META.get("HTTP_USER_AGENT", "")
             user_agent = parse(ua_string)
@@ -217,7 +225,8 @@ class AuthStatusView(APIView):
                         "photo": profile.photo.url if profile.photo else None,
                     },
                     "social_accounts": [
-                        {"provider": sa.provider, "uid": sa.uid, "extra_data": sa.extra_data}
+                        {"provider": sa.provider, "uid": sa.uid,
+                            "extra_data": sa.extra_data}
                         for sa in social_accounts
                     ],
                     "permissions": list(request.user.get_all_permissions()),
@@ -227,10 +236,13 @@ class AuthStatusView(APIView):
                     "ip": get_client_ip(request),
                 }
             )
-        except Profile.DoesNotExist:  # type: ignore[attr-defined]  # pylint: disable=no-member
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        except Profile.DoesNotExist:
             return Response({"authenticated": True, "profile": None}, status=status.HTTP_200_OK)
-        except Profile.MultipleObjectsReturned:  # type: ignore[attr-defined]  # pylint: disable=no-member
-            logger.error("Multiple profiles found for user id=%s", request.user.id)
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        except Profile.MultipleObjectsReturned:
+            logger.error("Multiple profiles found for user id=%s",
+                         request.user.id)
             return Response({"error": "Profile conflict"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:  # pragma: no cover  # pylint: disable=broad-except
             logger.error("Error fetching auth status: %s", str(e))
@@ -239,28 +251,31 @@ class AuthStatusView(APIView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        logger.info("Token refresh requested from IP: %s", get_client_ip(request))
+        logger.info("Token refresh requested from IP: %s",
+                    get_client_ip(request))
 
         body = request.data
-        payload = dict(body) if isinstance(body, dict) else {**getattr(body, "dict", lambda: {})()}
-        
+        payload = dict(body) if isinstance(body, dict) else {
+            **getattr(body, "dict", lambda: {})()}
+
         # Support both current and legacy cookie names
-        cookie_refresh = request.COOKIES.get("refresh_token") or request.COOKIES.get("refresh")
-        
+        cookie_refresh = request.COOKIES.get(
+            "refresh_token") or request.COOKIES.get("refresh")
+
         # Accept both 'refresh' and 'refresh_token' keys in body
         if not payload.get("refresh") and payload.get("refresh_token"):
             payload["refresh"] = payload.get("refresh_token")
-            
+
         # If no refresh token in body, try to get from cookie
         if not payload.get("refresh") and cookie_refresh:
             payload["refresh"] = cookie_refresh
-            
+
         # If still no refresh token, return detailed error
         if "refresh" not in payload or not payload["refresh"]:
             available_cookies = list(request.COOKIES.keys())
             logger.warning(
-                "Refresh request missing token. Body keys: %s, Cookies present: %s", 
-                list(payload.keys()), 
+                "Refresh request missing token. Body keys: %s, Cookies present: %s",
+                list(payload.keys()),
                 available_cookies
             )
             return Response({
@@ -273,7 +288,8 @@ class CustomTokenRefreshView(TokenRefreshView):
                 }
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+        from rest_framework_simplejwt.exceptions import (InvalidToken,
+                                                         TokenError)
         try:
             serializer = self.get_serializer(data=payload)
             serializer.is_valid(raise_exception=True)
@@ -286,11 +302,13 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         response_data = serializer.validated_data
         new_access = cast(dict, response_data).get("access")
-        new_refresh = cast(dict, response_data).get("refresh") or payload["refresh"]
+        new_refresh = cast(dict, response_data).get(
+            "refresh") or payload["refresh"]
 
         response = Response(response_data, status=status.HTTP_200_OK)
         if new_access:
-            response = set_auth_cookies(response, str(new_access), str(new_refresh))
+            response = set_auth_cookies(
+                response, str(new_access), str(new_refresh))
         return response
 
 
@@ -300,16 +318,19 @@ class ActiveSessionsView(APIView):
     def get(self, request):
         try:
             profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:  # type: ignore[attr-defined]  # pylint: disable=no-member
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        except Profile.DoesNotExist:
             logger.warning("No profile found for user %s", request.user.id)
             return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
 
         sessions = []
-        tokens = OutstandingToken.objects.filter(user=request.user)  # type: ignore[attr-defined]  # pylint: disable=no-member
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        tokens = OutstandingToken.objects.filter(user=request.user)
 
         for token in tokens:
             try:
-                signing_key = getattr(jwt_api_settings, "SIGNING_KEY", None) or settings.SECRET_KEY
+                signing_key = getattr(
+                    jwt_api_settings, "SIGNING_KEY", None) or settings.SECRET_KEY
                 algorithm = getattr(jwt_api_settings, "ALGORITHM", "HS256")
                 token_data = jwt.decode(
                     token.token,
@@ -318,12 +339,14 @@ class ActiveSessionsView(APIView):
                     options={"verify_exp": False},
                 )
             except jwt.InvalidTokenError as e:
-                logger.debug("Skipping invalid token %s: %s", str(token.id), str(e))
+                logger.debug("Skipping invalid token %s: %s",
+                             str(token.id), str(e))
                 continue
 
             ua_string = token_data.get("ua", "")
             ip = token_data.get("ip", "")
-            last_used = token.created_at.isoformat() if getattr(token, "created_at", None) else None
+            last_used = token.created_at.isoformat() if getattr(
+                token, "created_at", None) else None
 
             device_name, os_name, browser = "Unknown Device", "Unknown OS", "Unknown Browser"
             if ua_string:
@@ -335,17 +358,21 @@ class ActiveSessionsView(APIView):
                     if candidate:
                         device_name = candidate
                     os_family = getattr(user_agent.os, "family", "") or ""
-                    os_version = getattr(user_agent.os, "version_string", "") or ""
+                    os_version = getattr(
+                        user_agent.os, "version_string", "") or ""
                     candidate = f"{os_family} {os_version}".strip()
                     if candidate:
                         os_name = candidate
-                    browser_family = getattr(user_agent.browser, "family", "") or ""
-                    browser_version = getattr(user_agent.browser, "version_string", "") or ""
+                    browser_family = getattr(
+                        user_agent.browser, "family", "") or ""
+                    browser_version = getattr(
+                        user_agent.browser, "version_string", "") or ""
                     candidate = f"{browser_family} {browser_version}".strip()
                     if candidate:
                         browser = candidate
                 except Exception as e:  # UA parsing safety  # pylint: disable=broad-except
-                    logger.error("Failed to parse user agent '%s': %s", ua_string, str(e))
+                    logger.error(
+                        "Failed to parse user agent '%s': %s", ua_string, str(e))
 
             sessions.append(
                 {
@@ -361,8 +388,10 @@ class ActiveSessionsView(APIView):
                     "permissions": list(request.user.get_all_permissions()),
                     "roles": [group.name for group in request.user.groups.all()],
                     "socialAccounts": [
-                        {"provider": sa.provider, "uid": sa.uid, "extra_data": sa.extra_data}
-                        for sa in SocialAccount.objects.filter(user=request.user)  # type: ignore[attr-defined]  # pylint: disable=no-member
+                        {"provider": sa.provider, "uid": sa.uid,
+                            "extra_data": sa.extra_data}
+                        # type: ignore[attr-defined]  # pylint: disable=no-member
+                        for sa in SocialAccount.objects.filter(user=request.user)
                     ],
                     "ua": ua_string,
                     "ip": ip,
@@ -382,16 +411,23 @@ class ActiveSessionsView(APIView):
             return Response({"error": "Token ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            token = OutstandingToken.objects.get(id=token_id, user=request.user)  # type: ignore[attr-defined]  # pylint: disable=no-member
-            BlacklistedToken.objects.get_or_create(token=token)  # type: ignore[attr-defined]  # pylint: disable=no-member
+            # type: ignore[attr-defined]  # pylint: disable=no-member
+            token = OutstandingToken.objects.get(
+                id=token_id, user=request.user)
+            # type: ignore[attr-defined]  # pylint: disable=no-member
+            BlacklistedToken.objects.get_or_create(token=token)
             return Response({"detail": "Session terminated"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({"error": "Invalid or unauthorized token"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:  # pragma: no cover  # pylint: disable=broad-except
-            logger.error("Failed to terminate session %s: %s", str(token_id), str(e))
+            logger.error("Failed to terminate session %s: %s",
+                         str(token_id), str(e))
             return Response({"error": "Failed to terminate session"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @ensure_csrf_cookie
 def csrf_token_view(_request):
     return JsonResponse({"detail": "CSRF cookie set"})
+
+
+# Duplicate SocialLoginJWTView class removed to resolve redefinition error.
