@@ -59,7 +59,11 @@ jobs:
           else
             echo "output.tar.gz not found!"
           fi
-
+      # Add before Deploy to Azure Web App
+      - name: Clean up previous deployment files
+        run: |
+          rm -rf /home/site/wwwroot/*
+          
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
@@ -72,4 +76,5 @@ jobs:
       - name: Display URL of deployed app
         run: | 
           echo "Deployed app URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+
 
