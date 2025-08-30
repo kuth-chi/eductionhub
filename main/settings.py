@@ -25,9 +25,16 @@ if "CODESPACE_NAME" in os.environ:
         f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}'
     ]
 
+# URL Configuration
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL_ORIGIN = os.getenv("FRONTEND_URL_ORIGIN_ONE", FRONTEND_URL)
+
+# CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
@@ -51,7 +58,6 @@ PUBLIC_KEY = base64.b64decode(os.getenv("PUBLIC_KEY_B64", ""))
 # python -c 'import secrets; print(secrets.token_hex())'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ["SECRET_KEY"]
-FRONTEND_URL_ORIGIN = os.getenv("FRONTEND_URL_ORIGIN_ONE")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
