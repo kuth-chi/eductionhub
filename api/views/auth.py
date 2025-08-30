@@ -322,7 +322,8 @@ class AuthStatusView(APIView):
                         "email": request.user.email,
                         "first_name": request.user.first_name,
                         "last_name": request.user.last_name,
-                        "last_logged_in": request.user.last_login,
+                        # Use ISO string for strict JSON safety
+                        "last_logged_in": request.user.last_login.isoformat() if request.user.last_login else None,
                     },
                     "profile": {
                         "id": str(profile.uuid),
