@@ -50,13 +50,14 @@ class Profile(models.Model):
     def delete(self, *args, **kwargs):
         # Check if the photo field has an associated file
         if self.photo and self.photo.name:
-            self.photo.delete(save=False)
+            self.photo.storage.delete(self.photo.name)
         super().delete(*args, **kwargs)
 
     def __str__(self):
+        user_instance = self.user
         user_first_name = (
-            self.user.first_name if self.user.first_name else self.user.username
+            user_instance.first_name if getattr(user_instance, "first_name", None) else getattr(user_instance, "username", "")
         )
-        user_last_name = self.user.last_name if self.user.last_name else ""
+        user_last_name = getattr(user_instance, "last_name", "")
         user_name = f"{user_first_name} {user_last_name}"
         return user_name
