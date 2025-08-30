@@ -1,10 +1,9 @@
 import uuid
 
+import pytz
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import pytz
-
-from django.conf import settings
 
 
 def user_directory_path(instance, filename):
@@ -20,7 +19,8 @@ class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, db_index=True, on_delete=models.CASCADE
     )
-    photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    photo = models.ImageField(
+        upload_to=user_directory_path, blank=True, null=True)
     GENDER_CHOICES = [
         ("FEMALE", _("Female")),
         ("MALE", _("Male")),
@@ -36,16 +36,28 @@ class Profile(models.Model):
 
     objects = models.Manager()
 
+    # Backwards-compatible aliases for consumers expecting created_at/updated_at
+    @property
+    def created_at(self):  # noqa: D401
+        """Alias for created_date to support clients expecting created_at."""
+        return self.created_date
+
+    @property
+    def updated_at(self):  # noqa: D401
+        """Alias for updated_date to support clients expecting updated_at."""
+        return self.updated_date
+
     def delete(self, *args, **kwargs):
         # Check if the photo field has an associated file
         if self.photo and self.photo.name:
-            self.photo.delete(save=False)
+            self.photo.storage.delete(self.photo.name)
         super().delete(*args, **kwargs)
 
     def __str__(self):
+        user_instance = self.user
         user_first_name = (
-            self.user.first_name if self.user.first_name else self.user.username
+            user_instance.first_name if getattr(user_instance, "first_name", None) else getattr(user_instance, "username", "")
         )
-        user_last_name = self.user.last_name if self.user.last_name else ""
+        user_last_name = getattr(user_instance, "last_name", "")
         user_name = f"{user_first_name} {user_last_name}"
         return user_name
