@@ -49,12 +49,20 @@ jobs:
           name: python-app
 
       # Restart app first (avoids 409 conflict from previous deployments)
-      - name: Restart Azure Web App
+      - name: Restart Azure Web App (safe)
         uses: azure/CLI@v1
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az webapp restart --name education-hub --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+            #!/bin/bash
+            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
+            if [ -z "$RESOURCE_GROUP" ]; then
+              echo "ERROR: Azure resource group secret 'AZURE_RESOURCE_GROUP' is not set."
+              echo "Set the secret in repository Settings → Secrets or organization-level secrets and retry."
+              exit 1
+            fi
+            echo "Restarting webapp 'education-hub' in resource group '$RESOURCE_GROUP'..."
+            az webapp restart --name education-hub --resource-group "$RESOURCE_GROUP"
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
