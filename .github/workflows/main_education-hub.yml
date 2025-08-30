@@ -15,28 +15,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip . -x "venv/*" ".git/*" ".github/*" "__pycache__/*" "*.pyc"
+        run: zip -r release.zip ./*
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: release.zip
+          path: |
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,38 +47,27 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      # Restart app first (avoids 409 conflict from previous deployments)
-      - name: Restart Azure Web App (safe)
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.30.0
-          inlineScript: |
-            #!/bin/bash
-            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP }}"
-            if [ -z "$RESOURCE_GROUP" ]; then
-              echo "ERROR: Azure resource group secret 'AZURE_RESOURCE_GROUP' is not set."
-              echo "Set the secret in repository Settings → Secrets or organization-level secrets and retry."
-              exit 1
-            fi
-            echo "Restarting webapp 'education-hub' in resource group '$RESOURCE_GROUP'..."
-            az webapp restart --name education-hub --resource-group "$RESOURCE_GROUP"
+      - name: Upload and extract output.tar.gz
+        run: |
+          if [ -f output.tar.gz ]; then
+            echo "Extracting output.tar.gz"
+            tar -xvzf output.tar.gz -C /home/site/wwwroot
+          else
+            echo "output.tar.gz not found!"
+          fi
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'education-hub'
+          app-name: "education-hub"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_97317126A6E4494281984A0ACBBE7F0A }}
           package: release.zip
 
       - name: Display URL of deployed app
         run: |
           echo "Deployed app URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
-
-
-
-
