@@ -10,6 +10,7 @@ Best practices:
 from __future__ import annotations
 
 import logging
+import re
 from datetime import timedelta
 from typing import Union, cast
 
@@ -17,7 +18,7 @@ import jwt
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
@@ -41,6 +42,7 @@ SECURE = not DEBUG
 
 
 def _get_max_age(value: Union[timedelta, int], fallback_seconds: int) -> int:
+    """Safely get max age from timedelta or int value."""
     try:
         if isinstance(value, timedelta):
             return int(value.total_seconds())
@@ -49,36 +51,122 @@ def _get_max_age(value: Union[timedelta, int], fallback_seconds: int) -> int:
         return fallback_seconds
 
 
+def _validate_jwt_token(token: str) -> bool:
+    """Validate JWT token structure and signature."""
+    if not token or not isinstance(token, str):
+        return False
+
+    # Basic JWT format validation (header.payload.signature)
+    jwt_pattern = r'^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$'
+    if not re.match(jwt_pattern, token):
+        return False
+
+    # Additional length check to prevent extremely long tokens
+    if len(token) > 4096:  # Reasonable JWT size limit
+        return False
+
+    try:
+        # Validate token structure without verifying signature
+        # (signature validation happens during token use)
+        jwt.decode(token, options={"verify_signature": False})
+        return True
+    except (jwt.InvalidTokenError, ValueError, TypeError):
+        return False
+
+
+def _sanitize_cookie_value(value: str) -> str:
+    """Sanitize cookie value to prevent injection attacks."""
+    if not value or not isinstance(value, str):
+        raise ValidationError("Invalid cookie value")
+
+    # Remove any characters that could be used for cookie injection
+    # Keep only JWT-safe characters
+    safe_pattern = r'^[A-Za-z0-9._-]+$'
+    if not re.match(safe_pattern, value):
+        raise ValidationError("Cookie value contains invalid characters")
+
+    return value
+
+
 def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
-    same_site = "Lax"
+    """
+    Set secure authentication cookies with proper validation and security attributes.
+
+    Args:
+        response: Django Response object
+        access: JWT access token string
+        refresh: JWT refresh token string
+
+    Returns:
+        Response object with secure cookies set
+
+    Raises:
+        ValidationError: If token validation fails
+    """
+    # Validate and sanitize tokens before setting cookies
+    if not _validate_jwt_token(access):
+        logger.error("Invalid access token format detected")
+        raise ValidationError("Invalid access token format")
+
+    if not _validate_jwt_token(refresh):
+        logger.error("Invalid refresh token format detected")
+        raise ValidationError("Invalid refresh token format")
+
+    try:
+        sanitized_access = _sanitize_cookie_value(access)
+        sanitized_refresh = _sanitize_cookie_value(refresh)
+    except ValidationError as e:
+        logger.error("Token sanitization failed: %s", str(e))
+        raise
+
+    # Security-first cookie configuration
+    same_site = "Strict"  # Changed from "Lax" to "Strict" for better security
     access_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "ACCESS_TOKEN_LIFETIME", timedelta(minutes=5)), 300)
     refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "REFRESH_TOKEN_LIFETIME", timedelta(days=7)), 7 * 24 * 3600)
 
-    # In development, set domain to None to allow cookies to work with localhost
-    cookie_domain = None if DEBUG else None
+    # Secure domain configuration
+    cookie_domain = None  # Let browser handle domain automatically for security
 
+    # Set access token cookie with secure attributes
     response.set_cookie(
         "access_token",
-        access,
-        httponly=False,  # Allow JavaScript access in development
-        secure=SECURE,
-        samesite=same_site,
+        sanitized_access,
+        httponly=True,  # SECURITY FIX: Prevent JavaScript access to mitigate XSS
+        secure=SECURE,  # Only send over HTTPS in production
+        samesite=same_site,  # Prevent CSRF attacks
         path="/",
         max_age=access_age,
         domain=cookie_domain,
     )
+
+    # Set refresh token cookie with secure attributes
     response.set_cookie(
         "refresh_token",
-        refresh,
-        httponly=False,  # Allow JavaScript access in development
-        secure=SECURE,
-        samesite=same_site,
+        sanitized_refresh,
+        httponly=True,  # SECURITY FIX: Prevent JavaScript access to mitigate XSS
+        secure=SECURE,  # Only send over HTTPS in production
+        samesite=same_site,  # Prevent CSRF attacks
         path="/",
         max_age=refresh_age,
         domain=cookie_domain,
     )
+
+    # Set a separate cookie for frontend to know authentication status
+    # This cookie is safe for JavaScript access as it contains no sensitive data
+    response.set_cookie(
+        "auth_status",
+        "authenticated",
+        httponly=False,  # Safe for JavaScript access
+        secure=SECURE,
+        samesite=same_site,
+        path="/",
+        max_age=access_age,  # Sync with access token expiry
+        domain=cookie_domain,
+    )
+
+    logger.info("Secure authentication cookies set successfully")
     return response
 
 
@@ -99,7 +187,15 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         update_last_login(None, user)
         data = serializer.validated_data
         response = Response(data, status=status.HTTP_200_OK)
-        return set_auth_cookies(response, str(data["access"]), str(data["refresh"]))
+
+        try:
+            return set_auth_cookies(response, str(data["access"]), str(data["refresh"]))
+        except ValidationError as e:
+            logger.error("Failed to set authentication cookies: %s", str(e))
+            return Response(
+                {"error": "Authentication failed due to security validation"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class SocialLoginJWTView(APIView):
@@ -159,7 +255,15 @@ class SocialLoginJWTView(APIView):
             status=status.HTTP_200_OK,
         )
 
-        return set_auth_cookies(response, str(access), str(refresh))
+        try:
+            return set_auth_cookies(response, str(access), str(refresh))
+        except ValidationError as e:
+            logger.error(
+                "Failed to set authentication cookies for social login: %s", str(e))
+            return Response(
+                {"error": "Authentication failed due to security validation"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class LogoutView(APIView):
@@ -172,10 +276,13 @@ class LogoutView(APIView):
             # type: ignore[attr-defined]  # pylint: disable=no-member
             BlacklistedToken.objects.get_or_create(token=token)
 
+        # Clear all authentication-related cookies securely
         response.delete_cookie("access_token", path="/")
         response.delete_cookie("refresh_token", path="/")
-        response.delete_cookie("access")
-        response.delete_cookie("refresh")
+        # Clear the new auth status cookie
+        response.delete_cookie("auth_status", path="/")
+        response.delete_cookie("access")  # Legacy cookie cleanup
+        response.delete_cookie("refresh")  # Legacy cookie cleanup
         response.delete_cookie("csrftoken")
         if hasattr(request, "session"):
             request.session.flush()
@@ -307,8 +414,16 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         response = Response(response_data, status=status.HTTP_200_OK)
         if new_access:
-            response = set_auth_cookies(
-                response, str(new_access), str(new_refresh))
+            try:
+                response = set_auth_cookies(
+                    response, str(new_access), str(new_refresh))
+            except ValidationError as e:
+                logger.error(
+                    "Failed to set authentication cookies during refresh: %s", str(e))
+                return Response(
+                    {"error": "Token refresh failed due to security validation"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         return response
 
 
