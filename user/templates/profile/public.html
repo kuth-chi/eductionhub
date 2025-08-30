@@ -19,7 +19,7 @@
                 <div class="flex flex-col items-center">
                     {% if profile.photo %}
                     <img class="w-48 h-48 mb-3 rounded-full object-cover shadow-lg"
-                    src="{{ profile.photo.url }}" alt="{{profile.first_name}} profile">
+                    src="{{ profile.photo.url }}" alt="{{profile.user.first_name}} profile">
                     {% else %}
                     <img class="w-48 h-48 mb-3 rounded-full shadow-lg"
                     src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="default user photo">

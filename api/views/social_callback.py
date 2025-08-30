@@ -33,9 +33,8 @@ def social_login_callback(request):
         profile, created = Profile.objects.get_or_create(
             user=user,
             defaults={
-                "first_name": user.first_name or "",
-                "last_name": user.last_name or "",
-                "email": user.email or "",
+                "occupation": "untitled",
+                "timezone": "UTC",
             },
         )
 
@@ -54,10 +53,10 @@ def social_login_callback(request):
             },
             "profile": {
                 "uuid": str(profile.uuid),
-                "first_name": profile.first_name,
-                "last_name": profile.last_name,
-                "email": profile.email,
                 "photo": profile.photo.url if profile.photo else None,
+                "gender": profile.gender,
+                "occupation": profile.occupation,
+                "timezone": profile.timezone,
                 "last_login": user.last_login.isoformat() if user.last_login else None,
             },
             "permissions": list(user.get_all_permissions()),
@@ -119,10 +118,10 @@ def social_login_status(request):
                 },
                 "profile": {
                     "id": str(profile.uuid),
-                    "first_name": profile.first_name,
-                    "last_name": profile.last_name,
-                    "email": profile.email,
                     "photo": profile.photo.url if profile.photo else None,
+                    "gender": profile.gender,
+                    "occupation": profile.occupation,
+                    "timezone": profile.timezone,
                 },
                 "social_accounts": [
                     {

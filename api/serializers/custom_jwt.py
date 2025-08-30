@@ -33,22 +33,32 @@ class CustomJWTSerializer:
         profile, _ = Profile.objects.get_or_create(
             user=user,
             defaults={
-                "first_name": user.first_name or "",
-                "last_name": user.last_name or "",
-                "email": user.email or "",
+                "occupation": "untitled",
+                "timezone": "UTC",
             },
         )
 
         # Add custom claims to access token
         access_token["user_id"] = user.id
-        access_token["profile"] = {
-            "id": str(profile.uuid),
+        access_token["user"] = {
+            "id": user.id,
+            "username": user.username,
             "first_name": user.first_name or "",
             "last_name": user.last_name or "",
             "email": user.email or "",
-            "photo": profile.photo.url if profile.photo else None,
-            "last_login": user.last_login.isoformat() if user.last_login else None,
             "is_active": user.is_active,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+            "last_login": user.last_login.isoformat() if user.last_login else None,
+            "date_joined": user.date_joined.isoformat() if user.date_joined else None,
+        }
+        access_token["profile"] = {
+            "id": str(profile.uuid),
+            "photo": profile.photo.url if profile.photo else None,
+            "occupation": profile.occupation or "",
+            "timezone": profile.timezone or "UTC",
+            "created_at": profile.created_at.isoformat() if profile.created_at else None,
+            "updated_at": profile.updated_at.isoformat() if profile.updated_at else None,
         }
 
         # Add permissions and roles
@@ -168,30 +178,29 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         profile, _ = Profile.objects.get_or_create(
             user=self.user,
             defaults={
-                "first_name": self.user.first_name or "",
-                "last_name": self.user.last_name or "",
-                "email": self.user.email or "",
+                "occupation": "untitled",
+                "timezone": "UTC",
             },
         )
 
-        profile_data = {
-            "id": str(profile.uuid),
-            "first_name": profile.user.first_name,
-            "last_name": profile.user.last_name,
-            "email": profile.user.email,
-            "last_login": profile.user.last_login.isoformat() if profile.user.last_login else None,
-            "is_active": profile.user.is_active,
-            "photo": profile.photo.url if profile.photo else None,
-        }
-
         # Inject custom claims into both tokens - keep minimal for size
         common_claims = {
+            "user": {
+                "id": self.user.id,
+                "username": self.user.username,
+                "first_name": self.user.first_name or "",
+                "last_name": self.user.last_name or "",
+                "email": self.user.email or "",
+                "is_active": self.user.is_active,
+                "is_staff": self.user.is_staff,
+                "is_superuser": self.user.is_superuser,
+                "last_login": self.user.last_login.isoformat() if self.user.last_login else None,
+            },
             "profile": {
                 "id": str(profile.uuid),
-                "first_name": profile.user.first_name,
-                "last_name": profile.user.last_name,
-                "email": profile.user.email,
-                "is_active": profile.user.is_active,
+                "photo": profile.photo.url if profile.photo else None,
+                "occupation": profile.occupation or "",
+                "timezone": profile.timezone or "UTC",
             },
             # Include essential permissions/roles to keep token size manageable
             "is_staff": self.user.is_staff,

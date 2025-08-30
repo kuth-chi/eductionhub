@@ -58,26 +58,12 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         profile, created = Profile.objects.get_or_create(
             user=user,
             defaults={
-                'first_name': user.first_name or '',
-                'last_name': user.last_name or '',
-                'email': user.email or '',
+                'occupation': 'untitled',
+                'timezone': 'UTC',
             }
         )
 
-        # Update profile with social account data if needed
-        if not created:
-            updated = False
-            if not profile.first_name and user.first_name:
-                profile.first_name = user.first_name
-                updated = True
-            if not profile.last_name and user.last_name:
-                profile.last_name = user.last_name
-                updated = True
-            if not profile.email and user.email:
-                profile.email = user.email
-                updated = True
-
-            if updated:
-                profile.save()
+        # Note: first_name, last_name, and email are stored in the User model, not Profile
+        # The Profile model only contains: uuid, user, photo, gender, occupation, timezone, dates
 
         return user
