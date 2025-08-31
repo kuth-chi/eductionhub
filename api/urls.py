@@ -12,9 +12,14 @@ from api.views.ads_manager import (AdClickViewSet, AdImpressionViewSet,
                                    AdSpaceViewSet, AdTypeViewSet,
                                    UserBehaviorViewSet)
 from api.views.ads_manager import UserProfileViewSet as AdsUserProfileViewSet
-from api.views.auth import (ActiveSessionsView, AuthStatusView,
-                            CookieTokenObtainPairView, CustomTokenRefreshView,
-                            LogoutView, SocialLoginJWTView, csrf_token_view)
+from api.views.auth.auth_viewset import (ActiveSessionsView, AuthStatusView,
+                                         CookieTokenObtainPairView,
+                                         CustomTokenRefreshView, LogoutView,
+                                         SocialLoginJWTView, csrf_token_view)
+from api.views.auth.social_auth_complete import (FacebookSocialLoginView,
+                                                 GoogleSocialLoginView,
+                                                 TelegramSocialLoginView)
+from api.views.auth.social_auth_viewset import GoogleLogin
 from api.views.location_api import (CityViewSet, CountryViewSet, StateViewSet,
                                     VillageViewSet)
 from api.views.organizations.founder_viewset import FounderViewSet
@@ -94,21 +99,42 @@ router.register(r"ad-types", AdTypeViewSet, basename="ad-types")
 router.register(r"ad-spaces", AdSpaceViewSet, basename="ad-spaces")
 router.register(r"ad-campaigns", AdManagerViewSet, basename="ad-campaigns")
 router.register(r"ad-placements", AdPlacementViewSet, basename="ad-placements")
-router.register(r"ad-impressions", AdImpressionViewSet, basename="ad-impressions")
+router.register(r"ad-impressions", AdImpressionViewSet,
+                basename="ad-impressions")
 router.register(r"ad-clicks", AdClickViewSet, basename="ad-clicks")
-router.register(r"ads-user-profiles", AdsUserProfileViewSet, basename="ads-user-profiles")
-router.register(r"user-behavior", UserBehaviorViewSet, basename="user-behavior")
+router.register(r"ads-user-profiles", AdsUserProfileViewSet,
+                basename="ads-user-profiles")
+router.register(r"user-behavior", UserBehaviorViewSet,
+                basename="user-behavior")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("schools-list/", SchoolAPIView.as_view(), name="schools-view"),
+    # dj-rest-auth endpoints (complete authentication)
+    path('auth/', include('dj_rest_auth.urls')),
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+
+    # Social authentication endpoints (dj-rest-auth + allauth)
+    path('auth/google/', GoogleSocialLoginView.as_view(),
+         name='google_social_login'),
+    path('auth/facebook/', FacebookSocialLoginView.as_view(),
+         name='facebook_social_login'),
+    path('auth/telegram/', TelegramSocialLoginView.as_view(),
+         name='telegram_social_login'),
+
+    # Legacy endpoints (for backward compatibility)
+    path('auth/google/legacy/', GoogleLogin.as_view(), name='google_login_legacy'),
+
+    # Custom authentication endpoints
     path("social-jwt/", SocialLoginJWTView.as_view(), name="social-jwt"),
     path("token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("auth-status/", AuthStatusView.as_view(), name="auth-status"),
     path('active-sessions/', ActiveSessionsView.as_view(), name='active-sessions'),
-    path('utils/client-ip/', client_ip_info, name='client-ip-info'),
     path('csrf/', csrf_token_view, name='csrf-token'),
+
+    # Other endpoints
+    path("schools-list/", SchoolAPIView.as_view(), name="schools-view"),
+    path('utils/client-ip/', client_ip_info, name='client-ip-info'),
     path("upload/", upload_file, name="upload"),
 ]

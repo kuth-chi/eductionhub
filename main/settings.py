@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import base64
 import os
+import warnings
 from datetime import timedelta
 from pathlib import Path
 
@@ -59,6 +60,23 @@ PUBLIC_KEY = base64.b64decode(os.getenv("PUBLIC_KEY_B64", ""))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ["SECRET_KEY"]
 
+# Suppress deprecation warnings emitted by dj-rest-auth accessing
+# deprecated allauth settings (USERNAME_REQUIRED/EMAIL_REQUIRED).
+# We already configured the new-style settings (ACCOUNT_LOGIN_METHODS and
+# ACCOUNT_SIGNUP_FIELDS), so these warnings are safe to ignore.
+warnings.filterwarnings(
+    "ignore",
+    message=r".*app_settings\.USERNAME_REQUIRED is deprecated.*",
+    category=UserWarning,
+    module=r"dj_rest_auth\.registration\.serializers",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*app_settings\.EMAIL_REQUIRED is deprecated.*",
+    category=UserWarning,
+    module=r"dj_rest_auth\.registration\.serializers",
+)
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -78,6 +96,8 @@ INSTALLED_APPS = [
     "rosetta",  # http://127.0.0.1:8000/rosetta/pick/?rosetta
     "drf_yasg",
     "allauth",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
     "allauth.account",
     "allauth.socialaccount",
     # AllAuth
@@ -368,22 +388,36 @@ APP_URL = (
 OPEN_AI_API_SECRET = os.getenv("OPEN_AI_KEY")
 IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")
 
-# Django Allauth Configuration
+# Django Allauth Configuration (Updated for latest version)
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
-# Updated Allauth settings (new format)
-# Replaces ACCOUNT_AUTHENTICATION_METHOD
+# Allauth settings (latest format, no deprecation warnings)
+# Use both email and username for login
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-# Replaces ACCOUNT_EMAIL_REQUIRED and ACCOUNT_USERNAME_REQUIRED
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*',
+                         'password1*', 'password2*']  # All required fields
 # Skip email verification for social accounts
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# dj-rest-auth configuration
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'access_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SECURE': not DEBUG,  # Set to True in production
+    'JWT_AUTH_SAMESITE': 'Lax',
+    'USER_DETAILS_SERIALIZER': 'api.serializers.user_details.UserDetailsSerializer',
+    'JWT_SERIALIZER': 'api.serializers.custom_jwt.CustomTokenObtainPairSerializer',
+    'JWT_TOKEN_CLAIMS_SERIALIZER': 'api.serializers.custom_jwt.CustomTokenObtainPairSerializer',
+    'REGISTER_SERIALIZER': 'api.serializers.registration.CustomRegisterSerializer',
+}
 
 # Define custom adapter for social login redirects
 SOCIALACCOUNT_ADAPTER = 'api.adapters.CustomSocialAccountAdapter'
