@@ -54,6 +54,8 @@ jobs:
             !venv/
 
   deploy:
+    permissions:
+      contents: none
     runs-on: ubuntu-latest
     needs: build
 
@@ -62,6 +64,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
+          path: |
+            .
+            !venv/
 
       - name: Upload and extract output.tar.gz
         run: |
