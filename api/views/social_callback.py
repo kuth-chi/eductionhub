@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.serializers.custom_jwt import CustomJWTSerializer
+from api.views.auth.auth_viewset import set_auth_cookies
 from user.models.profile import Profile
 
 WEB_CLIENT_URL = settings.WEB_CLIENT_URL if hasattr(
@@ -38,8 +39,10 @@ def social_login_callback(request):
             },
         )
 
-        # Prepare response data with all necessary information
+        # Prepare response data; includes tokens so the frontend can set its own HttpOnly cookies
+        # Note: Tokens are also set as HttpOnly cookies on the backend domain via set_auth_cookies
         auth_data = {
+            "status": "ok",
             "refresh": str(refresh),
             "access": str(access_token),
             "user": {
@@ -79,11 +82,14 @@ def social_login_callback(request):
         frontend_url = request.GET.get(
             "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
 
-        # Add auth_data to the frontend URL
+        # Build redirect response
         separator = "&" if "?" in frontend_url else "?"
         redirect_url = f"{frontend_url}{separator}auth_data={auth_data_encoded}"
 
-        return redirect(redirect_url)
+        # Set secure cookies on the redirect response
+        response = redirect(redirect_url)
+        response = set_auth_cookies(response, str(access_token), str(refresh))
+        return response
 
     except Exception as e:
         # Redirect to frontend with error

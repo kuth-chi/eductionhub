@@ -119,8 +119,11 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
         logger.error("Token sanitization failed: %s", str(e))
         raise
 
-    # Security-first cookie configuration
-    same_site = "Strict"  # Changed from "Lax" to "Strict" for better security
+    # Cookie SameSite configuration: default to 'None' for cross-site frontend/backend
+    same_site = (
+        getattr(settings, "REST_AUTH", {}).get("JWT_AUTH_SAMESITE")
+        or "None"
+    )
     access_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "ACCESS_TOKEN_LIFETIME", timedelta(minutes=5)), 300)
     refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(

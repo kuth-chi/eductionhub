@@ -85,7 +85,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
         """
         Instantiate and return the list of permissions that this view requires.
         """
-        if self.action in ["list", "retrieve", "analytics"]:
+        if self.action in ["list", "retrieve", "analytics", "branches"]:
             # Public read access for these actions
             return [AllowAny()]
         else:
