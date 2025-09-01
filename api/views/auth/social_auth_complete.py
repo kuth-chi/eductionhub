@@ -33,7 +33,7 @@ class GoogleSocialLoginView(SocialLoginView):
         """Override to return custom JWT tokens with profile data"""
         try:
             # Get the default response from parent
-            response = super().get_response()
+            super().get_response()
 
             # Generate JWT tokens for the authenticated user
             user = self.user
@@ -71,6 +71,7 @@ class GoogleSocialLoginView(SocialLoginView):
                 token["social_accounts"] = [
                     {"provider": sa.provider, "uid": sa.uid,
                         "extra_data": sa.extra_data}
+                    # type: ignore[attr-defined]  # pylint: disable=no-member
                     for sa in SocialAccount.objects.filter(user=user)
                 ]
 
@@ -92,12 +93,13 @@ class GoogleSocialLoginView(SocialLoginView):
 
             return Response(custom_data, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            logger.error(f"Google social login error: {str(e)}")
-            return Response(
-                {"error": "Google authentication failed", "detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        except Exception as e:  # pylint: disable=broad-except
+            # Avoid leaking internal error details to clients
+            logger.exception("Google social login error")
+            payload = {"error": "Google authentication failed"}
+            if getattr(settings, "DEBUG", False):
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FacebookSocialLoginView(SocialLoginView):
@@ -109,7 +111,7 @@ class FacebookSocialLoginView(SocialLoginView):
         """Override to return custom JWT tokens with profile data"""
         try:
             # Get the default response from parent
-            response = super().get_response()
+            super().get_response()
 
             # Generate JWT tokens for the authenticated user
             user = self.user
@@ -147,6 +149,7 @@ class FacebookSocialLoginView(SocialLoginView):
                 token["social_accounts"] = [
                     {"provider": sa.provider, "uid": sa.uid,
                         "extra_data": sa.extra_data}
+                    # type: ignore[attr-defined]  # pylint: disable=no-member
                     for sa in SocialAccount.objects.filter(user=user)
                 ]
 
@@ -168,12 +171,13 @@ class FacebookSocialLoginView(SocialLoginView):
 
             return Response(custom_data, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            logger.error(f"Facebook social login error: {str(e)}")
-            return Response(
-                {"error": "Facebook authentication failed", "detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        except Exception as e:  # pylint: disable=broad-except
+            # Avoid leaking internal error details to clients
+            logger.exception("Facebook social login error")
+            payload = {"error": "Facebook authentication failed"}
+            if getattr(settings, "DEBUG", False):
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TelegramSocialLoginView(SocialLoginView):
@@ -185,7 +189,7 @@ class TelegramSocialLoginView(SocialLoginView):
         """Override to return custom JWT tokens with profile data"""
         try:
             # Get the default response from parent
-            response = super().get_response()
+            super().get_response()
 
             # Generate JWT tokens for the authenticated user
             user = self.user
@@ -223,6 +227,7 @@ class TelegramSocialLoginView(SocialLoginView):
                 token["social_accounts"] = [
                     {"provider": sa.provider, "uid": sa.uid,
                         "extra_data": sa.extra_data}
+                    # type: ignore[attr-defined]  # pylint: disable=no-member
                     for sa in SocialAccount.objects.filter(user=user)
                 ]
 
@@ -244,9 +249,10 @@ class TelegramSocialLoginView(SocialLoginView):
 
             return Response(custom_data, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            logger.error(f"Telegram social login error: {str(e)}")
-            return Response(
-                {"error": "Telegram authentication failed", "detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        except Exception as e:  # pylint: disable=broad-except
+            # Avoid leaking internal error details to clients
+            logger.exception("Telegram social login error")
+            payload = {"error": "Telegram authentication failed"}
+            if getattr(settings, "DEBUG", False):
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_400_BAD_REQUEST)

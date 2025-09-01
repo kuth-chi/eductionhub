@@ -356,8 +356,12 @@ class AuthStatusView(APIView):
                          request.user.id)
             return Response({"error": "Profile conflict"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:  # pragma: no cover  # pylint: disable=broad-except
-            logger.error("Error fetching auth status: %s", str(e))
-            return Response({"error": "Failed to fetch auth status"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Do not leak internal errors to clients
+            logger.exception("Error fetching auth status")
+            payload = {"error": "Failed to fetch auth status"}
+            if DEBUG:
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -406,10 +410,10 @@ class CustomTokenRefreshView(TokenRefreshView):
             serializer.is_valid(raise_exception=True)
         except (TokenError, InvalidToken) as e:
             logger.warning("Invalid refresh token: %s", str(e))
-            return Response({
-                "error": "Invalid refresh token",
-                "detail": str(e)
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            payload = {"error": "Invalid refresh token"}
+            if DEBUG:
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_401_UNAUTHORIZED)
 
         response_data = serializer.validated_data
         new_access = cast(dict, response_data).get("access")
@@ -424,10 +428,11 @@ class CustomTokenRefreshView(TokenRefreshView):
             except ValidationError as e:
                 logger.error(
                     "Failed to set authentication cookies during refresh: %s", str(e))
-                return Response(
-                    {"error": "Token refresh failed due to security validation"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                payload = {
+                    "error": "Token refresh failed due to security validation"}
+                if DEBUG:
+                    payload["detail"] = str(e)
+                return Response(payload, status=status.HTTP_400_BAD_REQUEST)
         return response
 
 
@@ -539,9 +544,11 @@ class ActiveSessionsView(APIView):
         except ObjectDoesNotExist:
             return Response({"error": "Invalid or unauthorized token"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:  # pragma: no cover  # pylint: disable=broad-except
-            logger.error("Failed to terminate session %s: %s",
-                         str(token_id), str(e))
-            return Response({"error": "Failed to terminate session"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception("Failed to terminate session %s", str(token_id))
+            payload = {"error": "Failed to terminate session"}
+            if DEBUG:
+                payload["detail"] = str(e)
+            return Response(payload, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @ensure_csrf_cookie
