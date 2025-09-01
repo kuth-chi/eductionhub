@@ -407,16 +407,18 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # dj-rest-auth configuration
 REST_AUTH = {
-    'USE_JWT': True,
+    'USE_JWT': True,  # Enable SimpleJWT integration
+    'SESSION_LOGIN': True,  # Keep Django session alongside JWT if needed
     'JWT_AUTH_COOKIE': 'access_token',
     'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
     'JWT_AUTH_HTTPONLY': True,
     'JWT_AUTH_SECURE': not DEBUG,  # Set to True in production
     'JWT_AUTH_SAMESITE': 'Lax',
+    # Response/user details
     'USER_DETAILS_SERIALIZER': 'api.serializers.user_details.UserDetailsSerializer',
-    'JWT_SERIALIZER': 'api.serializers.custom_jwt.CustomTokenObtainPairSerializer',
-    'JWT_TOKEN_CLAIMS_SERIALIZER': 'api.serializers.custom_jwt.CustomTokenObtainPairSerializer',
     'REGISTER_SERIALIZER': 'api.serializers.registration.CustomRegisterSerializer',
+    # Leave JWT serializer defaults; token creation/claims are governed by SIMPLE_JWT
+    # via SIMPLE_JWT["TOKEN_OBTAIN_SERIALIZER"] = api.serializers.custom_jwt.CustomTokenObtainPairSerializer
 }
 
 # Define custom adapter for social login redirects
