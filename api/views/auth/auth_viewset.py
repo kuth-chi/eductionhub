@@ -122,7 +122,7 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
     # Cookie SameSite configuration: default to 'None' for cross-site frontend/backend
     same_site = (
         getattr(settings, "REST_AUTH", {}).get("JWT_AUTH_SAMESITE")
-        or "None"
+        or "Lax"
     )
     access_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "ACCESS_TOKEN_LIFETIME", timedelta(minutes=5)), 300)
