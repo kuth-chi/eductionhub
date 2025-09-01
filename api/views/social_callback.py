@@ -31,7 +31,7 @@ def social_login_callback(request):
         access_token = jwt_serializer.get_token(user)
 
         # Get or create profile
-        profile, created = Profile.objects.get_or_create(
+        profile, _ = Profile.objects.get_or_create(
             user=user,
             defaults={
                 "occupation": "untitled",
@@ -70,17 +70,20 @@ def social_login_callback(request):
                     "uid": sa.uid,
                     "extra_data": sa.extra_data,
                 }
+                # type: ignore[attr-defined]  # pylint: disable=no-member
                 for sa in SocialAccount.objects.filter(user=user)
             ],
         }
 
         # Encode auth data for URL parameter
         auth_data_encoded = base64.b64encode(
-            json.dumps(auth_data).encode()).decode()
+            json.dumps(auth_data).encode()
+        ).decode()
 
         # Get the frontend redirect URL from query parameters
         frontend_url = request.GET.get(
-            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
+            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback"
+        )
 
         # Build redirect response
         separator = "&" if "?" in frontend_url else "?"
@@ -91,12 +94,23 @@ def social_login_callback(request):
         response = set_auth_cookies(response, str(access_token), str(refresh))
         return response
 
-    except Exception as e:
-        # Redirect to frontend with error
+    except Exception as e:  # pylint: disable=broad-except
+        # Redirect to frontend with generic error; avoid leaking details
+        import logging
+
+        logging.getLogger(__name__).exception("Social login callback failed")
+
         frontend_url = request.GET.get(
-            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
+            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback"
+        )
         separator = "&" if "?" in frontend_url else "?"
-        error_url = f"{frontend_url}{separator}error={str(e)}"
+        error_param = "error=social_login_failed"
+        # Optionally append detail in DEBUG for troubleshooting
+        if getattr(settings, "DEBUG", False):
+            from urllib.parse import quote
+
+            error_param += f"&detail={quote(str(e))}"
+        error_url = f"{frontend_url}{separator}{error_param}"
         return redirect(error_url)
 
 
@@ -110,39 +124,47 @@ def social_login_status(request):
         profile = Profile.objects.get(user=user)
 
         # Get social accounts
-        social_accounts = SocialAccount.objects.filter(user=user)
+        # type: ignore[attr-defined]  # pylint: disable=no-member
+        social_accounts_qs = SocialAccount.objects.filter(user=user)
 
-        return JsonResponse(
-            {
-                "authenticated": True,
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                },
-                "profile": {
-                    "id": str(profile.uuid),
-                    "photo": profile.photo.url if profile.photo else None,
-                    "gender": profile.gender,
-                    "occupation": profile.occupation,
-                    "timezone": profile.timezone,
-                },
-                "social_accounts": [
-                    {
-                        "provider": sa.provider,
-                        "uid": sa.uid,
-                        "extra_data": sa.extra_data,
-                    }
-                    for sa in social_accounts
-                ],
-                "permissions": list(user.get_all_permissions()),
-                "roles": [group.name for group in user.groups.all()],
-            }
-        )
+        data = {
+            "authenticated": True,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            },
+            "profile": {
+                "id": str(profile.uuid),
+                "photo": profile.photo.url if profile.photo else None,
+                "gender": profile.gender,
+                "occupation": profile.occupation,
+                "timezone": profile.timezone,
+            },
+            "social_accounts": [
+                {
+                    "provider": sa.provider,
+                    "uid": sa.uid,
+                    "extra_data": sa.extra_data,
+                }
+                for sa in social_accounts_qs
+            ],
+            "permissions": list(user.get_all_permissions()),
+            "roles": [group.name for group in user.groups.all()],
+        }
+        return JsonResponse(data)
 
     except ObjectDoesNotExist:
         return JsonResponse({"authenticated": True, "profile": None})
-    except Exception as e:
-        return JsonResponse({"authenticated": False, "error": str(e)}, status=401)
+    except Exception as e:  # pylint: disable=broad-except
+        import logging
+
+        logging.getLogger(__name__).exception(
+            "Social login status check failed")
+        payload = {"authenticated": False,
+                   "error": "Unable to fetch social login status"}
+        if getattr(settings, "DEBUG", False):
+            payload["detail"] = str(e)
+        return JsonResponse(payload, status=401)
