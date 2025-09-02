@@ -1,87 +1,220 @@
-{% extends '_base.html' %}
-{% load i18n static %}
+{% extends '_base.html' %} {% load i18n static %} {% block title %}{{
+page_title|default
+<h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+  10. Children's Privacy
+</h2>
+'Privacy Policy' }}{% endblock %} {% block content %}
+<header class="bg-gray-200 dark:bg-gray-900 shadow">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <h1 class="text-4xl font-extrabold text-blue-800 dark:text-blue-300">
+      Privacy Policy
+    </h1>
+    <p class="text-sm text-gray-600 mt-2">Effective Date: June 29, 2025</p>
+  </div>
+</header>
 
-{% block title %}{{ page_title|default:'Privacy Policy' }}{% endblock %}
+<main class="max-w-7xl mx-auto px-6 py-12">
+  <section
+    class="bg-gray-200 dark:bg-gray-900 shadow-md rounded-xl p-8 sm:p-10"
+  >
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      1. Introduction
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      At <strong>Education Hub</strong>, your privacy matters. This Privacy
+      Policy outlines how we collect, use, and protect your personal information
+      when you use our platform. We are committed to building trust through
+      transparency and responsible data practices.
+    </p>
 
-{% block content %}
- <header class="bg-gray-200 dark:bg-gray-900 shadow">
-    <div class="max-w-7xl mx-auto px-6 py-8">
-      <h1 class="text-4xl font-extrabold text-blue-800 dark:text-blue-300">Privacy Policy</h1>
-      <p class="text-sm text-gray-600 mt-2">Effective Date: June 29, 2025</p>
-    </div>
-  </header>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      2. Hosting & Infrastructure
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      We use secure, industry-leading cloud infrastructure to host our services
+      and store your data safely. Our providers comply with major international
+      data protection standards, a global cloud infrastructure trusted for its
+      compliance, and performance. We leverage cloud feature built-in
+      protections to keep your data safe from unauthorized access, data loss,
+      and cyber threats.
+    </p>
 
-  <main class="max-w-7xl mx-auto px-6 py-12">
-    <section class="bg-gray-200 dark:bg-gray-900 shadow-md rounded-xl p-8 sm:p-10">
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">1. Introduction</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        At <strong>Education Hub</strong>, your privacy matters. This Privacy Policy outlines how we collect, use, and protect your personal information when you use our platform. We are committed to building trust through transparency and responsible data practices.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      3. Third-Party Authentication Services
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-4">
+      To make access easier and more secure, we offer authentication via trusted
+      third-party providers such as
+      <strong>Google, Facebook, Telegram, and others</strong>. When you log in
+      using one of these services:
+    </p>
+    <ul
+      class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-4 space-y-1"
+    >
+      <li>
+        <strong>Google OAuth:</strong> We access your basic profile info (name,
+        email, profile picture) as permitted by Google's OAuth policies. We
+        comply with Google's API Services User Data Policy.
+      </li>
+      <li>
+        <strong>Facebook Login:</strong> We request only essential permissions
+        (public profile, email) in accordance with Facebook's Platform Terms and
+        Data Policy.
+      </li>
+      <li>
+        <strong>Telegram Login:</strong> We authenticate via Telegram's secure
+        login widget, accessing only your username, name, and photo if provided.
+      </li>
+    </ul>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      <strong>Important:</strong> We do not access your passwords, private
+      messages, friends lists, or any unnecessary personal data. You can revoke
+      our access at any time through your respective third-party account
+      settings.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">2. Hosting & Infrastructure</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        We use secure, industry-leading cloud infrastructure to host our services and store your data safely. Our providers comply with major international data protection standards, a global cloud infrastructure trusted for its compliance, and performance. We leverage cloud feature built-in protections to keep your data safe from unauthorized access, data loss, and cyber threats.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      4. Data Processing Legal Basis
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-4">
+      We process your personal data based on the following legal grounds:
+    </p>
+    <ul
+      class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-6 space-y-1"
+    >
+      <li>
+        <strong>Consent:</strong> When you choose to log in via third-party
+        services
+      </li>
+      <li>
+        <strong>Legitimate Interest:</strong> To provide, maintain, and improve
+        our educational services
+      </li>
+      <li>
+        <strong>Contractual Necessity:</strong> To fulfill our terms of service
+        and provide requested features
+      </li>
+    </ul>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">3. Authentication Services</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        To make access easier and more secure, we offer authentication via trusted third-party providers such as <strong>Google, Facebook, Telegram, and others</strong>. When you log in using one of these services, we only request essential information such as your name, email address, and profile image (if applicable). We do not access your passwords or any unnecessary personal data.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      5. What We Collect
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-2">
+      We may collect the following types of data:
+    </p>
+    <ul
+      class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-6 space-y-1"
+    >
+      <li>Basic identity data (e.g., name, email address, profile picture)</li>
+      <li>
+        Account-related preferences and usage behavior (to improve your
+        experience)
+      </li>
+      <li>
+        Browser and device data (collected anonymously for security and
+        performance monitoring)
+      </li>
+    </ul>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">4. What We Collect</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-2">We may collect the following types of data:</p>
-      <ul class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-6 space-y-1">
-        <li>Basic identity data (e.g., name, email address, profile picture)</li>
-        <li>Account-related preferences and usage behavior (to improve your experience)</li>
-        <li>Browser and device data (collected anonymously for security and performance monitoring)</li>
-      </ul>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      6. How We Use Your Data
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-4">
+      We use your data solely to provide, maintain, and improve our services.
+      This includes:
+    </p>
+    <ul
+      class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-4 space-y-1"
+    >
+      <li>Enabling secure account creation and authentication</li>
+      <li>Personalizing your Education Hub experience</li>
+      <li>Providing access to educational resources and tools</li>
+      <li>Communicating important service updates</li>
+      <li>Ensuring platform security and preventing abuse</li>
+    </ul>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      <strong
+        >We do not sell, rent, or share your personal data with third parties
+        for marketing purposes.</strong
+      >
+      We comply with all applicable data protection regulations including GDPR,
+      CCPA, and platform-specific requirements.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">5. How We Use Your Data</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        We use your data solely to provide, maintain, and improve our services. This includes allowing you to log in, personalize your experience, and access features like school search, scholarship listings, and saved preferences. <strong>We do not sell, rent, or share your personal data with third parties.</strong>
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      7. Data Retention
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      We retain your personal data only as long as necessary to provide our
+      services or as required by law. When you delete your account, we remove
+      your personal information within 30 days, except where retention is
+      required for legal compliance.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">6. Data Protection & Security</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        We apply strong industry-standard security practices to protect your personal data. These include encryption, secure authentication, regular audits, and ongoing monitoring. Our team is committed to protecting your privacy and responds swiftly to any security concerns.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      8. Data Protection & Security
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      We apply strong industry-standard security practices to protect your
+      personal data. These include encryption, secure authentication, regular
+      audits, and ongoing monitoring. Our team is committed to protecting your
+      privacy and responds swiftly to any security concerns.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">7. Your Rights</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        You have full control over your data. At any time, you may:
-      </p>
-      <ul class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-6 space-y-1">
-        <li>Request access to the data we hold about you</li>
-        <li>Update or correct your personal information</li>
-        <li>Delete your account and associated data</li>
-        <li>Withdraw your consent to data collection (where applicable)</li>
-      </ul>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      9. Your Rights
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      You have full control over your data. At any time, you may:
+    </p>
+    <ul
+      class="list-disc list-inside text-lg text-gray-700 dark:text-gray-500 mb-6 space-y-1"
+    >
+      <li>Request access to the data we hold about you</li>
+      <li>Update or correct your personal information</li>
+      <li>Delete your account and associated data</li>
+      <li>Withdraw your consent to data collection (where applicable)</li>
+    </ul>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">8. Children’s Privacy</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        Education Hub is intended for use by students, parents, and educators. If you are under the age of 13, please use the platform only with the guidance and consent of a parent or legal guardian. We do not knowingly collect data from children without such consent.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      8. Children’s Privacy
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      Education Hub is intended for use by students, parents, and educators. If
+      you are under the age of 13, please use the platform only with the
+      guidance and consent of a parent or legal guardian. We do not knowingly
+      collect data from children without such consent.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">9. Changes to This Policy</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        We may update this Privacy Policy to reflect improvements or legal requirements. If we make significant changes, we will notify you via the website or email. We encourage you to review this page regularly.
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      11. Changes to This Policy
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      We may update this Privacy Policy to reflect improvements or legal
+      requirements. If we make significant changes, we will notify you via the
+      website or email. We encourage you to review this page regularly.
+    </p>
 
-      <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">10. Contact Us</h2>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
-        If you have any questions, concerns, or requests regarding this Privacy Policy or your data, please contact us at:
-      </p>
-      <p class="text-lg text-gray-700 dark:text-gray-500 mb-2">
-        <strong>Email:</strong> education.hub@gmail.com<br />
-        <strong>Website:</strong> <a href="#" class="text-blue-600 hover:underline">www.education-hub.azurewebsites.net</a>
-      </p>
+    <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-500 mb-4">
+      12. Contact Us
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-6">
+      If you have any questions, concerns, or requests regarding this Privacy
+      Policy or your data, please contact us at:
+    </p>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mb-2">
+      <strong>Email:</strong> education.hub@gmail.com<br />
+      <strong>Website:</strong>
+      <a href="#" class="text-blue-600 hover:underline"
+        >www.education-hub.azurewebsites.net</a
+      >
+    </p>
 
-      <p class="text-lg text-gray-700 dark:text-gray-500 mt-8 font-semibold">
-        Your trust means everything to us. We are committed to safeguarding your privacy and delivering a safe, respectful experience for every user.
-      </p>
-    </section>
-  </main>
+    <p class="text-lg text-gray-700 dark:text-gray-500 mt-8 font-semibold">
+      Your trust means everything to us. We are committed to safeguarding your
+      privacy and delivering a safe, respectful experience for every user.
+    </p>
+  </section>
+</main>
 
-{% endblock content %}
-{% block script %}
-{% endblock script %}
+{% endblock content %} {% block script %} {% endblock script %}
