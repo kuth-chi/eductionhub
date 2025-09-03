@@ -27,6 +27,7 @@ if "CODESPACE_NAME" in os.environ:
     ]
 
 # URL Configuration
+WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "http://localhost:3000")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 FRONTEND_URL_ORIGIN = os.getenv("FRONTEND_URL_ORIGIN_ONE", FRONTEND_URL)
@@ -36,10 +37,17 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     FRONTEND_URL,
+    WEB_CLIENT_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+]
+ALLOWED_REDIRECT_HOSTS = [
+    WEB_CLIENT_URL.replace("http://", "").replace("https://", ""),
+    "127.0.0.1",
+    "localhost",
+    "educationhub.io",
 ]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -423,4 +431,3 @@ REST_AUTH = {
 
 # Define custom adapter for social login redirects
 SOCIALACCOUNT_ADAPTER = 'api.adapters.CustomSocialAccountAdapter'
-WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "http://localhost:3000")
