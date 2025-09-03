@@ -1,5 +1,7 @@
 import base64
 import json
+import logging
+from urllib.parse import quote, urlparse
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
@@ -24,6 +26,26 @@ def social_login_callback(request):
     """
     try:
         user = request.user
+
+        # Get rediect URL and VALIDATE IT
+        redirect_uri_from_request = request.GET.get("redirect_uri")
+        default_redirect_url = f"{WEB_CLIENT_URL}/auth/callback"
+        # Start with the safe default URL
+        frontend_url = default_redirect_url
+
+        if redirect_uri_from_request:
+            # Validate the redirect URI
+            parsed_uri = urlparse(redirect_uri_from_request)
+
+            # Check if the hostname is in our whitelist of allowed hosts
+            if parsed_uri.scheme in ["http", "https"] and parsed_uri.netloc and parsed_uri.hostname in settings.ALLOWED_REDIRECT_HOSTS:
+                frontend_url = redirect_uri_from_request
+            else:
+                # If the host is not allowed, log it and fall back to the default
+                logging.warning(
+                    "Open Redirect attempt blocked. Redirect URI '%s' is not in ALLOWED_REDIRECT_HOSTS.",
+                    redirect_uri_from_request
+                )
 
         # Use the custom JWT serializer to create tokens with all user data
         jwt_serializer = CustomJWTSerializer()
@@ -80,11 +102,6 @@ def social_login_callback(request):
             json.dumps(auth_data).encode()
         ).decode()
 
-        # Get the frontend redirect URL from query parameters
-        frontend_url = request.GET.get(
-            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback"
-        )
-
         # Build redirect response
         separator = "&" if "?" in frontend_url else "?"
         redirect_url = f"{frontend_url}{separator}auth_data={auth_data_encoded}"
@@ -96,19 +113,16 @@ def social_login_callback(request):
 
     except Exception as e:  # pylint: disable=broad-except
         # Redirect to frontend with generic error; avoid leaking details
-        import logging
 
         logging.getLogger(__name__).exception("Social login callback failed")
 
         frontend_url = request.GET.get(
-            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback"
-        )
+            "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
         separator = "&" if "?" in frontend_url else "?"
         error_param = "error=social_login_failed"
+
         # Optionally append detail in DEBUG for troubleshooting
         if getattr(settings, "DEBUG", False):
-            from urllib.parse import quote
-
             error_param += f"&detail={quote(str(e))}"
         error_url = f"{frontend_url}{separator}{error_param}"
         return redirect(error_url)
