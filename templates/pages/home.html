@@ -1,6 +1,7 @@
-{% extends '_base.html' %} {% load static i18n socialaccount %} 
+{% extends '_base.html' %} 
+{% load static i18n socialaccount %} 
 {% block title %} 
-{% translate 'Education Hub Account' %}
+  {% translate 'Education Hub Account' %} 
 {% endblock %} 
 {% block content %}
 <section class="container mx-auto px-4">
@@ -13,8 +14,7 @@
         {% translate 'One account for all Education Hub services' %}
       </h1>
       <p class="mt-4 text-lg text-blue-600 dark:text-blue-300 max-w-xl">
-        {% translate "Sign in once to access Education Hub products, tools, and
-        experiences across the platform." %}
+        {% translate "Sign in once to access Education Hub products, tools, and experiences across the platform." %}
       </p>
 
       {% if user.is_authenticated %}
@@ -81,8 +81,10 @@
       </div>
 
       <p class="mt-6 mb-8 text-xs text-blue-500 dark:text-blue-400 max-w-lg">
-        {% blocktrans %}By continuing, you agree to the Education Hub Terms and
-        acknowledge the Privacy Policy.{% endblocktrans %}
+        {% blocktrans %}
+        By continuing, you agree to the Education Hub Terms and
+        acknowledge the Privacy Policy.
+        {% endblocktrans %}
       </p>
       {% endif %}
     </div>
@@ -104,8 +106,7 @@
               <li class="flex items-start gap-2">
                 <i class="bi bi-box-arrow-in-right mt-1"></i
                 ><span
-                  >{% translate 'Single sign-on across Education Hub apps'
-                  %}</span
+                  >{% translate 'Single sign-on across Education Hub apps' %}</span
                 >
               </li>
               <li class="flex items-start gap-2">
@@ -128,8 +129,7 @@
         {% translate 'One account, many products' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'Use your Education Hub account to access learning tools,
-        organization portals, and more.' %}
+        {% translate 'Use your Education Hub account to access learning tools, organization portals, and more.' %}
       </p>
     </div>
     <div
@@ -139,8 +139,7 @@
         {% translate 'Privacy-first' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'We protect your data with robust security and transparent
-        controls.' %}
+        {% translate 'We protect your data with robust security and transparent controls.' %}
       </p>
     </div>
     <div
@@ -150,8 +149,7 @@
         {% translate 'Fast sign-in' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'Sign in with email or continue with your favorite social
-        provider.' %}
+        {% translate 'Sign in with email or continue with your favorite social provider.' %}
       </p>
     </div>
   </div>
