@@ -15,23 +15,11 @@ from user.views.utils import generate_jwt, verify_jwt
 
 
 # @login_required(login_url="/accounts/login/")
-def index(request, type=None):
-    if type:
-        try:
-            SCHOOL = School.objects.filter(type__type__iexact=type).distinct()
-        except School.DoesNotExist:
-            SCHOOL = School.objects.none()
-    else:
-        SCHOOL = School.objects.all()
-
-    types = SchoolType.objects.all()
-
+def index(request, school_type=None):
     context = {
         "page_title": "Home",
         "header_title": "Home",
-        'school_data': SCHOOL,
-        'type_req': type,
-        'types': types,
+        'type_req': school_type,
     }
 
     return render(request, "pages/home.html", context)
