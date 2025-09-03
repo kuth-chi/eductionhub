@@ -21,7 +21,7 @@ def upload_file(request):
     # logger.info(f"Request method: {request.method}")
     # logger.info(f"Request path: {request.path}")
     # logger.info(f"User authenticated: {request.user.is_authenticated}")
-    # logger.info(f"User: {request.user}")
+    # logger.info(f"User: {request.user}"
     # logger.info(
     #     f"Authorization header: {request.META.get('HTTP_AUTHORIZATION', 'NOT PRESENT')}")
     # logger.info(
@@ -96,10 +96,11 @@ def upload_file(request):
         try:
             file_path = default_storage.save(unique_filename, uploaded_file)
             # logger.info(f"File saved successfully to: {file_path}")
+
         except (OSError, ValueError) as e:
             logger.error("Failed to save file: %s", str(e))
             return Response(
-                {"error": "Failed to save file to server"},
+                {"error": f"Failed to save file to server {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -114,8 +115,9 @@ def upload_file(request):
                 # logger.info(f"Updated file URL with domain: {file_url}")
         except (OSError, ValueError) as e:
             logger.error("Failed to generate URL: %s", str(e))
+
             return Response(
-                {"error": "Failed to generate file URL"},
+                {"error": f"Failed to generate file URL {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
