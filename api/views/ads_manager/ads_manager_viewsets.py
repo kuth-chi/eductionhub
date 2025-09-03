@@ -3,7 +3,7 @@ ViewSets for Ads Manager API endpoints.
 """
 
 from datetime import date, timedelta
-
+import logging
 from django.db.models import Avg, Count, F, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -28,6 +28,8 @@ from api.serializers.ads_manager import (AdAnalyticsSerializer,
                                          AdSpaceSerializer, AdTypeSerializer,
                                          UserBehaviorSerializer,
                                          UserProfileSerializer)
+
+logger = logging.getLogger(__name__)
 
 
 class AdTypeFilter(filters_rf.FilterSet):
@@ -348,9 +350,13 @@ class AdPlacementViewSet(viewsets.ModelViewSet):
             return Response({'success': True})
 
         except Exception as e:
+            logger.exception(
+                "Failed to reorder placements due to an unexpected error. %s", str(e))
+
+            # 2. RETURN A GENERIC RESPONSE: The user only gets a vague, safe message.
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                {'error': 'An unexpected error occurred while processing your request. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 

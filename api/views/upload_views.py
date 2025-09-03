@@ -1,17 +1,11 @@
 import os
 import uuid
 import logging
-from django.conf import settings
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-import mimetypes
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +21,14 @@ def upload_file(request):
     # logger.info(f"Request method: {request.method}")
     # logger.info(f"Request path: {request.path}")
     # logger.info(f"User authenticated: {request.user.is_authenticated}")
-    # logger.info(f"User: {request.user}")
-    # logger.info(f"Authorization header: {request.META.get('HTTP_AUTHORIZATION', 'NOT PRESENT')}")
-    # logger.info(f"All headers starting with HTTP_: {[k for k in request.META.keys() if k.startswith('HTTP_')]}")
+    # logger.info(f"User: {request.user}"
+    # logger.info(
+    #     f"Authorization header: {request.META.get('HTTP_AUTHORIZATION', 'NOT PRESENT')}")
+    # logger.info(
+    #     f"All headers starting with HTTP_: {[k for k in request.META.keys() if k.startswith('HTTP_')]}")
     # for key in request.META.keys():
     #     if key.startswith('HTTP_'):
-    #         # logger.info(f"  {key}: {request.META[key]}")
+    #         logger.info(f"  {key}: {request.META[key]}")
     # logger.info("=== END UPLOAD DEBUG ===")
 
     try:
@@ -100,9 +96,9 @@ def upload_file(request):
         try:
             file_path = default_storage.save(unique_filename, uploaded_file)
             # logger.info(f"File saved successfully to: {file_path}")
-        except OSError as e:
 
-            # logger.error(f"Failed to save file: {str(e)}")
+        except (OSError, ValueError) as e:
+            logger.error("Failed to save file: %s", str(e))
             return Response(
                 {"error": f"Failed to save file to server {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -118,7 +114,8 @@ def upload_file(request):
                 file_url = f"{request.build_absolute_uri('/')[:-1]}{file_url}"
                 # logger.info(f"Updated file URL with domain: {file_url}")
         except (OSError, ValueError) as e:
-            # logger.error(f"Failed to generate URL: {str(e)}")
+            logger.error("Failed to generate URL: %s", str(e))
+
             return Response(
                 {"error": f"Failed to generate file URL {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
