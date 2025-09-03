@@ -129,47 +129,44 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
     refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "REFRESH_TOKEN_LIFETIME", timedelta(days=7)), 7 * 24 * 3600)
 
-    # Secure domain configuration
-    cookie_domain = None  # Let browser handle domain automatically for security
-
     # Set access token cookie with secure attributes
     response.set_cookie(
-        "access_token",
+        "__Host-access_token",
         sanitized_access,
         httponly=True,  # SECURITY FIX: Prevent JavaScript access to mitigate XSS
-        secure=SECURE,  # Only send over HTTPS in production
+        secure=True,  # Only send over HTTPS in production
         samesite=same_site,  # Prevent CSRF attacks
         path="/",
         max_age=access_age,
-        domain=cookie_domain,
+        domain=None,
     )
 
     # Set refresh token cookie with secure attributes
     response.set_cookie(
-        "refresh_token",
+        "__Host-refresh_token",
         sanitized_refresh,
         httponly=True,  # SECURITY FIX: Prevent JavaScript access to mitigate XSS
-        secure=SECURE,  # Only send over HTTPS in production
+        secure=True,  # Only send over HTTPS in production
         samesite=same_site,  # Prevent CSRF attacks
         path="/",
         max_age=refresh_age,
-        domain=cookie_domain,
+        domain=None,
     )
 
     # Set a separate cookie for frontend to know authentication status
     # This cookie is safe for JavaScript access as it contains no sensitive data
     response.set_cookie(
-        "auth_status",
+        "__Secure-auth_status",
         "authenticated",
-        httponly=False,  # Safe for JavaScript access
-        secure=SECURE,
+        httponly=False,
+        secure=True,
         samesite=same_site,
         path="/",
-        max_age=access_age,  # Sync with access token expiry
-        domain=cookie_domain,
+        max_age=access_age,
+        domain=None,
     )
 
-    logger.info("Secure authentication cookies set successfully")
+    logger.info("Secure, prefixed authentication cookies set successfully")
     return response
 
 
@@ -388,11 +385,11 @@ class CustomTokenRefreshView(TokenRefreshView):
         # If still no refresh token, return detailed error
         if "refresh" not in payload or not payload["refresh"]:
             available_cookies = list(request.COOKIES.keys())
-            logger.warning(
-                "Refresh request missing token. Body keys: %s, Cookies present: %s",
-                list(payload.keys()),
-                available_cookies
-            )
+            # logger.warning(
+            #     "Refresh request missing token. Body keys: %s, Cookies present: %s",
+            #     list(payload.keys()),
+            #     available_cookies
+            # )
             return Response({
                 "error": "No refresh token provided",
                 "detail": "Refresh token must be provided in request body or cookies",
@@ -417,8 +414,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         response_data = serializer.validated_data
         new_access = cast(dict, response_data).get("access")
-        new_refresh = cast(dict, response_data).get(
-            "refresh") or payload["refresh"]
+        new_refresh = cast(dict, response_data).get("refresh") or payload["refresh"]
 
         response = Response(response_data, status=status.HTTP_200_OK)
         if new_access:

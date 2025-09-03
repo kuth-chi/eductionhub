@@ -1,8 +1,10 @@
 import logging
 import time
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
 from django.core.cache import cache
 from django.contrib import messages
 from django.http import HttpResponse
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth import authenticate, login, logout
@@ -10,7 +12,7 @@ from user.models import User, Profile
 from user.forms.user_forms import RegisterForm, CustomerAuthenticationForm
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
+ALLOW_ORIGIN_URL = settings.BACKEND_URL
 # Create your views here.
 def user_register(request):
     template_name = "accounts/register.html"
@@ -62,16 +64,35 @@ def user_login(request):
             login(request, user)
 
             next_url = request.GET.get("next")
-            if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
+            # 2. IMPORTANT: Keep this validation. It's your first line of defense.
+            if not next_url or not url_has_allowed_host_and_scheme(
+                url=next_url, allowed_hosts=request.get_host()
+            ):
                 next_url = "/"
 
             code = request.COOKIES.get("authorization_code")
             state = request.COOKIES.get("state")
             if code and state:
                 if not next_url.startswith("http"):
-                    next_url = f"http://localhost:8000{next_url}"
-                next_url = f"{next_url}?code={code}&state={state}"
+                    next_url = f"{ALLOW_ORIGIN_URL.rstrip('/')}{next_url}"
+                new_params = {"code": code, "state": state}
 
+                try:
+                    # Deconstruct the URL into its 6 parts
+                    parts = list(urlparse(next_url))
+                    
+                    # Parse the existing query string and update it with the new params
+                    query_dict = parse_qs(parts[4])
+                    query_dict.update(new_params)
+                    
+                    # Re-encode the combined query string and update the URL parts
+                    parts[4] = urlencode(query_dict, doseq=True)
+                    
+                    # Reconstruct the full URL
+                    next_url = urlunparse(parts)
+                except Exception:
+                    # If parsing fails for any reason, fall back to a safe default
+                    next_url = "/"
             return redirect(f"/sync-jwt/?next={next_url}")
         else:
             # Increment failed attempts
