@@ -1,6 +1,7 @@
-{% extends '_base.html' %} 
-{% load static i18n socialaccount %} 
-{% block title %}{% translate 'Education Hub Account' %}{% endblock %} 
+{% extends '_base.html' %} {% load static i18n socialaccount %} 
+{% block title %} 
+{% translate 'Education Hub Account' %}
+{% endblock %} 
 {% block content %}
 <section class="container mx-auto px-4">
   <!-- Hero -->
@@ -12,71 +13,77 @@
         {% translate 'One account for all Education Hub services' %}
       </h1>
       <p class="mt-4 text-lg text-blue-600 dark:text-blue-300 max-w-xl">
-        {% translate "Sign in once to access Education Hub products, tools, and experiences across the platform." %}
+        {% translate "Sign in once to access Education Hub products, tools, and
+        experiences across the platform." %}
       </p>
 
       {% if user.is_authenticated %}
-        <!-- Content for authenticated users -->
-        <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <div class="flex items-center">
-            <i class="bi bi-check-circle-fill text-green-600 text-xl mr-3"></i>
-            <div>
-              <h3 class="text-lg font-semibold text-green-800 dark:text-green-300">
-                {% blocktrans with name=user.get_full_name|default:user.username %}Welcome back, {{ name }}!{% endblocktrans %}
-              </h3>
-              <p class="text-green-700 dark:text-green-400">
-                {% translate "You're signed in and ready to access all Education Hub services." %}
-              </p>
-            </div>
+      <!-- Content for authenticated users -->
+      <div
+        class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+      >
+        <div class="flex items-center">
+          <i class="bi bi-check-circle-fill text-green-600 text-xl mr-3"></i>
+          <div>
+            <h3
+              class="text-lg font-semibold text-green-800 dark:text-green-300"
+            >
+              {% blocktrans with name=user.get_full_name|default:user.username %} Welcome back, {{ name }}!{% endblocktrans %}
+            </h3>
+            <p class="text-green-700 dark:text-green-400">
+              {% translate "You're signed in and ready to access all Education Hub services." %}
+            </p>
           </div>
         </div>
+      </div>
 
-        <div class="mt-6 flex flex-wrap gap-3 mb-8">
-          <a
-            href="{% url 'profiles:profile' %}"
-            class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
-          >
-            <i class="bi bi-person mr-2"></i>
-            {% translate 'My Profile' %}
-          </a>
-          <a
-            href="{% url 'account_logout' %}"
-            class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-blue-700 border border-blue-600 bg-white hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:bg-transparent"
-          >
-            <i class="bi bi-box-arrow-right mr-2"></i>
-            {% translate 'Sign out' %}
-          </a>
-        </div>
+      <div class="mt-6 flex flex-wrap gap-3 mb-8">
+        <a
+          href="{% url 'profiles:profile' %}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+        >
+          <i class="bi bi-person mr-2"></i>
+          {% translate 'My Profile' %}
+        </a>
+        <a
+          href="{% url 'account_logout' %}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-blue-700 border border-blue-600 bg-white hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:bg-transparent"
+        >
+          <i class="bi bi-box-arrow-right mr-2"></i>
+          {% translate 'Sign out' %}
+        </a>
+      </div>
       {% else %}
-        <!-- Content for unauthenticated users -->
-        <div class="mt-6 flex flex-wrap gap-3">
-          <a
-            href="{% url 'account_login' %}"
-            class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
-          >
-            {% translate 'Sign in' %}
-          </a>
-          <a
-            href="{% url 'account_signup' %}"
-            class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-blue-700 border border-blue-600 bg-white/30 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:bg-transparent"
-          >
-            {% translate 'Create account' %}
-          </a>
-        </div>
+      <!-- Content for unauthenticated users -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a
+          href="{% url 'account_login' %}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+        >
+          {% translate 'Sign in' %}
+        </a>
+        <a
+          href="{% url 'account_signup' %}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-lg text-blue-700 border border-blue-600 bg-white/30 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:bg-transparent"
+        >
+          {% translate 'Create account' %}
+        </a>
+      </div>
 
-        <div class="mt-8">
-          <p class="text-sm text-blue-500 dark:text-blue-400 mb-3">
-            {% translate 'Or continue with a social account' %}
-          </p>
-          <!-- Social providers from django-allauth -->
-          <div class="max-w-sm">
-            {% include 'socialaccount/snippets/provider_list.html' with process='login' %}
-          </div>
-        </div>
-
-        <p class="mt-6 mb-8 text-xs text-blue-500 dark:text-blue-400 max-w-lg">
-          {% blocktrans %}By continuing, you agree to the Education Hub Terms and acknowledge the Privacy Policy.{% endblocktrans %}
+      <div class="mt-8">
+        <p class="text-sm text-blue-500 dark:text-blue-400 mb-3">
+          {% translate 'Or continue with a social account' %}
         </p>
+        <!-- Social providers from django-allauth -->
+        <div class="max-w-sm">
+          {% include 'socialaccount/snippets/provider_list.html' with process='login' %}
+        </div>
+      </div>
+
+      <p class="mt-6 mb-8 text-xs text-blue-500 dark:text-blue-400 max-w-lg">
+        {% blocktrans %}By continuing, you agree to the Education Hub Terms and
+        acknowledge the Privacy Policy.{% endblocktrans %}
+      </p>
       {% endif %}
     </div>
 
@@ -84,12 +91,6 @@
       <div
         class="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-blue-600 to-indigo-600"
       >
-        <img
-          src="{% static 'images/eh-account-hero.png' %}"
-          alt="Education Hub Account"
-          class="w-full h-72 md:h-96 object-cover opacity-90 hidden"
-          onerror="this.style.display='none'"
-        />
         <div class="p-8 mt-12 md:mt-16 md:p-10">
           <div class="text-white">
             <h2 class="text-2xl md:text-3xl font-bold">
@@ -102,7 +103,10 @@
               </li>
               <li class="flex items-start gap-2">
                 <i class="bi bi-box-arrow-in-right mt-1"></i
-                ><span>{% translate 'Single sign-on across Education Hub apps' %}</span>
+                ><span
+                  >{% translate 'Single sign-on across Education Hub apps'
+                  %}</span
+                >
               </li>
               <li class="flex items-start gap-2">
                 <i class="bi bi-person-check-fill mt-1"></i
@@ -124,7 +128,8 @@
         {% translate 'One account, many products' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'Use your Education Hub account to access learning tools, organization portals, and more.' %}
+        {% translate 'Use your Education Hub account to access learning tools,
+        organization portals, and more.' %}
       </p>
     </div>
     <div
@@ -134,7 +139,8 @@
         {% translate 'Privacy-first' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'We protect your data with robust security and transparent controls.' %}
+        {% translate 'We protect your data with robust security and transparent
+        controls.' %}
       </p>
     </div>
     <div
@@ -144,7 +150,8 @@
         {% translate 'Fast sign-in' %}
       </h3>
       <p class="mt-2 text-blue-600 dark:text-blue-300">
-        {% translate 'Sign in with email or continue with your favorite social provider.' %}
+        {% translate 'Sign in with email or continue with your favorite social
+        provider.' %}
       </p>
     </div>
   </div>
