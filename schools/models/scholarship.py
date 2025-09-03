@@ -2,11 +2,13 @@
 import os
 import re
 import uuid
+
 from django.db import models
-from django.utils.translation import gettext as _
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 from geo.models import Country
+
 
 def scholarship_thumbnail_upload_path(instance, filename):
     """Generate a file path for new scholarship thumbnail uploads."""
@@ -14,6 +16,7 @@ def scholarship_thumbnail_upload_path(instance, filename):
     name = re.sub(r"[^a-zA-Z0-9_-]", "", instance.name) or "untitled"
     filename = f"{name}-{uuid.uuid4()}.{ext}"
     return os.path.join("uploads/scholarship/thumbnails/", filename)
+
 
 class Scholarship(models.Model):
     """Represents a scholarship offered by institutions or organizations"""
@@ -38,7 +41,8 @@ class Scholarship(models.Model):
         max_length=255, blank=True, verbose_name="Scholarship Local Name"
     )
 
-    description = models.TextField(blank=True, verbose_name="Scholarship Description")
+    description = models.TextField(
+        blank=True, verbose_name="Scholarship Description")
     local_description = models.TextField(
         blank=True, verbose_name="Scholarship Local Description"
     )
@@ -80,7 +84,8 @@ class Scholarship(models.Model):
         blank=True,
         verbose_name="Minimum GPA Requirement",
     )
-    required_documents = models.TextField(blank=True, verbose_name="Required Documents")
+    required_documents = models.TextField(
+        blank=True, verbose_name="Required Documents")
 
     # Target Audience
     target_countries = models.ManyToManyField(
@@ -102,13 +107,15 @@ class Scholarship(models.Model):
     )
     application_status = models.CharField(
         max_length=50,
-        choices=[("Open", "Open"), ("Closed", "Closed"), ("Upcoming", "Upcoming")],
+        choices=[("Open", "Open"), ("Closed", "Closed"),
+                 ("Upcoming", "Upcoming")],
         default="Upcoming",
         verbose_name="Application Status",
     )
 
     # Additional Features
-    renewable = models.BooleanField(default=False, verbose_name="Is Renewable?")
+    renewable = models.BooleanField(
+        default=False, verbose_name="Is Renewable?")
     duration = models.CharField(
         max_length=255, blank=True, verbose_name="Duration of Scholarship"
     )
@@ -124,19 +131,22 @@ class Scholarship(models.Model):
     is_active = models.BooleanField(default=True)
     is_delete = models.BooleanField(default=False)
     created_by = models.ForeignKey("user.User",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="%(class)s_created_by",
-        verbose_name="Created By",
-    )
+                                   on_delete=models.SET_NULL,
+                                   null=True,
+                                   blank=True,
+                                   related_name="%(class)s_created_by",
+                                   verbose_name="Created By",
+                                   )
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if not self.slug:
+            name = str(self.name).lower() if self.name else ""
+            provider = str(self.provider).lower() if self.provider else ""
             self.slug = slugify(
-                self.name.lower()
+                name
                 + "-"
-                + self.provider.lower()
+                + provider
                 + "-"
                 + str(uuid.uuid4())[:6]
             )
@@ -144,17 +154,20 @@ class Scholarship(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Scholarship"
         verbose_name_plural = "Scholarships"
 
+
 class ScholarshipType(models.Model):
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
-    name = models.CharField(max_length=100, unique=True, verbose_name=_("Type Name"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    name = models.CharField(max_length=100, unique=True,
+                            verbose_name=_("Type Name"))
+    description = models.TextField(
+        blank=True, null=True, verbose_name=_("Description"))
 
     is_need_based = models.BooleanField(
         default=False, help_text="Does this require financial need?"
@@ -174,15 +187,15 @@ class ScholarshipType(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     created_by = models.ForeignKey("user.User",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="%(class)s_created_by",
-        verbose_name="Created By",
-    )
+                                   on_delete=models.SET_NULL,
+                                   null=True,
+                                   blank=True,
+                                   related_name="%(class)s_created_by",
+                                   verbose_name="Created By",
+                                   )
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     class Meta:
         verbose_name = _("Scholarship Type")
