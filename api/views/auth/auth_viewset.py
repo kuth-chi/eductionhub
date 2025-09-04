@@ -129,7 +129,7 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
     refresh_age = _get_max_age(getattr(settings, "SIMPLE_JWT", {}).get(
         "REFRESH_TOKEN_LIFETIME", timedelta(days=7)), 7 * 24 * 3600)
 
-    # Set access token cookie with secure attributes
+    # Set access token cookie with secure attributes (host-only, hardened)
     response.set_cookie(
         "__Host-access_token",
         sanitized_access,
@@ -141,7 +141,7 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
         domain=None,
     )
 
-    # Set refresh token cookie with secure attributes
+    # Set refresh token cookie with secure attributes (host-only, hardened)
     response.set_cookie(
         "__Host-refresh_token",
         sanitized_refresh,
@@ -165,6 +165,45 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
         max_age=access_age,
         domain=None,
     )
+
+    # Additionally set cross-subdomain cookies for the frontend domain (for proxies on educationhub.io)
+    # This enables educationhub.io to send tokens to authz.educationhub.io via server-side proxy.
+    try:
+        cross_domain = getattr(settings, "CROSS_SUBDOMAIN_COOKIE_DOMAIN", None)
+        if cross_domain:
+            response.set_cookie(
+                "access_token",
+                sanitized_access,
+                httponly=True,
+                secure=True,
+                samesite=same_site,
+                path="/",
+                max_age=access_age,
+                domain=cross_domain,
+            )
+            response.set_cookie(
+                "refresh_token",
+                sanitized_refresh,
+                httponly=True,
+                secure=True,
+                samesite=same_site,
+                path="/",
+                max_age=refresh_age,
+                domain=cross_domain,
+            )
+            # Convenience frontend flag (non-sensitive)
+            response.set_cookie(
+                "auth_status",
+                "authenticated",
+                httponly=False,
+                secure=True,
+                samesite=same_site,
+                path="/",
+                max_age=access_age,
+                domain=cross_domain,
+            )
+    except Exception as e:  # pragma: no cover
+        logger.warning("Failed to set cross-subdomain cookies: %s", str(e))
 
     logger.info("Secure, prefixed authentication cookies set successfully")
     return response
@@ -414,7 +453,8 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         response_data = serializer.validated_data
         new_access = cast(dict, response_data).get("access")
-        new_refresh = cast(dict, response_data).get("refresh") or payload["refresh"]
+        new_refresh = cast(dict, response_data).get(
+            "refresh") or payload["refresh"]
 
         response = Response(response_data, status=status.HTTP_200_OK)
         if new_access:

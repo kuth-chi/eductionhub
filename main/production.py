@@ -44,6 +44,11 @@ if CUSTOM_DOMAIN:
 if WEBSITE_HOSTNAME:
     CORS_ALLOWED_ORIGINS.append(f"https://{WEBSITE_HOSTNAME}")
 
+# Cross-subdomain cookie domain for issuing frontend-readable JWT cookies from authz.*
+# This allows the frontend on educationhub.io to include tokens when proxying to authz.educationhub.io
+CROSS_SUBDOMAIN_COOKIE_DOMAIN = os.getenv(
+    "CROSS_SUBDOMAIN_COOKIE_DOMAIN", ".educationhub.io")
+
 # Additional allowed redirect hosts for cross-subdomain authentication
 ALLOWED_REDIRECT_HOSTS = [
     "educationhub.io",
