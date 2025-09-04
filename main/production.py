@@ -85,6 +85,45 @@ REST_AUTH = {
     'REGISTER_SERIALIZER': 'api.serializers.registration.CustomRegisterSerializer',
 }
 
+# Enhanced logging for production debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'app.log',
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 730,
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'rest_framework': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'dj_rest_auth': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+}
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000

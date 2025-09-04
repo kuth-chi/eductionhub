@@ -6,6 +6,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from api.debug_views import debug_cookies_backend
 from api.utils.client_ip import client_ip_info
 from api.views.ads_manager import (AdClickViewSet, AdImpressionViewSet,
                                    AdManagerViewSet, AdPlacementViewSet,
@@ -137,4 +138,7 @@ urlpatterns = [
     path("schools-list/", SchoolAPIView.as_view(), name="schools-view"),
     path('utils/client-ip/', client_ip_info, name='client-ip-info'),
     path("upload/", upload_file, name="upload"),
+
+    # Debug endpoint for production troubleshooting
+    path('debug/cookies/', debug_cookies_backend, name='debug-cookies-backend'),
 ]
