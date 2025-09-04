@@ -1,40 +1,89 @@
 import os
 import re
+
 from main.settings import *
 from main.settings import BASE_DIR
 
-
-
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']
+                 ] if 'WEBSITE_HOSTNAME' in os.environ else []
 CUSTOM_DOMAIN = os.getenv('CUSTOM_DOMAIN')
 WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME')
-ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net", "https://educationhub.io"]
-CSRF_TRUSTED_ORIGINS = ['https://' + os.environ['WEBSITE_HOSTNAME']] if 'WEBSITE_HOSTNAME' in os.environ else []
+ALLOWED_HOSTS += ["https://eduhubstorage.blob.core.windows.net",
+                  "https://educationhub.io"]
+
+# CSRF Trusted Origins - Critical for cross-subdomain authentication in production
+CSRF_TRUSTED_ORIGINS = [
+    "https://educationhub.io",
+    "https://authz.educationhub.io",
+]
+
+# Add environment-specific domains
+if 'WEBSITE_HOSTNAME' in os.environ:
+    CSRF_TRUSTED_ORIGINS.append('https://' + os.environ['WEBSITE_HOSTNAME'])
+
 CORS_ALLOWED_ORIGINS = [
     'https://eduhubstorage.blob.core.windows.net',
-    f"https://{os.environ['WEBSITE_HOSTNAME']}" if 'WEBSITE_HOSTNAME' in os.environ else ''
+    "https://educationhub.io",
+    "https://authz.educationhub.io",
 ]
+
+# Add environment-specific CORS origins
+if 'WEBSITE_HOSTNAME' in os.environ:
+    CORS_ALLOWED_ORIGINS.append(f"https://{os.environ['WEBSITE_HOSTNAME']}")
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.blob\.core\.windows\.net$",
     r"^https://(\w+\.)*educationhub\.io$",
-    r"^http://(\w+\.)*educationhub\.io$", 
+    r"^http://(\w+\.)*educationhub\.io$",
 ]
 
 if CUSTOM_DOMAIN:
     ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
     CSRF_TRUSTED_ORIGINS.append('https://' + CUSTOM_DOMAIN)
+    CORS_ALLOWED_ORIGINS.append('https://' + CUSTOM_DOMAIN)
+
 if WEBSITE_HOSTNAME:
     CORS_ALLOWED_ORIGINS.append(f"https://{WEBSITE_HOSTNAME}")
-    
+
+# Additional allowed redirect hosts for cross-subdomain authentication
+ALLOWED_REDIRECT_HOSTS = [
+    "educationhub.io",
+    "authz.educationhub.io",
+]
+
+# Add environment-specific redirect hosts
+if CUSTOM_DOMAIN:
+    ALLOWED_REDIRECT_HOSTS.append(CUSTOM_DOMAIN.replace(
+        "https://", "").replace("http://", ""))
+if WEBSITE_HOSTNAME:
+    ALLOWED_REDIRECT_HOSTS.append(WEBSITE_HOSTNAME.replace(
+        "https://", "").replace("http://", ""))
+
+# Security settings for production
 CORS_ALLOW_ALL_ORIGINS = False
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax' 
+CSRF_COOKIE_SAMESITE = 'Lax'
 
+# Session and JWT cookie settings for cross-subdomain authentication
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'  # Required for cross-subdomain
 SESSION_COOKIE_AGE = 1800
+
+# JWT cookie settings for production (override development settings)
+# These settings ensure JWT cookies work across subdomains
+REST_AUTH = {
+    'USE_JWT': True,
+    'SESSION_LOGIN': True,
+    'JWT_AUTH_COOKIE': 'access_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SECURE': True,  # Secure in production
+    'JWT_AUTH_SAMESITE': 'Lax',  # Critical for cross-subdomain
+    'USER_DETAILS_SERIALIZER': 'api.serializers.user_details.UserDetailsSerializer',
+    'REGISTER_SERIALIZER': 'api.serializers.registration.CustomRegisterSerializer',
+}
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
@@ -121,22 +170,21 @@ CSRF_TRUSTED_ORIGINS += [f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"]
 # STORAGES setting for Django 5.x
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",  
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
         "OPTIONS": {
             "account_name": AZURE_ACCOUNT_NAME,
-            "account_key": AZURE_ACCOUNT_KEY,  
+            "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "expiration_secs": 10,  
+            "expiration_secs": 10,
         },
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
-    "rosetta_storage_class": { 
+    "rosetta_storage_class": {
         "BACKEND": "rosetta.storage.CacheRosettaStorage",
     },
 }
-
 
 
 # Static files configuration
@@ -147,7 +195,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'cache'), 
+        'LOCATION': os.path.join(BASE_DIR, 'cache'),
         'TIMEOUT': 36000,
     }
 }
@@ -164,7 +212,7 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'app.log',
             'when': 'midnight',
-            'interval': 1, 
+            'interval': 1,
             'backupCount': 730,
         }
     },

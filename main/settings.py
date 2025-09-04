@@ -21,15 +21,27 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CSRF Trusted Origins - Critical for cross-subdomain authentication
+CSRF_TRUSTED_ORIGINS = [
+    "https://educationhub.io",
+    "https://authz.educationhub.io",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+]
+
+# Add Codespace support if in that environment
 if "CODESPACE_NAME" in os.environ:
-    CSRF_TRUSTED_ORIGINS = [
+    CSRF_TRUSTED_ORIGINS.append(
         f'https://{os.getenv("CODESPACE_NAME")}-8000.{os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")}'
-    ]
+    )
 
 # URL Configuration
-WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "http://localhost:3000")
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+WEB_CLIENT_URL = os.getenv("WEB_CLIENT_URL", "https://educationhub.io")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://authz.educationhub.io")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://educationhub.io")
 FRONTEND_URL_ORIGIN = os.getenv("FRONTEND_URL_ORIGIN_ONE", FRONTEND_URL)
 
 # CORS Configuration
@@ -39,6 +51,8 @@ CORS_ALLOWED_ORIGINS = [
     FRONTEND_URL,
     BACKEND_URL,
     WEB_CLIENT_URL,
+    "https://educationhub.io",
+    "https://authz.educationhub.io",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
@@ -49,6 +63,7 @@ ALLOWED_REDIRECT_HOSTS = [
     "127.0.0.1",
     "localhost",
     "educationhub.io",
+    "authz.educationhub.io",
 ]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
