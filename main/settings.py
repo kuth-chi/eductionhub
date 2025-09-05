@@ -44,6 +44,11 @@ BACKEND_URL = os.getenv("BACKEND_URL", "https://authz.educationhub.io")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://educationhub.io")
 FRONTEND_URL_ORIGIN = os.getenv("FRONTEND_URL_ORIGIN_ONE", FRONTEND_URL)
 
+# When set (e.g., ".educationhub.io"), backend will also set cookies scoped to
+# the shared parent domain for cross-subdomain auth (educationhub.io ⇄ authz.educationhub.io)
+CROSS_SUBDOMAIN_COOKIE_DOMAIN = os.getenv(
+    "CROSS_SUBDOMAIN_COOKIE_DOMAIN") or None
+
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
