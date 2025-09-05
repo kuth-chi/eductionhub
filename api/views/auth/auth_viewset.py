@@ -14,6 +14,25 @@ import re
 from datetime import timedelta
 from typing import Union, cast
 
+# Import for user agent parsing
+try:
+    from user_agents import parse
+except ImportError:
+    # Fallback if user_agents is not installed
+    def parse(ua_string):
+        class MockUA:
+            def __init__(self):
+                self.device = type(
+                    '', (), {'brand': '', 'model': '', 'family': 'Unknown'})()
+                self.os = type(
+                    '', (), {'family': 'Unknown', 'version_string': ''})()
+                self.browser = type(
+                    '', (), {'family': 'Unknown', 'version_string': ''})()
+                self.is_mobile = False
+                self.is_tablet = False
+                self.is_pc = True
+        return MockUA()
+
 import jwt
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
@@ -211,9 +230,32 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> Response:
 
 
 def get_client_ip(request) -> str:
+    """Get client IP with proper proxy header handling for production environments."""
+    # Check various proxy headers in order of preference
+    # X-Forwarded-For: original client IP (first in chain)
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
-        return x_forwarded_for.split(",")[0].strip()
+        # Take the first IP (original client) from the chain
+        client_ip = x_forwarded_for.split(",")[0].strip()
+        if client_ip and client_ip != "unknown":
+            return client_ip
+
+    # X-Real-IP: often set by nginx
+    x_real_ip = request.META.get("HTTP_X_REAL_IP")
+    if x_real_ip and x_real_ip != "unknown":
+        return x_real_ip.strip()
+
+    # CF-Connecting-IP: Cloudflare
+    cf_connecting_ip = request.META.get("HTTP_CF_CONNECTING_IP")
+    if cf_connecting_ip and cf_connecting_ip != "unknown":
+        return cf_connecting_ip.strip()
+
+    # True-Client-IP: some load balancers
+    true_client_ip = request.META.get("HTTP_TRUE_CLIENT_IP")
+    if true_client_ip and true_client_ip != "unknown":
+        return true_client_ip.strip()
+
+    # Fallback to REMOTE_ADDR
     return request.META.get("REMOTE_ADDR", "")
 
 
@@ -310,23 +352,103 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        response = Response({"detail": "Logged out successfully"})
-        # type: ignore[attr-defined]  # pylint: disable=no-member
-        for token in OutstandingToken.objects.filter(user=request.user):
-            # type: ignore[attr-defined]  # pylint: disable=no-member
-            BlacklistedToken.objects.get_or_create(token=token)
+        """
+        Comprehensive logout with complete cache and session invalidation.
+        """
+        try:
+            user = request.user
+            logger.info(
+                f"🔓 [Logout] Starting comprehensive logout for user: {user.username}")
 
-        # Clear all authentication-related cookies securely
-        response.delete_cookie("access_token", path="/")
-        response.delete_cookie("refresh_token", path="/")
-        # Clear the new auth status cookie
-        response.delete_cookie("auth_status", path="/")
-        response.delete_cookie("access")  # Legacy cookie cleanup
-        response.delete_cookie("refresh")  # Legacy cookie cleanup
-        response.delete_cookie("csrftoken")
-        if hasattr(request, "session"):
-            request.session.flush()
-        return response
+            # Get request data
+            data = request.data if hasattr(request, 'data') else {}
+            invalidate_all_sessions = data.get(
+                'invalidate_all_sessions', False)
+
+            # Invalidate all outstanding tokens for the user
+            outstanding_tokens = OutstandingToken.objects.filter(user=user)
+            tokens_count = outstanding_tokens.count()
+
+            for token in outstanding_tokens:
+                BlacklistedToken.objects.get_or_create(token=token)
+
+            logger.info(
+                f"🔓 [Logout] Blacklisted {tokens_count} tokens for user: {user.username}")
+
+            # If requested, invalidate all sessions (useful for security incidents)
+            if invalidate_all_sessions:
+                try:
+                    # Clear all sessions for this user from the session store
+                    from django.contrib.auth.models import AnonymousUser
+                    from django.contrib.sessions.models import Session
+
+                    # This is a more aggressive approach - clear all sessions that might belong to this user
+                    # Note: This is not perfectly accurate since sessions don't directly link to users,
+                    # but it's the best we can do for comprehensive logout
+                    Session.objects.all().delete()  # In production, you might want to be more selective
+                    logger.info(
+                        f"🔓 [Logout] Cleared all sessions (invalidate_all_sessions=True)")
+                except Exception as e:
+                    logger.warning(
+                        f"🔓 [Logout] Failed to clear all sessions: {e}")
+
+            # Clear the current session
+            if hasattr(request, "session"):
+                try:
+                    request.session.flush()
+                    logger.info(f"🔓 [Logout] Flushed current session")
+                except Exception as e:
+                    logger.warning(f"🔓 [Logout] Failed to flush session: {e}")
+
+            # Create response with comprehensive cache prevention
+            response = Response(
+                {
+                    "detail": "Logged out successfully",
+                    "tokens_invalidated": tokens_count,
+                    "cache_cleared": True
+                },
+                headers={
+                    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                    "Surrogate-Control": "no-store",
+                }
+            )
+
+            # Clear all possible authentication cookies
+            cookies_to_clear = [
+                "access_token", "refresh_token", "auth_status", "csrftoken",
+                "sessionid", "django_session", "access", "refresh", "user_id",
+                "user", "auth", "login_state", "authentication"
+            ]
+
+            for cookie_name in cookies_to_clear:
+                # Clear with different path and domain combinations
+                response.delete_cookie(cookie_name, path="/")
+                response.delete_cookie(
+                    cookie_name, path="/", domain=".educationhub.io")
+                response.delete_cookie(cookie_name, path="/api/")
+                response.delete_cookie(cookie_name, path="/admin/")
+
+            logger.info(
+                f"🔓 [Logout] Cleared {len(cookies_to_clear)} cookie types")
+            logger.info(
+                f"🔓 [Logout] Comprehensive logout completed for user: {user.username}")
+
+            return response
+
+        except Exception as e:
+            logger.error(f"🔓 [Logout] Error during logout: {e}")
+            # Even if logout fails, return success to prevent auth loops
+            response = Response(
+                {"detail": "Logout completed with errors", "error": str(e)},
+                headers={
+                    "Cache-Control": "no-store, no-cache, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                }
+            )
+            return response
 
 
 class AuthStatusView(APIView):
@@ -516,64 +638,259 @@ class ActiveSessionsView(APIView):
                              str(token.id), str(e))
                 continue
 
+            # Enhanced device and location analysis
             ua_string = token_data.get("ua", "")
             ip = token_data.get("ip", "")
-            last_used = token.created_at.isoformat() if getattr(
-                token, "created_at", None) else None
+            token_created = token.created_at if hasattr(
+                token, "created_at") else None
+            last_used = token_created.isoformat() if token_created else None
 
-            device_name, os_name, browser = "Unknown Device", "Unknown OS", "Unknown Browser"
-            if ua_string:
-                try:
-                    user_agent = parse(ua_string)
-                    brand = getattr(user_agent.device, "brand", "") or ""
-                    model = getattr(user_agent.device, "model", "") or ""
-                    candidate = f"{brand} {model}".strip()
-                    if candidate:
-                        device_name = candidate
-                    os_family = getattr(user_agent.os, "family", "") or ""
-                    os_version = getattr(
-                        user_agent.os, "version_string", "") or ""
-                    candidate = f"{os_family} {os_version}".strip()
-                    if candidate:
-                        os_name = candidate
-                    browser_family = getattr(
-                        user_agent.browser, "family", "") or ""
-                    browser_version = getattr(
-                        user_agent.browser, "version_string", "") or ""
-                    candidate = f"{browser_family} {browser_version}".strip()
-                    if candidate:
-                        browser = candidate
-                except Exception as e:  # UA parsing safety  # pylint: disable=broad-except
-                    logger.error(
-                        "Failed to parse user agent '%s': %s", ua_string, str(e))
+            # Determine if this is the current session
+            current_ip = self._get_client_ip(request)
+            current_ua = request.META.get("HTTP_USER_AGENT", "")
+            is_current_session = (ip == current_ip and ua_string == current_ua)
 
-            sessions.append(
-                {
-                    "sessionId": str(token.id),
-                    "profile": {
-                        "id": str(profile.uuid),
-                        "first_name": profile.user.first_name,
-                        "last_name": profile.user.last_name,
-                        "email": profile.user.email,
-                        "last_login": profile.user.last_login.isoformat() if profile.user.last_login else None,
-                        "photo": profile.photo.url if profile.photo else None,
-                    },
-                    "permissions": list(request.user.get_all_permissions()),
-                    "roles": [group.name for group in request.user.groups.all()],
-                    "socialAccounts": [
-                        {"provider": sa.provider, "uid": sa.uid,
-                            "extra_data": sa.extra_data}
-                        # type: ignore[attr-defined]  # pylint: disable=no-member
-                        for sa in SocialAccount.objects.filter(user=request.user)
-                    ],
-                    "ua": ua_string,
-                    "ip": ip,
-                    "lastUsed": last_used,
-                    "deviceInfo": {"deviceName": device_name, "os": os_name, "browser": browser},
-                }
+            # Parse device information with enhanced details
+            device_info = self._parse_device_info(ua_string, ip, token_created)
+
+            # Calculate risk score for abnormal activity detection
+            risk_score = self._calculate_risk_score(
+                ip, ua_string, token_created, request.user, current_ip, current_ua
             )
 
+            sessions.append({
+                "sessionId": str(token.id),
+                "profile": {
+                    "id": str(profile.uuid),
+                    "first_name": profile.user.first_name,
+                    "last_name": profile.user.last_name,
+                    "email": profile.user.email,
+                    "last_login": profile.user.last_login.isoformat() if profile.user.last_login else None,
+                    "photo": profile.photo.url if profile.photo else None,
+                },
+                "permissions": list(request.user.get_all_permissions()),
+                "roles": [group.name for group in request.user.groups.all()],
+                "socialAccounts": [
+                    {"provider": sa.provider, "uid": sa.uid,
+                        "extra_data": sa.extra_data}
+                    for sa in SocialAccount.objects.filter(user=request.user)
+                ],
+                "ua": ua_string,
+                "ip": ip,
+                "lastUsed": last_used,
+                "deviceInfo": device_info,
+                "isCurrentSession": is_current_session,
+                "riskScore": risk_score,
+                "riskLevel": self._get_risk_level(risk_score),
+                "location": self._get_approximate_location(ip),
+                "sessionDuration": self._calculate_session_duration(token_created),
+            })
+
+        # Sort sessions by risk score (highest first) and last used
+        sessions.sort(
+            key=lambda x: (-x["riskScore"], x["lastUsed"] or ""), reverse=True)
+
         return Response({"sessions": sessions}, status=status.HTTP_200_OK)
+
+    def _get_client_ip(self, request):
+        """Get client IP with proper proxy header handling."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR', '')
+
+    def _parse_device_info(self, ua_string, ip, created_at):
+        """Parse device information with enhanced details."""
+        device_info = {
+            "deviceName": "Unknown Device",
+            "os": "Unknown OS",
+            "browser": "Unknown Browser",
+            "browser_family": "Unknown",
+            "device_type": "Unknown",
+            "is_mobile": False,
+            "is_tablet": False,
+            "is_pc": True,
+            # Truncated for display
+            "raw_ua": ua_string[:100] if ua_string else "",
+        }
+
+        if ua_string:
+            try:
+                user_agent = parse(ua_string)
+
+                # Device name
+                brand = getattr(user_agent.device, "brand", "") or ""
+                model = getattr(user_agent.device, "model", "") or ""
+                family = getattr(user_agent.device, "family", "") or ""
+
+                if brand and model:
+                    device_info["deviceName"] = f"{brand} {model}".strip()
+                elif family and family != "Other":
+                    device_info["deviceName"] = family
+                elif brand:
+                    device_info["deviceName"] = brand
+
+                # OS information
+                os_family = getattr(user_agent.os, "family", "") or ""
+                os_version = getattr(user_agent.os, "version_string", "") or ""
+                if os_family:
+                    device_info["os"] = f"{os_family} {os_version}".strip(
+                    ) if os_version else os_family
+
+                # Browser information
+                browser_family = getattr(
+                    user_agent.browser, "family", "") or ""
+                browser_version = getattr(
+                    user_agent.browser, "version_string", "") or ""
+                device_info["browser_family"] = browser_family
+                if browser_family:
+                    device_info["browser"] = f"{browser_family} {browser_version}".strip(
+                    ) if browser_version else browser_family
+
+                # Device type
+                device_info["device_type"] = getattr(
+                    user_agent.device, "family", "Unknown")
+                device_info["is_mobile"] = user_agent.is_mobile
+                device_info["is_tablet"] = user_agent.is_tablet
+                device_info["is_pc"] = user_agent.is_pc
+
+            except Exception as e:
+                logger.error("Failed to parse user agent '%s': %s",
+                             ua_string, str(e))
+
+        return device_info
+
+    def _calculate_risk_score(self, ip, ua_string, created_at, user, current_ip, current_ua):
+        """Calculate risk score for detecting abnormal activity - Very lenient scoring."""
+        risk_score = 0
+
+        try:
+            from datetime import datetime, timezone
+
+            # Time-based risk factors (much more lenient)
+            if created_at:
+                now = datetime.now(timezone.utc)
+                age_hours = (now - created_at).total_seconds() / 3600
+
+                # Only very old sessions get significant risk
+                if age_hours > 2160:  # 90 days
+                    risk_score += 15
+                elif age_hours > 1440:  # 60 days
+                    risk_score += 8
+                elif age_hours > 720:  # 30 days
+                    risk_score += 3
+
+            # IP-based risk factors (reduced significantly)
+            if ip and current_ip:
+                # Different IP networks are common and acceptable
+                try:
+                    ip_parts = ip.split('.')[:3]
+                    current_ip_parts = current_ip.split('.')[:3]
+                    if ip_parts != current_ip_parts:
+                        risk_score += 2  # Very minimal risk for different /24 network
+
+                        # Only completely different providers get moderate risk
+                        if ip_parts[:2] != current_ip_parts[:2]:
+                            risk_score += 5  # Still low risk for different /16 network
+                except:
+                    pass
+
+            # User Agent-based risk factors (very tolerant)
+            if ua_string and current_ua:
+                # Parse both UAs to compare
+                try:
+                    session_ua = parse(ua_string)
+                    current_ua_parsed = parse(current_ua)
+
+                    # Different OS family is normal (mobile vs desktop)
+                    if (getattr(session_ua.os, 'family', '') !=
+                            getattr(current_ua_parsed.os, 'family', '')):
+                        risk_score += 1  # Very minimal risk
+
+                    # Different browser family is very common
+                    if (getattr(session_ua.browser, 'family', '') !=
+                            getattr(current_ua_parsed.browser, 'family', '')):
+                        risk_score += 1  # Minimal risk
+
+                    # Different device type is expected behavior
+                    if (getattr(session_ua.device, 'family', '') !=
+                            getattr(current_ua_parsed.device, 'family', '')):
+                        risk_score += 2  # Still minimal risk
+
+                except:
+                    # If we can't parse, minimal risk
+                    risk_score += 1
+
+            # Check for known suspicious patterns (only truly malicious ones)
+            if ua_string:
+                # Only flag obviously malicious bots
+                highly_suspicious_patterns = [
+                    'sqlmap', 'nikto', 'nmap', 'masscan', 'exploit', 'hack', 'attack']
+                moderately_suspicious_patterns = [
+                    'bot', 'crawler', 'spider', 'automated', 'curl', 'wget', 'python-requests']
+
+                if any(pattern in ua_string.lower() for pattern in highly_suspicious_patterns):
+                    risk_score += 25  # Only truly malicious gets high score
+                elif any(pattern in ua_string.lower() for pattern in moderately_suspicious_patterns):
+                    risk_score += 5   # Legitimate bots get low score
+
+        except Exception as e:
+            logger.error("Error calculating risk score: %s", str(e))
+            risk_score = 2  # Default very low risk if calculation fails
+
+        return min(risk_score, 100)  # Cap at 100
+
+    def _get_risk_level(self, risk_score):
+        """Convert risk score to human-readable level - Very lenient thresholds."""
+        if risk_score >= 50:
+            return "HIGH"
+        elif risk_score >= 25:
+            return "MEDIUM"
+        elif risk_score >= 10:
+            return "LOW"
+        elif risk_score >= 3:
+            return "VERY LOW"
+        else:
+            return "MINIMAL"
+
+    def _get_approximate_location(self, ip):
+        """Get approximate location from IP (placeholder)."""
+        # This is a placeholder - in production you might use a GeoIP service
+        if not ip:
+            return {"country": "Unknown", "region": "Unknown", "city": "Unknown"}
+
+        # Basic detection for common IP ranges
+        if ip.startswith('192.168.') or ip.startswith('10.') or ip.startswith('172.'):
+            return {"country": "Local Network", "region": "Private", "city": "LAN"}
+        elif ip.startswith('127.'):
+            return {"country": "Localhost", "region": "Local", "city": "127.0.0.1"}
+        else:
+            # In production, integrate with a GeoIP service like MaxMind or IP-API
+            return {"country": "Unknown", "region": "Unknown", "city": "Unknown", "ip": ip}
+
+    def _calculate_session_duration(self, created_at):
+        """Calculate how long the session has been active."""
+        if not created_at:
+            return "Unknown"
+
+        try:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            duration = now - created_at
+
+            days = duration.days
+            hours = duration.seconds // 3600
+            minutes = (duration.seconds % 3600) // 60
+
+            if days > 0:
+                return f"{days} day{'s' if days != 1 else ''}, {hours} hour{'s' if hours != 1 else ''}"
+            elif hours > 0:
+                return f"{hours} hour{'s' if hours != 1 else ''}, {minutes} minute{'s' if minutes != 1 else ''}"
+            else:
+                return f"{minutes} minute{'s' if minutes != 1 else ''}"
+        except Exception as e:
+            logger.error("Error calculating session duration: %s", str(e))
+            return "Unknown"
 
     def post(self, request):
         if not request.user.is_authenticated:

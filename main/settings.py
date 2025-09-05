@@ -162,6 +162,8 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # request id + request/response logs
+    "api.middlewares.RequestContextLoggingMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -466,3 +468,35 @@ REST_AUTH = {
 
 # Define custom adapter for social login redirects
 SOCIALACCOUNT_ADAPTER = 'api.adapters.CustomSocialAccountAdapter'
+
+# Structured logging config (console). In production, route to your aggregator.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s %(levelname)s %(name)s: %(message)s",
+        },
+        "auth": {
+            "format": "%(asctime)s %(levelname)s %(name)s | msg=%(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "console_auth": {
+            "class": "logging.StreamHandler",
+            "formatter": "auth",
+        },
+    },
+    "loggers": {
+        # Our API/auth modules
+        "api": {"handlers": ["console_auth"], "level": "INFO", "propagate": False},
+        # Django
+        "django": {"handlers": ["console"], "level": "WARNING", "propagate": True},
+        # Requests to see CORS/CSRF warnings, etc.
+        "django.security": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}
