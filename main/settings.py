@@ -67,7 +67,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
 # Allow any subdomain like https://foo.educationhub.io
-CORS_ALLOWED_ORIGIN_REGEXES = [r"^https:\/\/([a-z0-9-]+\.)*educationhub\.io$"]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https:\/\/[a-z0-9-]+\.educationhub\.io$"]
 ALLOWED_REDIRECT_HOSTS = [
     WEB_CLIENT_URL.replace("http://", "").replace("https://", ""),
     "127.0.0.1",
