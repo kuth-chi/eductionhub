@@ -33,7 +33,8 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 from user_agents import parse
 
-from api.serializers.custom_jwt import CustomTokenObtainPairSerializer
+from api.serializers.custom_jwt import (CustomJWTSerializer,
+                                        CustomTokenObtainPairSerializer)
 from user.models.profile import Profile  # pylint: disable=no-member
 
 logger = logging.getLogger(__name__)
@@ -352,6 +353,12 @@ class AuthStatusView(APIView):
                 "is_pc": user_agent.is_pc,
             }
 
+            # Align permissions/roles with frontend expectations while preserving compatibility
+            roles = CustomJWTSerializer._get_user_roles(
+                request.user)  # type: ignore[attr-defined]
+            essential_permissions = CustomJWTSerializer._get_essential_permissions(
+                request.user)  # type: ignore[attr-defined]
+
             return Response(
                 {
                     "authenticated": True,
@@ -363,6 +370,8 @@ class AuthStatusView(APIView):
                         "last_name": request.user.last_name,
                         # Use ISO string for strict JSON safety
                         "last_logged_in": request.user.last_login.isoformat() if request.user.last_login else None,
+                        "is_staff": request.user.is_staff,
+                        "is_superuser": request.user.is_superuser,
                     },
                     "profile": {
                         "id": str(profile.uuid),
@@ -376,8 +385,12 @@ class AuthStatusView(APIView):
                             "extra_data": sa.extra_data}
                         for sa in social_accounts
                     ],
-                    "permissions": list(request.user.get_all_permissions()),
-                    "roles": [group.name for group in request.user.groups.all()],
+                    # New shape expected by frontend (booleans for core abilities)
+                    "permissions": essential_permissions,
+                    # Backward-compatibility: full Django permission codenames as a separate field
+                    "permissions_list": list(request.user.get_all_permissions()),
+                    "roles": roles,
+                    "is_superuser": request.user.is_superuser,
                     "ua": ua_string,
                     "device": device_info,
                     "ip": get_client_ip(request),
