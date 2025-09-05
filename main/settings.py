@@ -23,9 +23,11 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 # CSRF Trusted Origins - Critical for cross-subdomain authentication
+# Include wildcard to trust any subdomain of educationhub.io
 CSRF_TRUSTED_ORIGINS = [
     "https://educationhub.io",
     "https://authz.educationhub.io",
+    "https://*.educationhub.io",
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:3000",
@@ -50,7 +52,8 @@ CROSS_SUBDOMAIN_COOKIE_DOMAIN = os.getenv(
     "CROSS_SUBDOMAIN_COOKIE_DOMAIN") or None
 
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+# For credentialed requests, don't allow-all; use explicit origins and wildcard regex for subdomains
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     FRONTEND_URL,
@@ -63,6 +66,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
 ]
+# Allow any subdomain like https://foo.educationhub.io
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https:\/\/([a-z0-9-]+\.)*educationhub\.io$"]
 ALLOWED_REDIRECT_HOSTS = [
     WEB_CLIENT_URL.replace("http://", "").replace("https://", ""),
     "127.0.0.1",
@@ -185,6 +190,13 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Cookie size settings for JWT tokens
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+# If configured, scope session/CSRF cookies to the parent domain for subdomain sharing
+if not DEBUG and CROSS_SUBDOMAIN_COOKIE_DOMAIN:
+    SESSION_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
+    CSRF_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
+    CSRF_COOKIE_SECURE = True
+    # CSRF SameSite Lax allows top-level navigations (login redirects) to carry cookies
+    CSRF_COOKIE_SAMESITE = 'Lax'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
