@@ -191,12 +191,14 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 # If configured, scope session/CSRF cookies to the parent domain for subdomain sharing
-if not DEBUG and CROSS_SUBDOMAIN_COOKIE_DOMAIN:
-    SESSION_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
-    CSRF_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # CSRF SameSite Lax allows top-level navigations (login redirects) to carry cookies
-    CSRF_COOKIE_SAMESITE = 'Lax'
+    if CROSS_SUBDOMAIN_COOKIE_DOMAIN:
+        SESSION_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
+        CSRF_COOKIE_DOMAIN = CROSS_SUBDOMAIN_COOKIE_DOMAIN
+        # CSRF SameSite Lax allows top-level navigations (login redirects) to carry cookies
+        CSRF_COOKIE_SAMESITE = 'Lax'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
