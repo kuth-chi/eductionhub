@@ -2,6 +2,10 @@
   "name": "tailwindcss-project",
   "version": "1.0.0",
   "description": "A project using Tailwind CSS",
+  "engines": {
+    "node": ">=22.19.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./static/css/style.css --watch",
     "build": "npx @tailwindcss/cli -i ./src/input.css -o ./static/css/style.css --minify"

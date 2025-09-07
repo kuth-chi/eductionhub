@@ -1,21 +1,20 @@
 import logging
-from rest_framework import viewsets, status
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 
-from geo.models import Country, State, City, Village
-from api.serializers.schools.locations import (
-    CountrySerializer,
-    StateSerializer,
-    CitySerializer,
-    VillageSerializer,
-    CountrySimpleSerializer,
-    StateSimpleSerializer,
-    CitySimpleSerializer,
-    VillageSimpleSerializer,
-)
+from api.serializers.schools.locations import (CitySerializer,
+                                               CitySimpleSerializer,
+                                               CountrySerializer,
+                                               CountrySimpleSerializer,
+                                               StateSerializer,
+                                               StateSimpleSerializer,
+                                               VillageSerializer,
+                                               VillageSimpleSerializer)
+from geo.models import City, Country, State, Village
 
 logger = logging.getLogger(__name__)
 
@@ -124,13 +123,14 @@ class CityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def simple(self, request):
         """Get simplified city list for dropdowns"""
+        logger.info("Request for simplified city list from user: %s", request.user)
         cities = self.get_queryset()
         serializer = CitySimpleSerializer(cities, many=True)
         return Response(serializer.data)
 
 
 class VillageViewSet(viewsets.ModelViewSet):
-    """ViewSet for Village model"""
+    """ViewSet for Village model with enhanced multi-level filtering"""
 
     queryset = Village.objects.filter(is_active=True).select_related(
         "city", "city__state", "city__state__country"
@@ -138,38 +138,96 @@ class VillageViewSet(viewsets.ModelViewSet):
     serializer_class = VillageSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["city", "city__state", "city__state__country", "is_active"]
+    # Simplified - we'll handle geo filtering manually
+    filterset_fields = ["is_active"]
     search_fields = ["name", "code", "city__name", "city__state__name"]
     ordering_fields = ["name", "code", "city__name"]
-    ordering = ["city__state__country__name", "city__state__name", "city__name", "name"]
+    ordering = ["city__state__country__name",
+                "city__state__name", "city__name", "name"]
     lookup_field = "uuid"
 
     def get_queryset(self):
-        """Override to allow updates on inactive villages"""
+        """Override to add custom multi-level geographic filtering"""
         if self.action in ["update", "partial_update", "destroy"]:
             # For update/delete operations, include inactive villages
-            queryset = Village.objects.select_related(
+            base_queryset = Village.objects.select_related(
                 "city", "city__state", "city__state__country"
             )
-            logger.info(
-                f"VillageViewSet get_queryset for {self.action}: {queryset.count()} villages (including inactive)"
+        else:
+            # For list/retrieve operations, only show active villages
+            base_queryset = Village.objects.filter(is_active=True).select_related(
+                "city", "city__state", "city__state__country"
             )
-            return queryset
-        # For list/retrieve operations, only show active villages
-        queryset = Village.objects.filter(is_active=True).select_related(
-            "city", "city__state", "city__state__country"
-        )
-        logger.info(
-            f"VillageViewSet get_queryset for {self.action}: {queryset.count()} active villages"
-        )
-        return queryset
 
-    def update(self, request, *args, **kwargs):
-        """Override update method to add debugging"""
-        logger.info(f"VillageViewSet update called with pk: {kwargs.get('pk')}")
-        logger.info(f"Request user: {request.user}")
-        logger.info(f"Request method: {request.method}")
-        return super().update(request, *args, **kwargs)
+        # Apply custom geographic filtering with OR logic
+        geo_filter = self._build_geographic_filter()
+        if geo_filter:
+            base_queryset = base_queryset.filter(geo_filter)
+
+        logger.info(
+            "VillageViewSet get_queryset for %s: %d villages",
+            self.action,
+            base_queryset.count()
+        )
+        return base_queryset
+
+    def _build_geographic_filter(self):
+        """Build OR-based geographic filter from query parameters"""
+        request = self.request
+        if not request:
+            return None
+
+        # Get multiple IDs for each geographic level
+        city_ids = self._get_param_list('city')
+        state_ids = self._get_param_list('city__state')
+        country_ids = self._get_param_list('city__state__country')
+
+        # Build OR conditions for each level
+        conditions = []
+
+        # Add city conditions
+        if city_ids:
+            city_conditions = Q(city_id__in=city_ids)
+            conditions.append(city_conditions)
+            logger.info("Adding city filter: city_id__in=%s", city_ids)
+
+        # Add state conditions
+        if state_ids:
+            state_conditions = Q(city__state_id__in=state_ids)
+            conditions.append(state_conditions)
+            logger.info("Adding state filter: city__state_id__in=%s", state_ids)
+
+        # Add country conditions
+        if country_ids:
+            country_conditions = Q(city__state__country_id__in=country_ids)
+            conditions.append(country_conditions)
+            logger.info("Adding country filter: city__state__country_id__in=%s", country_ids)
+
+        # Combine all conditions with OR logic
+        if conditions:
+            final_filter = conditions[0]
+            for condition in conditions[1:]:
+                final_filter |= condition  # OR logic
+            logger.info("Final geographic filter: %s", final_filter)
+            return final_filter
+
+        return None
+
+    def _get_param_list(self, param_name):
+        """Extract multiple values for a parameter from query string"""
+        if not self.request:
+            return []
+
+        values = self.request.query_params.getlist(param_name)
+        # Convert to integers and filter out invalid values
+        int_values = []
+        for value in values:
+            try:
+                int_values.append(int(value))
+            except (ValueError, TypeError):
+                logger.warning("Invalid %s value: %s", param_name, value)
+        return int_values
+
 
     @action(detail=False, methods=["get"])
     def by_city(self, request):
@@ -213,6 +271,7 @@ class VillageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def simple(self, request):
         """Get simplified village list for dropdowns"""
+        logger.info("Request for simplified village list from user: %s", request.user)
         villages = self.get_queryset()
         serializer = VillageSimpleSerializer(villages, many=True)
         return Response(serializer.data)
