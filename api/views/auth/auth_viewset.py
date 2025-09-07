@@ -357,8 +357,7 @@ class LogoutView(APIView):
         """
         try:
             user = request.user
-            logger.info(
-                f"🔓 [Logout] Starting comprehensive logout for user: {user.username}")
+            logger.info("🔓 [Logout] Starting comprehensive logout for user xxx")
 
             # Get request data
             data = request.data if hasattr(request, 'data') else {}
@@ -372,8 +371,7 @@ class LogoutView(APIView):
             for token in outstanding_tokens:
                 BlacklistedToken.objects.get_or_create(token=token)
 
-            logger.info(
-                f"🔓 [Logout] Blacklisted {tokens_count} tokens for user: {user.username}")
+            logger.info("🔓 [Logout] Blacklisted token tokens for username")
 
             # If requested, invalidate all sessions (useful for security incidents)
             if invalidate_all_sessions:
@@ -386,19 +384,17 @@ class LogoutView(APIView):
                     # Note: This is not perfectly accurate since sessions don't directly link to users,
                     # but it's the best we can do for comprehensive logout
                     Session.objects.all().delete()  # In production, you might want to be more selective
-                    logger.info(
-                        f"🔓 [Logout] Cleared all sessions (invalidate_all_sessions=True)")
-                except Exception as e:
-                    logger.warning(
-                        f"🔓 [Logout] Failed to clear all sessions: {e}")
+                    logger.info("🔓 [Logout] Cleared all sessions (invalidate_all_sessions=True)")
+                except Exception:
+                    logger.warning("🔓 [Logout] Failed to clear all sessions")
 
             # Clear the current session
             if hasattr(request, "session"):
                 try:
                     request.session.flush()
-                    logger.info(f"🔓 [Logout] Flushed current session")
-                except Exception as e:
-                    logger.warning(f"🔓 [Logout] Failed to flush session: {e}")
+                    logger.info("🔓 [Logout] Flushed current session")
+                except Exception:
+                    logger.warning("🔓 [Logout] Failed to flush session")
 
             # Create response with comprehensive cache prevention
             response = Response(
