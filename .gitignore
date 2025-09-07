@@ -11,6 +11,9 @@ __pycache__/
 
 # JavaScript
 node_modules
+package-lock.json
+yarn.lock
+package.json
 
 # Distribution / packaging
 .github
