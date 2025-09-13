@@ -2,8 +2,9 @@
 ViewSets for Ads Manager API endpoints.
 """
 
-from datetime import date, timedelta
 import logging
+from datetime import date, timedelta
+
 from django.db.models import Avg, Count, F, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -171,7 +172,8 @@ class AdManagerViewSet(viewsets.ModelViewSet):
 
     queryset = AdManager.objects.select_related(
         'ad_type').prefetch_related('placements__ad_space')
-    permission_classes = [IsAuthenticated]
+    # Allow public read access for ads
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend,
                        filters.SearchFilter, filters.OrderingFilter]
     filterset_class = AdManagerFilter
@@ -321,7 +323,8 @@ class AdPlacementViewSet(viewsets.ModelViewSet):
 
     queryset = AdPlacement.objects.select_related('ad', 'ad_space').all()
     serializer_class = AdPlacementSerializer
-    permission_classes = [IsAuthenticated]
+    # Allow public read access for placements
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['ad', 'ad_space', 'is_primary']
     ordering_fields = ['position', 'id']
