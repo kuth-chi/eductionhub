@@ -44,8 +44,8 @@ class AdManagerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdManager
         fields = [
-            'uuid', 'campaign_title', 'ad_type_name', 'start_datetime',
-            'end_datetime', 'is_active', 'is_currently_active',
+            'uuid', 'campaign_title', 'description', 'ad_type_name', 'start_datetime',
+            'end_datetime', 'target_url', 'is_active', 'is_currently_active',
             'placement_count', 'days_remaining', 'create_datetime', 'poster'
         ]
         read_only_fields = [
@@ -84,8 +84,8 @@ class AdManagerDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdManager
         fields = [
-            'uuid', 'campaign_title', 'ad_type', 'ad_type_name', 'tags',
-            'start_datetime', 'end_datetime', 'is_active', 'is_currently_active',
+            'uuid', 'campaign_title', 'description', 'ad_type', 'ad_type_name', 'tags',
+            'start_datetime', 'end_datetime', 'target_url', 'is_active', 'is_currently_active',
             'active_ad_period', 'limited_overdue', 'poster', 'placements',
             'impression_count', 'click_count', 'click_through_rate',
             'update_datetime', 'create_datetime'
@@ -126,8 +126,8 @@ class AdManagerCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdManager
         fields = [
-            'campaign_title', 'ad_type', 'tags', 'start_datetime',
-            'end_datetime', 'is_active', 'limited_overdue', 'poster'
+            'campaign_title', 'description', 'ad_type', 'tags', 'start_datetime',
+            'end_datetime', 'target_url', 'is_active', 'limited_overdue', 'poster'
         ]
 
     def validate(self, data):
