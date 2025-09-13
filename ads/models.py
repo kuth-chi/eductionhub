@@ -61,7 +61,7 @@ class AdManager(models.Model):
 
     start_datetime = models.DateField(null=True)
     end_datetime = models.DateField(null=True)
-
+    target_url = models.URLField(max_length=500, help_text="URL to navigate to on click", blank=True, null=True, default="")
     is_active = models.BooleanField(default=True)
     active_ad_period = models.DurationField(null=True, blank=True)
     limited_overdue = models.IntegerField(null=True, blank=True)
@@ -132,10 +132,8 @@ class AdPlacement(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        ad_title = str(
-            self.ad.campaign_title) if self.ad and self.ad.campaign_title else ""
-        space_name = str(
-            self.ad_space.name) if self.ad_space and self.ad_space.name else ""
+        ad_title = str(getattr(self.ad, "campaign_title", "")) if self.ad else ""
+        space_name = str(getattr(self.ad_space, "name", "")) if self.ad_space else ""
         return f"{ad_title} in {space_name}"
 
 
@@ -185,12 +183,33 @@ class AdClick(models.Model):
     objects = models.Manager()
 
 
+_NORMALIZING_SPACES = set()
+
+
 def normalize_positions(ad_space):
+    """Reassign sequential position numbers for placements in an ad space.
+
+    Previous implementation called save() per placement which re-fired
+    post_save signals causing potential deep recursion. We now:
+      1. Guard against re-entrancy with a set of space ids.
+      2. Perform a single pass computing desired positions.
+      3. Use bulk_update to avoid triggering per-row post_save signals.
     """
-    Reassigns sequential position numbers to AdPlacements in a given AdSpace.
-    """
-    placements = AdPlacement.objects.filter(
-        ad_space=ad_space).order_by('position')
-    for i, placement in enumerate(placements):
-        placement.position = i + 1
-        placement.save()
+    if not ad_space or ad_space.id in _NORMALIZING_SPACES:
+        return
+
+    _NORMALIZING_SPACES.add(ad_space.id)
+    try:
+        placements = list(
+            AdPlacement.objects.filter(
+                ad_space=ad_space).order_by('position', 'id')
+        )
+        changed = False
+        for i, placement in enumerate(placements, start=1):
+            if placement.position != i:
+                placement.position = i
+                changed = True
+        if changed:
+            AdPlacement.objects.bulk_update(placements, ['position'])
+    finally:
+        _NORMALIZING_SPACES.discard(ad_space.id)

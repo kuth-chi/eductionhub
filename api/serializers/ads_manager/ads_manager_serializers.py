@@ -46,11 +46,11 @@ class AdManagerListSerializer(serializers.ModelSerializer):
         fields = [
             'uuid', 'campaign_title', 'ad_type_name', 'start_datetime',
             'end_datetime', 'is_active', 'is_currently_active',
-            'placement_count', 'days_remaining', 'create_datetime'
+            'placement_count', 'days_remaining', 'create_datetime', 'poster'
         ]
         read_only_fields = [
             'uuid', 'is_currently_active', 'placement_count',
-            'days_remaining', 'create_datetime'
+            'days_remaining', 'create_datetime', 'poster'
         ]
 
     def get_placement_count(self, obj):
