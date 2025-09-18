@@ -208,7 +208,7 @@ AZURE_STORAGE_URL = os.getenv("AZURE_STORAGE_URL")
 # Media files configuration
 AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = MEDIA_URL
 CSRF_TRUSTED_ORIGINS += [f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net"]
 
 # STORAGES setting for Django 5.x
@@ -219,7 +219,7 @@ STORAGES = {
             "account_name": AZURE_ACCOUNT_NAME,
             "account_key": AZURE_ACCOUNT_KEY,
             "azure_container": AZURE_CONTAINER,
-            "expiration_secs": 10,
+            "expiration_secs": 3600,
         },
     },
     "staticfiles": {

@@ -136,6 +136,9 @@ class SchoolListSerializer(serializers.ModelSerializer):
     major_count = serializers.SerializerMethodField(read_only=True)
     degree_count = serializers.SerializerMethodField(read_only=True)
 
+    # New: locations array field
+    locations = serializers.SerializerMethodField()
+
     class Meta:
         model = School
         fields = (
@@ -148,6 +151,7 @@ class SchoolListSerializer(serializers.ModelSerializer):
             "logo",
             "cover_image",
             "location",
+            "locations",  # <-- new field
             "created_date",
             "updated_date",
             "type",
@@ -182,7 +186,29 @@ class SchoolListSerializer(serializers.ModelSerializer):
         data["logo"] = resolve_image_path(getattr(instance, "logo", None))
         data["cover_image"] = resolve_image_path(
             getattr(instance, "cover_image", None))
+
+        # Add locations array: school location + branch locations
+        data["locations"] = self.get_locations(instance)
         return data
+
+    def _is_valid_location(self, location):
+        """Helper to validate location string format."""
+        return isinstance(location, str) and "," in location
+
+    def get_locations(self, obj):
+        locations = []
+        # Add school's own location if present and valid
+        if obj.location and self._is_valid_location(obj.location):
+            locations.append(obj.location.strip())
+        # Add branch locations
+        branch_qs = getattr(obj, "school_branches", None)
+        if branch_qs:
+            for branch in branch_qs.all():
+                loc = getattr(branch, "location", None)
+                if loc and self._is_valid_location(loc):
+                    locations.append(loc.strip())
+        # Remove duplicates and empty
+        return sorted(list({l for l in locations if l}))
 
     def get_branch_count(self, obj):
         return getattr(obj, "branch_count", obj.school_branches.count())

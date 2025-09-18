@@ -51,8 +51,8 @@ class AdManager(models.Model):
     """
     uuid = models.UUIDField(unique=True, default=uuid.uuid4,
                             verbose_name=_("unique identifier"))
-    campaign_title = models.CharField(
-        max_length=75, verbose_name=_("Campaign title"))
+    campaign_title = models.CharField(max_length=75, verbose_name=_("Campaign title"))
+    description = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Short description"))
     ad_type = models.ForeignKey(
         AdType, null=True, blank=True, on_delete=models.SET_NULL)
 
