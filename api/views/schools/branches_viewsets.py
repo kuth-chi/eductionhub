@@ -64,7 +64,7 @@ class SchoolBranchViewSet(viewsets.ModelViewSet):
     # Default ordering: headquarters first, then by name
     ordering = ['-is_headquarters', 'name']
     lookup_field = 'uuid'
-    permission_classes = [IsStaffOrSuperuserOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [IsStaffOrSuperuserOrReadOnly]
 
     def get_queryset(self):
         """
