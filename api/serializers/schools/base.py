@@ -191,17 +191,21 @@ class SchoolListSerializer(serializers.ModelSerializer):
         data["locations"] = self.get_locations(instance)
         return data
 
+    def _is_valid_location(self, location):
+        """Helper to validate location string format."""
+        return isinstance(location, str) and "," in location
+
     def get_locations(self, obj):
         locations = []
         # Add school's own location if present and valid
-        if obj.location and isinstance(obj.location, str) and "," in obj.location:
+        if obj.location and self._is_valid_location(obj.location):
             locations.append(obj.location.strip())
         # Add branch locations
         branch_qs = getattr(obj, "school_branches", None)
         if branch_qs:
             for branch in branch_qs.all():
                 loc = getattr(branch, "location", None)
-                if loc and isinstance(loc, str) and "," in loc:
+                if loc and self._is_valid_location(loc):
                     locations.append(loc.strip())
         # Remove duplicates and empty
         return sorted(list({l for l in locations if l}))
