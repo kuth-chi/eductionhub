@@ -196,15 +196,15 @@ class SchoolListSerializer(serializers.ModelSerializer):
         # Add school's own location if present and valid
         if obj.location and isinstance(obj.location, str) and "," in obj.location:
             locations.append(obj.location.strip())
-        # Add branch locations
-        branch_qs = getattr(obj, "school_branches", None)
-        if branch_qs:
-            for branch in branch_qs.all():
-                loc = getattr(branch, "location", None)
-                if loc and isinstance(loc, str) and "," in loc:
-                    locations.append(loc.strip())
-        # Remove duplicates and empty
-        return sorted(list({l for l in locations if l}))
+
+        # Add branch locations efficiently
+        branch_locations = obj.school_branches.values_list("location", flat=True)
+        for loc in branch_locations:
+            if loc and isinstance(loc, str) and "," in loc:
+                locations.append(loc.strip())
+
+        # Remove duplicates and return sorted list
+        return sorted(list(set(locations)))
 
     def get_branch_count(self, obj):
         return getattr(obj, "branch_count", obj.school_branches.count())
