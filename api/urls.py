@@ -47,6 +47,11 @@ from api.views.schools.schools_viewsets import (
     SchoolScholarshipViewSet)
 from api.views.upload_views import upload_file
 from api.views.user.profile_viewset import ProfileViewSet
+from api.views.user.resume_viewset import (AttachmentViewSet, EducationViewSet,
+                                           ExperienceViewSet, HobbyViewSet,
+                                           LanguageViewSet, LetterViewSet,
+                                           ProfileContactViewSet,
+                                           ReferenceViewSet, SkillViewSet)
 
 app_name = "api"
 
@@ -107,6 +112,21 @@ router.register(r"ads-user-profiles", AdsUserProfileViewSet,
                 basename="ads-user-profiles")
 router.register(r"user-behavior", UserBehaviorViewSet,
                 basename="user-behavior")
+
+# Resume/CV endpoints
+router.register(r"user-attachments", AttachmentViewSet,
+                basename="user-attachments")
+router.register(r"user-letters", LetterViewSet, basename="user-letters")
+router.register(r"user-experiences", ExperienceViewSet,
+                basename="user-experiences")
+router.register(r"user-education", EducationViewSet, basename="user-education")
+router.register(r"user-skills", SkillViewSet, basename="user-skills")
+router.register(r"user-languages", LanguageViewSet, basename="user-languages")
+router.register(r"user-hobbies", HobbyViewSet, basename="user-hobbies")
+router.register(r"user-references", ReferenceViewSet,
+                basename="user-references")
+router.register(r"user-contacts", ProfileContactViewSet,
+                basename="user-contacts")
 
 urlpatterns = [
     path("", include(router.urls)),
