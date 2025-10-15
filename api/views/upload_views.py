@@ -88,7 +88,10 @@ def upload_file(request):
 
         # Generate unique filename
         file_extension = os.path.splitext(uploaded_file.name)[1]
-        unique_filename = f"{upload_type}/{uuid.uuid4()}{file_extension}"
+        if upload_type == "logo":
+            unique_filename = f"uploads/organization/logo/{uuid.uuid4()}{file_extension}"
+        else:
+            unique_filename = f"{upload_type}/{uuid.uuid4()}{file_extension}"
 
         # logger.info(f"Saving file to: {unique_filename}")
 
@@ -123,7 +126,7 @@ def upload_file(request):
 
         response_data = {
             "url": file_url,
-            "filename": os.path.basename(file_path),
+            "path": file_path,
             "size": uploaded_file.size,
             "type": upload_type,
         }

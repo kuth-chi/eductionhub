@@ -97,7 +97,8 @@ class Experience(models.Model):
     )
 
     def __str__(self):
-        return f"{self.title} at {self.organization.name}"
+        org_name = self.organization.name if self.organization else "No Organization"
+        return f"{self.title} at {org_name}"
 
     objects = models.Manager()
 
@@ -119,7 +120,8 @@ class Education(models.Model):
     )
 
     def __str__(self):
-        return f"{self.degree} at {self.school}"
+        inst_name = self.institution.name if self.institution else "No Institution"
+        return f"{self.degree} at {inst_name}"
 
     objects = models.Manager()
 
@@ -130,15 +132,32 @@ class Education(models.Model):
 
 
 class Skill(models.Model):
+    class LevelChoices(models.IntegerChoices):
+        BEGINNER = 1, _("Beginner")
+        INTERMEDIATE = 2, _("Intermediate")
+        ADVANCED = 3, _("Advanced")
+        EXPERT = 4, _("Expert")
+
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    level = models.CharField(max_length=100, blank=True, verbose_name=_("level"))
+    name = models.CharField(max_length=100, verbose_name=_("name"))
+    level = models.IntegerField(
+        choices=LevelChoices.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("level"),
+        help_text=_("Proficiency level for this skill"),
+    )
     attachments = models.ManyToManyField(
         "Attachment", blank=True, verbose_name=_("attachments")
     )
 
     def __str__(self):
         return self.name
+    
+    @property
+    def level_display(self):
+        """Return the display name of the level"""
+        return self.get_level_display() if self.level else ""
 
     objects = models.Manager()
 
@@ -149,9 +168,22 @@ class Skill(models.Model):
 
 
 class Language(models.Model):
+    class ProficiencyChoices(models.IntegerChoices):
+        ELEMENTARY = 1, _("Elementary")
+        LIMITED_WORKING = 2, _("Limited Working")
+        PROFESSIONAL_WORKING = 3, _("Professional Working")
+        FULL_PROFESSIONAL = 4, _("Full Professional")
+        NATIVE_BILINGUAL = 5, _("Native or Bilingual")
+
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    level = models.CharField(max_length=100, blank=True, verbose_name=_("level"))
+    name = models.CharField(max_length=100, verbose_name=_("name"))
+    level = models.IntegerField(
+        choices=ProficiencyChoices.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("level"),
+        help_text=_("Language proficiency level"),
+    )
     is_native = models.BooleanField(default=False, verbose_name=_("native"))
     attachments = models.ManyToManyField(
         "Attachment", blank=True, verbose_name=_("attachments")
@@ -159,6 +191,11 @@ class Language(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def level_display(self):
+        """Return the display name of the level"""
+        return self.get_level_display() if self.level else ""
 
     objects = models.Manager()
 

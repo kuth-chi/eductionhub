@@ -64,11 +64,38 @@ class ProfileViewSet(viewsets.ModelViewSet):
             )
         return super().perform_destroy(instance)
 
-    @action(detail=False, methods=["get"], url_path="my-profile")
+    @action(detail=False, methods=["get", "patch", "put"], url_path="my-profile")
     def my_profile(self, request):
         """
-        Custom action to retrieve the authenticated user's profile.
+        Custom action to retrieve and update the authenticated user's profile.
+        Supports GET, PATCH, and PUT methods.
+        Also handles updating User model fields (first_name, last_name, email).
         """
         profile = get_object_or_404(Profile, user=request.user)
-        serializer = self.get_serializer(profile)
+        
+        if request.method == "GET":
+            serializer = self.get_serializer(profile)
+            return Response(serializer.data)
+        
+        # Extract User model fields from request data
+        user_fields = {}
+        user_field_names = ['first_name', 'last_name', 'email']
+        profile_data = request.data.copy()
+        
+        for field_name in user_field_names:
+            if field_name in profile_data:
+                user_fields[field_name] = profile_data.pop(field_name)
+        
+        # Update User model fields if provided
+        if user_fields:
+            user = request.user
+            for field_name, value in user_fields.items():
+                setattr(user, field_name, value)
+            user.save(update_fields=list(user_fields.keys()))
+        
+        # Handle PATCH/PUT for profile updates
+        serializer = self.get_serializer(profile, data=profile_data, partial=(request.method == "PATCH"))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
         return Response(serializer.data)

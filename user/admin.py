@@ -54,7 +54,17 @@ class LettersAdmin(admin.ModelAdmin):
 
 
 class ExperienceAdmin(admin.ModelAdmin):
-    list_display = ("user", "organization", "title", "start_date", "end_date")
+    def user_full_name(self, obj):
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
+
+    user_full_name.short_description = "User"
+
+    list_display = ("user_full_name", "organization", "title", "start_date", "end_date")
+    search_fields = ("user__user__username", "title", "organization__name")
 
 
 class ProfileAdmin(admin.ModelAdmin):
@@ -76,22 +86,30 @@ class AttachmentAdmin(admin.ModelAdmin):
 
 class HobbyAdmin(admin.ModelAdmin):
     def user_full_name(self, obj):
-        if not obj.First_name and not obj.Last_name:
-            return obj.user.username
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
+
+    user_full_name.short_description = "User"
 
     list_display = ("user_full_name", "name")
-    search_fields = ("user__username", "name")
+    search_fields = ("user__user__username", "name")
 
 
 class EducationAdmin(admin.ModelAdmin):
     def user_full_name(self, obj):
-        if not obj.First_name and not obj.Last_name:
-            return obj.user.username
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
+
+    user_full_name.short_description = "User"
 
     list_display = ("user_full_name", "institution", "degree", "start_date", "end_date")
-    search_fields = ("user__username", "institution", "degree")
+    search_fields = ("user__user__username", "institution__name", "degree")
 
 
 try:
@@ -102,27 +120,39 @@ except admin.sites.NotRegistered:
 
 class LanguageAdmin(admin.ModelAdmin):
     def user_full_name(self, obj):
-        if not obj.First_name and not obj.Last_name:
-            return obj.user.username
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
 
-    list_display = ("user", "name", "level", "is_native")
+    user_full_name.short_description = "User"
+
+    list_display = ("user_full_name", "name", "level", "is_native")
 
 
 class SkillAdmin(admin.ModelAdmin):
     def user_full_name(self, obj):
-        if not obj.First_name and not obj.Last_name:
-            return obj.user.username
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
 
-    list_display = ("user", "name", "level")
+    user_full_name.short_description = "User"
+
+    list_display = ("user_full_name", "name", "level")
 
 
 class ReferenceAdmin(admin.ModelAdmin):
     def user_full_name(self, obj):
-        if not obj.First_name and not obj.Last_name:
-            return obj.user.username
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        # obj.user is Profile, so access user through obj.user.user
+        user = obj.user.user
+        if not user.first_name and not user.last_name:
+            return user.username
+        return f"{user.first_name} {user.last_name}".strip()
+
+    user_full_name.short_description = "User"
 
     list_display = ("user_full_name", "name", "phone", "email", "position")
 

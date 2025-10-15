@@ -8,7 +8,10 @@ from rest_framework import serializers
 from api.serializers.organizations.organization_serializers import \
     OrganizationSerializer
 from api.serializers.schools.base import SchoolSerializer
+from api.serializers.social_platforms.platform_serializers import \
+    PlatformSerializer
 from api.serializers.user.profile import UserBasicSerializer
+from schools.models.online_profile import Platform
 from user.models.base import (Attachment, Education, Experience, Hobby,
                               Language, Letter, ProfileContact, Reference,
                               Skill)
@@ -213,6 +216,7 @@ class EducationSerializer(serializers.ModelSerializer):
 class SkillSerializer(serializers.ModelSerializer):
     """Serializer for user skills"""
 
+    level_display = serializers.CharField(source='get_level_display', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     attachment_ids = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -228,15 +232,23 @@ class SkillSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "level",
+            "level_display",
             "attachments",
             "attachment_ids",
         ]
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "level_display")
+    
+    def validate_level(self, value):
+        """Validate level is a valid choice"""
+        if value is not None and value not in [1, 2, 3, 4]:
+            raise serializers.ValidationError("Invalid skill level. Must be 1 (Beginner), 2 (Intermediate), 3 (Advanced), or 4 (Expert).")
+        return value
 
 
 class LanguageSerializer(serializers.ModelSerializer):
     """Serializer for user languages"""
 
+    level_display = serializers.CharField(source='get_level_display', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     attachment_ids = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -252,11 +264,18 @@ class LanguageSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "level",
+            "level_display",
             "is_native",
             "attachments",
             "attachment_ids",
         ]
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "level_display")
+    
+    def validate_level(self, value):
+        """Validate level is a valid choice"""
+        if value is not None and value not in [1, 2, 3, 4, 5]:
+            raise serializers.ValidationError("Invalid language proficiency level. Must be 1-5.")
+        return value
 
 
 class HobbySerializer(serializers.ModelSerializer):
@@ -349,10 +368,6 @@ class ReferenceSerializer(serializers.ModelSerializer):
 
 class ProfileContactSerializer(serializers.ModelSerializer):
     """Serializer for user contact profiles on various platforms"""
-
-    from api.serializers.social_platforms.platform_serializers import \
-        PlatformSerializer
-    from schools.models.online_profile import Platform
 
     platform = PlatformSerializer(read_only=True)
     platform_id = serializers.PrimaryKeyRelatedField(
