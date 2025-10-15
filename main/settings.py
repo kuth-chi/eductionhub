@@ -493,10 +493,10 @@ LOGGING = {
     },
     "loggers": {
         # Our API/auth modules
-        "api": {"handlers": ["console_auth"], "level": "INFO", "propagate": False},
+        "api": {"handlers": ["console_auth"], "level": "INFO", "propagate": True},
         # Django
         "django": {"handlers": ["console"], "level": "WARNING", "propagate": True},
         # Requests to see CORS/CSRF warnings, etc.
-        "django.security": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "INFO", "propagate": True},
     },
 }

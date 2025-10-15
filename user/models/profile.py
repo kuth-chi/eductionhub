@@ -31,6 +31,43 @@ class Profile(models.Model):
     timezone = models.CharField(
         max_length=100, choices=[(tz, tz) for tz in pytz.all_timezones], default="UTC"
     )
+    # NEW FIELDS TO ADD:
+    phone = models.CharField(
+        max_length=20, 
+        blank=True, 
+        verbose_name=_("Phone Number")
+    )
+    date_of_birth = models.DateField(
+        null=True, 
+        blank=True, 
+        verbose_name=_("Date of Birth")
+    )
+    
+    # Address fields (Option 1: Simple text)
+    address_line1 = models.CharField(max_length=255, blank=True)
+    address_line2 = models.CharField(max_length=255, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    
+    # Address fields (Option 2: Using geo models - RECOMMENDED)
+    country = models.ForeignKey(
+        'geo.Country', 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+    state = models.ForeignKey(
+        'geo.State', 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+    city = models.ForeignKey(
+        'geo.City', 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 

@@ -14,6 +14,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
     founders = FounderSerializer(many=True, read_only=True)
     founder_ids = serializers.PrimaryKeyRelatedField(many=True, queryset=Founder.objects.all(), source='founders', write_only=True, required=False)
 
+    logo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
     class Meta:
         """Meta options for the OrganizationSerializer."""
         model = Organization
@@ -25,8 +27,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'local_name',
             'description',
             'established_year',
-            'industry',
-            'industry_id',
             'primary_color',
             'on_primary_color',
             'created_at',
@@ -35,13 +35,26 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'self_data',
             'founders',
             'founder_ids',
+            'industries',
+            'industry_ids',
         ]
         read_only_fields = ['uuid', 'slug', 'created_at', 'updated_at']
 
+    def to_representation(self, instance):
+        """Customize the representation to return logo path."""
+        data = super().to_representation(instance)
+        if instance.logo:
+            data['logo'] = instance.logo.name if hasattr(instance.logo, 'name') else str(instance.logo)
+        else:
+            data['logo'] = None
+        return data
+
     def create(self, validated_data):
-        industry = validated_data.pop('industry', None)
+        industries = validated_data.pop('industries', [])
         founders = validated_data.pop('founders', [])
-        organization = Organization.objects.create(**validated_data, industry=industry)
+        organization = Organization.objects.create(**validated_data)
+        if industries:
+            organization.industries.set(industries)
         if founders:
             organization.founders.set(founders)
         return organization

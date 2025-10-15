@@ -452,7 +452,7 @@ class AuthStatusView(APIView):
 
     def get(self, request):
         try:
-            profile = Profile.objects.get(user=request.user)
+            profile = Profile.objects.select_related('country', 'state__country', 'city__state__country').get(user=request.user)
             # type: ignore[attr-defined]  # pylint: disable=no-member
             social_accounts = SocialAccount.objects.filter(user=request.user)
 
@@ -477,6 +477,77 @@ class AuthStatusView(APIView):
             essential_permissions = CustomJWTSerializer._get_essential_permissions(
                 request.user)  # type: ignore[attr-defined]
 
+            # Build complete profile data with all fields
+            profile_data = {
+                "uuid": str(profile.uuid),
+                "id": str(profile.uuid),  # Compatibility with frontend expecting 'id'
+                "photo": profile.photo.url if profile.photo else None,
+                "gender": profile.gender or "",
+                "occupation": profile.occupation or "",
+                "timezone": profile.timezone or "UTC",
+                # Contact fields
+                "phone": profile.phone or "",
+                "date_of_birth": profile.date_of_birth.isoformat() if profile.date_of_birth else None,
+                # Address fields (simple text)
+                "address_line1": profile.address_line1 or "",
+                "address_line2": profile.address_line2 or "",
+                "postal_code": profile.postal_code or "",
+                # User fields (for convenience)
+                "first_name": profile.user.first_name,
+                "last_name": profile.user.last_name,
+                "email": profile.user.email,
+                "last_login": request.user.last_login.isoformat() if request.user.last_login else None,
+                # Timestamps
+                "created_date": profile.created_date.isoformat() if profile.created_date else None,
+                "updated_date": profile.updated_date.isoformat() if profile.updated_date else None,
+            }
+            
+            # Add geo fields if they exist
+            if profile.country:
+                profile_data["country"] = {
+                    "id": profile.country.id,
+                    "name": profile.country.name,
+                    "code": profile.country.code,
+                    "flag_emoji": getattr(profile.country, 'flag_emoji', None) or "",
+                }
+            else:
+                profile_data["country"] = None
+                
+            if profile.state:
+                profile_data["state"] = {
+                    "id": profile.state.id,
+                    "name": profile.state.name,
+                    "code": profile.state.code,
+                    "country": {
+                        "id": profile.state.country.id,
+                        "name": profile.state.country.name,
+                        "code": profile.state.country.code,
+                        "flag_emoji": getattr(profile.state.country, 'flag_emoji', None) or "",
+                    }
+                }
+            else:
+                profile_data["state"] = None
+                
+            if profile.city:
+                profile_data["city"] = {
+                    "id": profile.city.id,
+                    "name": profile.city.name,
+                    "code": profile.city.code,
+                    "state": {
+                        "id": profile.city.state.id,
+                        "name": profile.city.state.name,
+                        "code": profile.city.state.code,
+                        "country": {
+                            "id": profile.city.state.country.id,
+                            "name": profile.city.state.country.name,
+                            "code": profile.city.state.country.code,
+                            "flag_emoji": getattr(profile.city.state.country, 'flag_emoji', None) or "",
+                        }
+                    }
+                }
+            else:
+                profile_data["city"] = None
+
             return Response(
                 {
                     "authenticated": True,
@@ -487,17 +558,13 @@ class AuthStatusView(APIView):
                         "first_name": request.user.first_name,
                         "last_name": request.user.last_name,
                         # Use ISO string for strict JSON safety
-                        "last_logged_in": request.user.last_login.isoformat() if request.user.last_login else None,
+                        "last_login": request.user.last_login.isoformat() if request.user.last_login else None,
+                        "date_joined": request.user.date_joined.isoformat() if request.user.date_joined else None,
                         "is_staff": request.user.is_staff,
                         "is_superuser": request.user.is_superuser,
+                        "is_active": request.user.is_active,
                     },
-                    "profile": {
-                        "id": str(profile.uuid),
-                        "first_name": profile.user.first_name,
-                        "last_name": profile.user.last_name,
-                        "email": profile.user.email,
-                        "photo": profile.photo.url if profile.photo else None,
-                    },
+                    "profile": profile_data,
                     "social_accounts": [
                         {"provider": sa.provider, "uid": sa.uid,
                             "extra_data": sa.extra_data}

@@ -112,13 +112,24 @@ class ExperienceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return only the current user's experiences"""
+        print(f"ExperienceViewSet.get_queryset: user={self.request.user}, is_authenticated={self.request.user.is_authenticated}")
+        print(f"ExperienceViewSet.get_queryset: user={self.request.user}, has_profile={hasattr(self.request.user, 'profile')}")
         if not hasattr(self.request.user, "profile"):
-            return Experience.objects.none()
-        return Experience.objects.filter(user=self.request.user.profile)
+            print("ExperienceViewSet.get_queryset: No profile found, creating one...")
+            from user.models.profile import Profile
+            profile, created = Profile.objects.get_or_create(user=self.request.user)
+            print(f"ExperienceViewSet.get_queryset: Profile created: {created}, profile: {profile}")
+        profile = self.request.user.profile
+        print(f"ExperienceViewSet.get_queryset: profile={profile}, filtering experiences...")
+        queryset = Experience.objects.filter(user=self.request.user.profile)
+        print(f"ExperienceViewSet.get_queryset: found {queryset.count()} experiences")
+        return queryset
 
     def perform_create(self, serializer):
         """Automatically associate the experience with the current user's profile"""
-        profile = get_object_or_404(Profile, user=self.request.user)
+        from user.models.profile import Profile
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        print(f"ExperienceViewSet.perform_create: Profile created: {created}, profile: {profile}")
         serializer.save(user=profile)
 
 

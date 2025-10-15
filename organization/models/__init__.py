@@ -1,1 +1,1 @@
-from .base import organization_logo_image_upload_path
+from .base import organization_logo_image_upload_path, Organization
