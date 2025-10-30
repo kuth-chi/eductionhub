@@ -21,6 +21,16 @@ from api.views.auth.social_auth_complete import (FacebookSocialLoginView,
                                                  GoogleSocialLoginView,
                                                  TelegramSocialLoginView)
 from api.views.auth.social_auth_viewset import GoogleLogin
+from api.views.events_viewset import (EventCategoryViewSet,
+                                      EventExpenseViewSet,
+                                      EventFeedbackViewSet, EventImpactViewSet,
+                                      EventMilestoneViewSet,
+                                      EventOrganizerViewSet,
+                                      EventParticipantViewSet,
+                                      EventPartnershipViewSet,
+                                      EventPhotoViewSet, EventSponsorViewSet,
+                                      EventTicketViewSet, EventTypeViewSet,
+                                      EventUpdateViewSet, EventViewSet)
 from api.views.location_api import (CityViewSet, CountryViewSet, StateViewSet,
                                     VillageViewSet)
 from api.views.organizations.founder_viewset import FounderViewSet
@@ -127,6 +137,31 @@ router.register(r"user-references", ReferenceViewSet,
                 basename="user-references")
 router.register(r"user-contacts", ProfileContactViewSet,
                 basename="user-contacts")
+
+# Event Management routes
+router.register(r"event-categories", EventCategoryViewSet,
+                basename="event-categories")
+router.register(r"event-types", EventTypeViewSet, basename="event-types")
+router.register(r"events", EventViewSet, basename="events")
+router.register(r"event-participants", EventParticipantViewSet,
+                basename="event-participants")
+router.register(r"event-organizers", EventOrganizerViewSet,
+                basename="event-organizers")
+router.register(r"event-sponsors", EventSponsorViewSet,
+                basename="event-sponsors")
+router.register(r"event-expenses", EventExpenseViewSet,
+                basename="event-expenses")
+router.register(r"event-tickets", EventTicketViewSet, basename="event-tickets")
+router.register(r"event-photos", EventPhotoViewSet, basename="event-photos")
+router.register(r"event-updates", EventUpdateViewSet, basename="event-updates")
+router.register(r"event-milestones", EventMilestoneViewSet,
+                basename="event-milestones")
+router.register(r"event-feedback", EventFeedbackViewSet,
+                basename="event-feedback")
+router.register(r"event-partnerships", EventPartnershipViewSet,
+                basename="event-partnerships")
+router.register(r"event-impacts", EventImpactViewSet, basename="event-impacts")
+
 
 urlpatterns = [
     path("", include(router.urls)),
