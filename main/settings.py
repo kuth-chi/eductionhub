@@ -139,6 +139,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.telegram",
     # My apps
+    "event",
     "user",
     "rbac",
     "administrator",

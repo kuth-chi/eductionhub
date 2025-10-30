@@ -5,6 +5,7 @@ Concise, project-specific guidance so an AI agent can be productive immediately.
 ## 1. Big Picture
 
 - Monorepo-style workspace: Next.js (frontend under `web_frontend/web`) + Django REST backend (`v0.0.2`).
+- when access terminal to backend, `cd v0.0.2 && .venv\Scripts\activate` first.
 - Core domain: school & education data (schools, branches, majors, degrees, scholarships), plus organization / ads manager, geo (countries, states, cities, villages), authentication & user profiles.
 - Frontend uses: Next.js App Router, feature-based modules (`src/modules/<feature>`), tRPC for some internal typing + direct REST calls via `auth-fetch.ts`, TanStack Query for server state, Zod for validation.
 - Backend: Django + DRF viewsets registered in `api/urls.py` using a `DefaultRouter` (naming pattern: kebab-case paths e.g. `major-document-requirements`). Ads manager endpoints share `ad-*` prefix.
@@ -25,6 +26,48 @@ Concise, project-specific guidance so an AI agent can be productive immediately.
 - Use `auth-fetch.ts` for authenticated REST calls; ensure cache-prevention headers for auth-sensitive actions.
 - Mark auth-related pages & routes with dynamic export flags when necessary (`export const dynamic = 'force-dynamic'` etc.) consistent with docs in `AUTH_CACHE_PREVENTION_SUMMARY.md`.
 - Validation: Zod schemas colocated (e.g. `schemas.ts`); reuse in forms + server calls; do not create ad-hoc runtime validators.
+
+### 3.1 SSR-First Architecture (Critical)
+
+**Default to Server Components** — Keep components as server-rendered unless they REQUIRE client-side features.
+
+**When to use `"use client"`:**
+- Component uses React hooks (`useState`, `useEffect`, `useContext`, etc.)
+- Component needs browser APIs (`window`, `navigator`, `localStorage`, `document`)
+- Component has event handlers (`onClick`, `onChange`, `onSubmit`)
+- Component uses client-only libraries (chart libraries, animation libs)
+
+**Push `"use client"` down the tree** — Extract interactive parts into separate client components rather than marking entire pages/views as client. Example:
+```tsx
+// ❌ BAD: Entire page is client
+"use client";
+export default function Page() {
+  return (
+    <div>
+      <StaticContent />
+      <button onClick={...}>Click</button>
+    </div>
+  );
+}
+
+// ✅ GOOD: Only interactive part is client
+export default function Page() {
+  return (
+    <div>
+      <StaticContent /> {/* SSR */}
+      <InteractiveButton /> {/* Client */}
+    </div>
+  );
+}
+```
+
+**Benefits of SSR-first:**
+- Better SEO (search engines get full HTML)
+- Faster initial page load (less JavaScript)
+- Improved Core Web Vitals
+- Data fetching happens server-side (faster, more secure)
+
+**Reference implementation:** See `modules/events/ui/views/event-detail-page-view.tsx` and its extracted client components (`event-management-menu.tsx`, `event-share-button.tsx`, `event-tabs-section.tsx`) for the pattern. Documentation in `docs/EVENT_DETAIL_SSR_OPTIMIZATION.md`.
 
 ## 4. Naming & Routing Patterns
 
@@ -74,12 +117,14 @@ Concise, project-specific guidance so an AI agent can be productive immediately.
 - Do NOT store JWTs or sensitive tokens in localStorage/sessionStorage.
 - Do NOT introduce a new state management library (Redux, MobX) without justification.
 - Do NOT create duplicate UI primitives—extend existing components.
+- Do NOT add `"use client"` to components that don't need it—default to server components for better performance and SEO.
 
 ## 12. Quick Reference Key Files
 
 - Backend routing: `v0.0.2/api/urls.py`
 - Auth cache prevention patterns: `docs/AUTH_CACHE_PREVENTION_SUMMARY.md`
 - Frontend architecture: `docs/FRONTEND_ARCHITECTURE.md`
+- SSR optimization patterns: `docs/EVENT_DETAIL_SSR_OPTIMIZATION.md`
 - Environment config: `docs/ENV_CONFIG.md`, `src/lib/env.ts`
 - Auth production fixes: `docs/AUTHENTICATION_PRODUCTION_FIX.md`
 - Upload utility: `src/lib/file-upload.ts`

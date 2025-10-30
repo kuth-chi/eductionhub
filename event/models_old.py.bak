@@ -1,0 +1,1186 @@
+# pylint: disable=no-member
+import uuid
+from decimal import Decimal
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class EventCategory(models.Model):
+    """
+    Flexible event categorization: charity, educational, cultural, sports, health, etc.
+    Supports hierarchy for sub-categories.
+    """
+    name = models.CharField(max_length=100, unique=True,
+                            verbose_name=_("Category name"))
+    slug = models.SlugField(unique=True, verbose_name=_("URL slug"))
+    icon = models.CharField(max_length=50, blank=True,
+                            help_text="Icon identifier (e.g., font-awesome class)")
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    parent_category = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='subcategories',
+        verbose_name=_("Parent category")
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Category")
+        verbose_name_plural = _("Event Categories")
+        ordering = ['name']
+
+    def __str__(self):
+        return str(self.name)
+
+
+class EventType(models.Model):
+    """
+    Specific event types: fundraiser, workshop, conference, donation-drive, 
+    school-supply-drive, sports-tournament, health-camp, etc.
+    """
+    name = models.CharField(max_length=100, verbose_name=_("Type name"))
+    slug = models.SlugField(unique=True, verbose_name=_("URL slug"))
+    category = models.ForeignKey(
+        EventCategory,
+        on_delete=models.CASCADE,
+        related_name='event_types',
+        verbose_name=_("Category")
+    )
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    icon = models.CharField(max_length=50, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Type")
+        verbose_name_plural = _("Event Types")
+        ordering = ['category', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.category.name})"
+
+
+class Event(models.Model):
+    """
+    Core flexible event entity supporting charity, educational, and global events.
+    Enhanced with precise geolocation for easy discovery and mobile integration.
+    """
+    STATUS_CHOICES = [
+        ('draft', _('Draft')),
+        ('published', _('Published')),
+        ('ongoing', _('Ongoing')),
+        ('completed', _('Completed')),
+        ('cancelled', _('Cancelled')),
+    ]
+
+    VISIBILITY_CHOICES = [
+        ('public', _('Public - Anyone can view')),
+        ('unlisted', _('Unlisted - Only with link')),
+        ('private', _('Private - Invite only')),
+    ]
+
+    # Identity
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True,
+                            editable=False, verbose_name=_("Unique ID"))
+    title = models.CharField(max_length=255, verbose_name=_("Event title"))
+    slug = models.SlugField(max_length=255, unique=True,
+                            verbose_name=_("URL slug"))
+    description = models.TextField(verbose_name=_("Description"))
+    short_description = models.CharField(
+        max_length=500, blank=True, help_text="Brief summary for cards/previews")
+    event_type = models.ForeignKey(
+        EventType,
+        on_delete=models.PROTECT,
+        related_name='events',
+        verbose_name=_("Event type")
+    )
+    tags = models.JSONField(default=list, blank=True,
+                            help_text="Tags for search and filtering")
+
+    # Flexible target: school, organization, or standalone global event
+    target_school = models.ForeignKey(
+        'schools.School',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+        verbose_name=_("Target school")
+    )
+    target_organization = models.ForeignKey(
+        'organization.Organization',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+        verbose_name=_("Target organization")
+    )
+
+    # Enhanced Geolocation - Easy to find on maps!
+    # Administrative hierarchy (optional, for filtering)
+    country = models.ForeignKey(
+        'geo.Country',
+        on_delete=models.PROTECT,
+        related_name='events',
+        verbose_name=_("Country")
+    )
+    state = models.ForeignKey(
+        'geo.State',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+        verbose_name=_("State/Province")
+    )
+    city = models.ForeignKey(
+        'geo.City',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+        verbose_name=_("City")
+    )
+    village = models.ForeignKey(
+        'geo.Village',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+        verbose_name=_("Village/Suburb")
+    )
+
+    # Precise location - KEY FOR USER CONVENIENCE
+    address_line_1 = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Address line 1"),
+        help_text="Street address, building name"
+    )
+    address_line_2 = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Address line 2"),
+        help_text="Apartment, suite, floor, etc."
+    )
+    postal_code = models.CharField(
+        max_length=20, blank=True, verbose_name=_("Postal/ZIP code"))
+
+    # Lat/Lon for maps, distance calculation, and mobile location services
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(
+            Decimal('-90')), MaxValueValidator(Decimal('90'))],
+        verbose_name=_("Latitude"),
+        help_text="Decimal degrees (-90 to 90)"
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(
+            Decimal('-180')), MaxValueValidator(Decimal('180'))],
+        verbose_name=_("Longitude"),
+        help_text="Decimal degrees (-180 to 180)"
+    )
+
+    # Location display & convenience
+    location_name = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Location name"),
+        help_text="E.g., 'City Hall', 'Community Center', 'School Auditorium'"
+    )
+    location_instructions = models.TextField(
+        blank=True,
+        verbose_name=_("How to get there"),
+        help_text="Directions, parking info, landmarks"
+    )
+    google_maps_url = models.URLField(
+        blank=True, help_text="Direct link to Google Maps")
+
+    # Virtual event option
+    is_virtual = models.BooleanField(
+        default=False, verbose_name=_("Virtual/Online event"))
+    virtual_meeting_url = models.URLField(
+        blank=True, help_text="Zoom, Meet, Teams link")
+    virtual_meeting_password = models.CharField(max_length=100, blank=True)
+
+    # Timing
+    start_datetime = models.DateTimeField(verbose_name=_("Start date & time"))
+    end_datetime = models.DateTimeField(verbose_name=_("End date & time"))
+    timezone = models.CharField(
+        max_length=50,
+        default='UTC',
+        help_text="IANA timezone (e.g., America/New_York)"
+    )
+    registration_start = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Registration opens")
+    )
+    registration_deadline = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Registration closes")
+    )
+
+    # Capacity
+    max_participants = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        help_text="Leave empty for unlimited"
+    )
+
+    # Media
+    banner_image = models.ImageField(
+        upload_to='events/banners/',
+        null=True,
+        blank=True,
+        verbose_name=_("Banner image")
+    )
+    thumbnail_image = models.ImageField(
+        upload_to='events/thumbnails/',
+        null=True,
+        blank=True,
+        verbose_name=_("Thumbnail for cards")
+    )
+    video_url = models.URLField(
+        blank=True, verbose_name=_("Promotional video URL"))
+
+    # Financial (for charity/fundraising events)
+    funding_goal = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name=_("Funding goal")
+    )
+    current_funding = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0'),
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name=_("Current funding")
+    )
+    currency = models.CharField(
+        max_length=3, default='USD', verbose_name=_("Currency code"))
+
+    # Status & visibility
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+        verbose_name=_("Status")
+    )
+    visibility = models.CharField(
+        max_length=20,
+        choices=VISIBILITY_CHOICES,
+        default='public',
+        verbose_name=_("Visibility")
+    )
+    requires_approval = models.BooleanField(
+        default=False,
+        help_text="Organizer must approve registrations"
+    )
+    is_featured = models.BooleanField(
+        default=False, help_text="Show on homepage")
+
+    # Metadata
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='events_created',
+        verbose_name=_("Creator")
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("Created at"))
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name=_("Updated at"))
+    published_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Published at"))
+
+    # SEO & sharing
+    meta_description = models.CharField(max_length=160, blank=True)
+    og_image = models.ImageField(upload_to='events/og/', null=True, blank=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event")
+        verbose_name_plural = _("Events")
+        ordering = ['-start_datetime']
+        indexes = [
+            models.Index(fields=['status', 'visibility']),
+            models.Index(fields=['start_datetime']),
+            models.Index(fields=['latitude', 'longitude']),
+            models.Index(fields=['country', 'state', 'city']),
+        ]
+
+    def clean(self):
+        """Validate event data"""
+        super().clean()
+
+        # Date validation
+        if self.start_datetime and self.end_datetime:
+            if self.start_datetime >= self.end_datetime:
+                raise ValidationError({
+                    'end_datetime': _('End date must be after start date.')
+                })
+
+        # Registration deadline validation
+        if self.registration_deadline and self.start_datetime:
+            if self.registration_deadline > self.start_datetime:
+                raise ValidationError({
+                    'registration_deadline': _('Registration must close before event starts.')
+                })
+
+        # Location validation
+        if not self.is_virtual:
+            if not (self.latitude and self.longitude):
+                if not (self.address_line_1 or self.location_name):
+                    raise ValidationError(
+                        _('Physical events need either coordinates (lat/lon) or an address.')
+                    )
+
+        # Virtual event validation
+        if self.is_virtual and not self.virtual_meeting_url:
+            raise ValidationError({
+                'virtual_meeting_url': _('Virtual events require a meeting URL.')
+            })
+
+        # Coordinates validation
+        if (self.latitude is None) != (self.longitude is None):
+            raise ValidationError(
+                _('Both latitude and longitude must be provided together.'))
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean"""
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.title)
+
+    @property
+    def is_registration_open(self):
+        """Check if registration is currently open"""
+        from django.utils import timezone
+        now = timezone.now()
+
+        if self.registration_start and now < self.registration_start:
+            return False
+        if self.registration_deadline and now > self.registration_deadline:
+            return False
+        if self.status not in ['published', 'ongoing']:
+            return False
+
+        return True
+
+    @property
+    def is_full(self):
+        """Check if event reached capacity"""
+        if not self.max_participants:
+            return False
+        return self.participants.filter(status='registered').count() >= self.max_participants
+
+    @property
+    def funding_percentage(self):
+        """Calculate funding progress"""
+        if not self.funding_goal or self.funding_goal == 0:
+            return 0
+        return min(100, (float(self.current_funding) / float(self.funding_goal)) * 100)
+
+    @property
+    def full_address(self):
+        """Get formatted full address"""
+        parts = [
+            self.address_line_1,
+            self.address_line_2,
+            self.city.name if self.city else None,
+            self.state.name if self.state else None,
+            self.postal_code,
+            self.country.name if self.country else None,
+        ]
+        return ', '.join(filter(None, parts))
+
+
+class EventOrganizer(models.Model):
+    """
+    Multiple organizers per event with different roles and permissions.
+    Supports team-based event management.
+    """
+    ROLE_CHOICES = [
+        ('lead', _('Lead Organizer')),
+        ('co-organizer', _('Co-Organizer')),
+        ('volunteer-coordinator', _('Volunteer Coordinator')),
+        ('finance-manager', _('Finance Manager')),
+        ('media-manager', _('Media & Communications')),
+        ('logistics', _('Logistics Manager')),
+        ('registration', _('Registration Manager')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='organizers',
+        verbose_name=_("Event")
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='organized_events',
+        verbose_name=_("User")
+    )
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, verbose_name=_("Role"))
+
+    # Granular permissions
+    can_edit_event = models.BooleanField(default=False)
+    can_manage_participants = models.BooleanField(default=False)
+    can_manage_finances = models.BooleanField(default=False)
+    can_upload_media = models.BooleanField(default=True)
+    can_post_updates = models.BooleanField(default=True)
+
+    notes = models.TextField(
+        blank=True, help_text="Internal notes about this organizer")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Organizer")
+        verbose_name_plural = _("Event Organizers")
+        unique_together = ['event', 'user']
+        ordering = ['event', '-role']
+
+    def __str__(self):
+        return f"{self.user} - {self.get_role_display()} ({self.event.title})"
+
+
+class EventSponsor(models.Model):
+    """
+    Sponsors and their contributions (financial or in-kind).
+    Supports transparency and acknowledgment.
+    """
+    SPONSOR_TYPE = [
+        ('title', _('Title Sponsor')),
+        ('platinum', _('Platinum')),
+        ('gold', _('Gold')),
+        ('silver', _('Silver')),
+        ('bronze', _('Bronze')),
+        ('in-kind', _('In-Kind Contribution')),
+        ('community', _('Community Sponsor')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='sponsors',
+        verbose_name=_("Event")
+    )
+
+    # Can link to organization or be standalone
+    organization = models.ForeignKey(
+        'organization.Organization',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='sponsored_events',
+        verbose_name=_("Organization")
+    )
+    sponsor_name = models.CharField(
+        max_length=255, verbose_name=_("Sponsor name"))
+    sponsor_logo = models.ImageField(
+        upload_to='events/sponsors/',
+        null=True,
+        blank=True,
+        verbose_name=_("Logo")
+    )
+    sponsor_website = models.URLField(blank=True, verbose_name=_("Website"))
+
+    sponsor_type = models.CharField(
+        max_length=20,
+        choices=SPONSOR_TYPE,
+        verbose_name=_("Sponsorship level")
+    )
+
+    # Financial or in-kind
+    contribution_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name=_("Contribution amount")
+    )
+    contribution_description = models.TextField(
+        blank=True,
+        verbose_name=_("Contribution details"),
+        help_text="Describe in-kind contributions or what the money supports"
+    )
+
+    # Display settings
+    is_public = models.BooleanField(
+        default=True,
+        help_text="Show sponsor publicly on event page"
+    )
+    display_order = models.IntegerField(
+        default=0, help_text="Sort order for display")
+
+    # Metadata
+    contributed_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, help_text="Internal notes")
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Sponsor")
+        verbose_name_plural = _("Event Sponsors")
+        ordering = ['event', 'display_order', '-contribution_amount']
+
+    def __str__(self):
+        return f"{self.sponsor_name} - {self.get_sponsor_type_display()} ({self.event.title})"
+
+
+class EventExpense(models.Model):
+    """
+    Financial transparency - track all expenses with receipts.
+    Critical for charity events and donor trust.
+    """
+    EXPENSE_CATEGORY = [
+        ('materials', _('Materials & Supplies')),
+        ('venue', _('Venue & Facilities')),
+        ('food', _('Food & Catering')),
+        ('transport', _('Transportation')),
+        ('marketing', _('Marketing & Promotion')),
+        ('equipment', _('Equipment Rental/Purchase')),
+        ('staffing', _('Staffing & Labor')),
+        ('permits', _('Permits & Licenses')),
+        ('insurance', _('Insurance')),
+        ('printing', _('Printing & Signage')),
+        ('technology', _('Technology & Software')),
+        ('other', _('Other')),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', _('Pending Approval')),
+        ('approved', _('Approved')),
+        ('rejected', _('Rejected')),
+        ('paid', _('Paid')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='expenses',
+        verbose_name=_("Event")
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=EXPENSE_CATEGORY,
+        verbose_name=_("Category")
+    )
+    title = models.CharField(max_length=255, verbose_name=_("Expense title"))
+    description = models.TextField(verbose_name=_("Description"))
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name=_("Amount")
+    )
+    currency = models.CharField(max_length=3, default='USD')
+
+    # Documentation
+    receipt = models.FileField(
+        upload_to='events/receipts/',
+        null=True,
+        blank=True,
+        verbose_name=_("Receipt/Invoice")
+    )
+    receipt_number = models.CharField(max_length=100, blank=True)
+    vendor_name = models.CharField(
+        max_length=255, blank=True, verbose_name=_("Vendor/Supplier"))
+
+    # Dates
+    expense_date = models.DateField(verbose_name=_("Date of expense"))
+    payment_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Payment date"))
+
+    # Approval workflow
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending')
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='submitted_expenses'
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='approved_expenses'
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    notes = models.TextField(blank=True, verbose_name=_("Notes"))
+    rejection_reason = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Expense")
+        verbose_name_plural = _("Event Expenses")
+        ordering = ['event', '-expense_date']
+
+    def __str__(self):
+        return f"{self.title} - {self.amount} {self.currency} ({self.event.title})"
+
+
+class EventParticipant(models.Model):
+    """
+    Event registration and attendance tracking.
+    Supports both registered users and guest registrations.
+    """
+    PARTICIPANT_STATUS = [
+        ('registered', _('Registered')),
+        ('waitlist', _('Waitlist')),
+        ('confirmed', _('Confirmed')),
+        ('attended', _('Attended')),
+        ('no-show', _('No Show')),
+        ('cancelled', _('Cancelled')),
+    ]
+
+    PARTICIPANT_ROLE = [
+        ('attendee', _('Attendee')),
+        ('speaker', _('Speaker/Presenter')),
+        ('volunteer', _('Volunteer')),
+        ('staff', _('Staff')),
+        ('vip', _('VIP Guest')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='participants',
+        verbose_name=_("Event")
+    )
+
+    # User account (optional for guest registration)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='event_participations',
+        verbose_name=_("User")
+    )
+
+    # Guest details (required if no user account)
+    name = models.CharField(max_length=255, verbose_name=_("Full name"))
+    email = models.EmailField(verbose_name=_("Email"))
+    phone = models.CharField(max_length=20, blank=True,
+                             verbose_name=_("Phone number"))
+
+    # Role & status
+    role = models.CharField(
+        max_length=20,
+        choices=PARTICIPANT_ROLE,
+        default='attendee',
+        verbose_name=_("Role")
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=PARTICIPANT_STATUS,
+        default='registered',
+        verbose_name=_("Status")
+    )
+
+    # Additional info
+    organization_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Company, school, or organization"
+    )
+    special_requirements = models.TextField(
+        blank=True,
+        help_text="Dietary, accessibility, or other needs"
+    )
+
+    # Timestamps
+    registration_date = models.DateTimeField(auto_now_add=True)
+    confirmation_date = models.DateTimeField(null=True, blank=True)
+    check_in_time = models.DateTimeField(null=True, blank=True)
+    check_out_time = models.DateTimeField(null=True, blank=True)
+
+    # Communication
+    registration_confirmed = models.BooleanField(default=False)
+    reminder_sent = models.BooleanField(default=False)
+
+    notes = models.TextField(blank=True, help_text="Internal notes")
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Participant")
+        verbose_name_plural = _("Event Participants")
+        ordering = ['event', 'registration_date']
+        indexes = [
+            models.Index(fields=['event', 'status']),
+            models.Index(fields=['email']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.get_role_display()} ({self.event.title})"
+
+
+class EventPhoto(models.Model):
+    """
+    Photo gallery for event documentation.
+    Essential for transparency and showcasing impact.
+    """
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='photos',
+        verbose_name=_("Event")
+    )
+    image = models.ImageField(
+        upload_to='events/photos/', verbose_name=_("Photo"))
+    caption = models.CharField(
+        max_length=500, blank=True, verbose_name=_("Caption"))
+
+    # Photo metadata
+    photographer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='event_photos',
+        verbose_name=_("Photographer")
+    )
+    photographer_credit = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Photographer name if not a user"
+    )
+    taken_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Photo taken at")
+    )
+
+    # Organization
+    tags = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Tags: ceremony, distribution, students, volunteers, etc."
+    )
+
+    # Display settings
+    is_featured = models.BooleanField(
+        default=False, help_text="Show in highlights")
+    is_public = models.BooleanField(
+        default=True, help_text="Visible to public")
+    display_order = models.IntegerField(default=0)
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Photo")
+        verbose_name_plural = _("Event Photos")
+        ordering = ['event', 'display_order', '-taken_at']
+
+    def __str__(self):
+        return f"Photo for {self.event.title} - {self.uploaded_at.date()}"
+
+
+class EventUpdate(models.Model):
+    """
+    Progress updates and announcements for stakeholders.
+    Keeps sponsors, participants, and community informed.
+    """
+    UPDATE_TYPE = [
+        ('general', _('General Update')),
+        ('milestone', _('Milestone Achieved')),
+        ('announcement', _('Announcement')),
+        ('reminder', _('Reminder')),
+        ('thank-you', _('Thank You')),
+        ('urgent', _('Urgent Notice')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='updates',
+        verbose_name=_("Event")
+    )
+    update_type = models.CharField(
+        max_length=20,
+        choices=UPDATE_TYPE,
+        default='general',
+        verbose_name=_("Update type")
+    )
+    title = models.CharField(max_length=255, verbose_name=_("Title"))
+    content = models.TextField(verbose_name=_("Content"))
+
+    # Media attachment
+    image = models.ImageField(
+        upload_to='events/updates/', null=True, blank=True)
+
+    # Posting details
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='event_updates',
+        verbose_name=_("Posted by")
+    )
+    posted_at = models.DateTimeField(auto_now_add=True)
+
+    # Display settings
+    is_pinned = models.BooleanField(
+        default=False, help_text="Pin to top of updates")
+    is_public = models.BooleanField(default=True)
+
+    # Notifications
+    notify_participants = models.BooleanField(default=False)
+    notify_sponsors = models.BooleanField(default=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Update")
+        verbose_name_plural = _("Event Updates")
+        ordering = ['event', '-is_pinned', '-posted_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.event.title}"
+
+
+class EventMilestone(models.Model):
+    """
+    Track key achievements and goals.
+    Great for fundraising campaigns and progress visualization.
+    """
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='milestones',
+        verbose_name=_("Event")
+    )
+    title = models.CharField(max_length=255, verbose_name=_("Milestone title"))
+    description = models.TextField(verbose_name=_("Description"))
+
+    # Target & completion
+    target_date = models.DateField(verbose_name=_("Target date"))
+    completion_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Completion date"))
+    is_completed = models.BooleanField(
+        default=False, verbose_name=_("Completed"))
+
+    # Proof/evidence
+    proof_image = models.ImageField(
+        upload_to='events/milestones/',
+        null=True,
+        blank=True,
+        verbose_name=_("Proof image")
+    )
+    proof_document = models.FileField(
+        upload_to='events/milestones/docs/',
+        null=True,
+        blank=True,
+        verbose_name=_("Proof document")
+    )
+    completion_notes = models.TextField(blank=True)
+
+    # Display
+    display_order = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Milestone")
+        verbose_name_plural = _("Event Milestones")
+        ordering = ['event', 'display_order', 'target_date']
+
+    def __str__(self):
+        status = "✓" if self.is_completed else "○"
+        return f"{status} {self.title} - {self.event.title}"
+
+
+class EventFeedback(models.Model):
+    """
+    Post-event feedback and ratings.
+    Helps improve future events and build credibility.
+    """
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='feedback',
+        verbose_name=_("Event")
+    )
+    participant = models.ForeignKey(
+        EventParticipant,
+        on_delete=models.CASCADE,
+        related_name='feedback',
+        verbose_name=_("Participant")
+    )
+
+    # Ratings (1-5 stars)
+    overall_rating = models.IntegerField(
+        choices=[(i, f"{i} Star{'s' if i > 1 else ''}") for i in range(1, 6)],
+        verbose_name=_("Overall rating")
+    )
+    organization_rating = models.IntegerField(
+        null=True,
+        blank=True,
+        choices=[(i, str(i)) for i in range(1, 6)],
+        help_text="How well organized was the event?"
+    )
+    content_rating = models.IntegerField(
+        null=True,
+        blank=True,
+        choices=[(i, str(i)) for i in range(1, 6)],
+        help_text="Quality of content/activities"
+    )
+    venue_rating = models.IntegerField(
+        null=True,
+        blank=True,
+        choices=[(i, str(i)) for i in range(1, 6)],
+        help_text="Venue and facilities"
+    )
+
+    # Feedback
+    comment = models.TextField(blank=True, verbose_name=_("Comments"))
+    what_went_well = models.TextField(blank=True)
+    what_to_improve = models.TextField(blank=True)
+    would_recommend = models.BooleanField(
+        null=True, help_text="Would you recommend this event?")
+
+    # Display settings
+    is_public = models.BooleanField(
+        default=True,
+        help_text="Allow others to see this feedback"
+    )
+    is_featured = models.BooleanField(
+        default=False, help_text="Feature as testimonial")
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Feedback")
+        verbose_name_plural = _("Event Feedback")
+        ordering = ['event', '-submitted_at']
+        unique_together = ['event', 'participant']
+
+    def __str__(self):
+        return f"Feedback from {self.participant.name} - {self.overall_rating}★"
+
+
+class EventTicket(models.Model):
+    """
+    Ticket types for paid or tiered-access events.
+    Supports free events with registration tiers too.
+    """
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='tickets',
+        verbose_name=_("Event")
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_("Ticket name"),
+        help_text="E.g., 'Early Bird', 'VIP', 'Student', 'General Admission'"
+    )
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+
+    # Pricing
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name=_("Price")
+    )
+    currency = models.CharField(max_length=3, default='USD')
+
+    # Availability
+    quantity_available = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Leave empty for unlimited"
+    )
+    quantity_sold = models.IntegerField(
+        default=0, validators=[MinValueValidator(0)])
+
+    # Sale period
+    sale_start = models.DateTimeField(null=True, blank=True)
+    sale_end = models.DateTimeField(null=True, blank=True)
+
+    # Settings
+    is_active = models.BooleanField(default=True)
+    display_order = models.IntegerField(default=0)
+
+    # Benefits
+    benefits = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of benefits for this ticket type"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Ticket")
+        verbose_name_plural = _("Event Tickets")
+        ordering = ['event', 'display_order', 'price']
+
+    def __str__(self):
+        return f"{self.name} - {self.price} {self.currency} ({self.event.title})"
+
+    @property
+    def is_available(self):
+        """Check if ticket is still available"""
+        from django.utils import timezone
+        now = timezone.now()
+
+        if not self.is_active:
+            return False
+        if self.sale_start and now < self.sale_start:
+            return False
+        if self.sale_end and now > self.sale_end:
+            return False
+        if self.quantity_available and self.quantity_sold >= self.quantity_available:
+            return False
+
+        return True
+
+
+class EventPartnership(models.Model):
+    """
+    Partnerships with other organizations.
+    Useful for collaborative events.
+    """
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='partnerships',
+        verbose_name=_("Event")
+    )
+    partner_organization = models.ForeignKey(
+        'organization.Organization',
+        on_delete=models.CASCADE,
+        related_name='event_partnerships',
+        verbose_name=_("Partner organization")
+    )
+    partnership_type = models.CharField(
+        max_length=50,
+        verbose_name=_("Partnership type"),
+        help_text="E.g., 'Co-host', 'Supporting Partner', 'Media Partner'"
+    )
+    description = models.TextField(
+        blank=True, verbose_name=_("Partnership details"))
+    logo = models.ImageField(
+        upload_to='events/partners/', null=True, blank=True)
+
+    is_public = models.BooleanField(default=True)
+    display_order = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Partnership")
+        verbose_name_plural = _("Event Partnerships")
+        ordering = ['event', 'display_order']
+
+    def __str__(self):
+        return f"{self.partner_organization.name} - {self.partnership_type} ({self.event.title})"
+
+
+class EventImpact(models.Model):
+    """
+    Measure and showcase social impact.
+    Critical for demonstrating event success and value.
+    """
+    METRIC_TYPE = [
+        ('beneficiaries', _('Beneficiaries Reached')),
+        ('funds', _('Funds Raised')),
+        ('items', _('Items Distributed')),
+        ('volunteers', _('Volunteers Engaged')),
+        ('hours', _('Volunteer Hours')),
+        ('custom', _('Custom Metric')),
+    ]
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='impact_metrics',
+        verbose_name=_("Event")
+    )
+    metric_type = models.CharField(max_length=30, choices=METRIC_TYPE)
+    metric_name = models.CharField(
+        max_length=100,
+        verbose_name=_("Metric name"),
+        help_text="E.g., 'Students helped', 'Books distributed', 'Trees planted'"
+    )
+    metric_value = models.IntegerField(verbose_name=_("Value"))
+    metric_unit = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="E.g., 'students', 'kg', 'hours'"
+    )
+
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    icon = models.CharField(max_length=50, blank=True,
+                            help_text="Icon identifier")
+
+    # Verification
+    verified = models.BooleanField(default=False)
+    verification_document = models.FileField(
+        upload_to='events/impact/',
+        null=True,
+        blank=True
+    )
+
+    display_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = _("Event Impact Metric")
+        verbose_name_plural = _("Event Impact Metrics")
+        ordering = ['event', 'display_order']
+
+    def __str__(self):
+        unit = f" {self.metric_unit}" if self.metric_unit else ""
+        return f"{self.metric_name}: {self.metric_value}{unit} ({self.event.title})"
