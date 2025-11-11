@@ -119,16 +119,16 @@ class EventTicketSerializer(serializers.ModelSerializer):
         model = EventTicket
         fields = [
             'id', 'event', 'name', 'description', 'price', 'currency',
-            'quantity_available', 'quantity_sold', 'remaining',
-            'sale_start', 'sale_end', 'is_active', 'is_available',
-            'display_order', 'benefits'
+            'quantity', 'quantity_sold', 'remaining',
+            'sale_start', 'sale_end', 'status', 'is_available',
+            'display_order', 'max_per_order'
         ]
 
     def get_remaining(self, obj):
         """Calculate remaining tickets"""
-        if obj.quantity_available is None:
+        if obj.quantity is None:
             return None
-        return max(0, obj.quantity_available - obj.quantity_sold)
+        return max(0, obj.quantity - obj.quantity_sold)
 
 
 class EventFinancialSummarySerializer(serializers.Serializer):
