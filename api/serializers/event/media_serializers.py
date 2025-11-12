@@ -113,23 +113,103 @@ class EventFeedbackCreateSerializer(serializers.ModelSerializer):
             'is_public'
         ]
 
+    def validate(self, attrs):
+        """Validate event and check for existing feedback"""
+        user = self.context['request'].user
+        event = attrs['event']
+
+        # Check if user has already submitted feedback for this event
+        from event.models import EventParticipant
+
+        participant = EventParticipant.objects.filter(
+            event=event,
+            user=user,
+            status__in=['registered', 'confirmed', 'attended']
+        ).first()
+
+        if participant and EventFeedback.objects.filter(
+            event=event,
+            participant=participant
+        ).exists():
+            raise serializers.ValidationError(
+                'You have already submitted feedback for this event'
+            )
+
+        return attrs
+
     def create(self, validated_data):
         """Link to participant record"""
+        import logging
+
+        from event.models import EventParticipant
+
+        logger = logging.getLogger(__name__)
         user = self.context['request'].user
         event = validated_data['event']
+
+        # Debug logging
+        logger.info(
+            f"Feedback submission attempt - User: {user.id}, Event: {event.id}")
+
+        # Check all participant records for debugging
+        all_participants = EventParticipant.objects.filter(
+            event=event, user=user)
+        logger.info(
+            f"Found {all_participants.count()} participant records for user {user.id} in event {event.id}")
+        for p in all_participants:
+            logger.info(
+                f"  - Participant {p.id}: status={p.status}, name={p.name}, email={p.email}")
 
         # Find participant record
         # Allow feedback from registered, confirmed, or attended participants
         try:
-            participant = event.participants.get(
+            participant = EventParticipant.objects.get(
+                event=event,
                 user=user,
                 status__in=['registered', 'confirmed', 'attended']
             )
             validated_data['participant'] = participant
-        except Exception as exc:
-            raise serializers.ValidationError(
-                'You must be registered for this event to provide feedback'
-            ) from exc
+            logger.info(
+                f"Using participant {participant.id} with status {participant.status}")
+        except EventParticipant.DoesNotExist as exc:
+            # Check if participant exists with different status
+            participant_with_other_status = EventParticipant.objects.filter(
+                event=event,
+                user=user
+            ).first()
+
+            if participant_with_other_status:
+                logger.warning(
+                    f"Participant exists but has invalid status: {participant_with_other_status.status}"
+                )
+                raise serializers.ValidationError(
+                    f'You cannot provide feedback with status "{participant_with_other_status.status}". '
+                    'Only registered, confirmed, or attended participants can provide feedback.'
+                ) from exc
+            else:
+                logger.warning(
+                    f"No participant record found for user {user.id} in event {event.id}")
+                raise serializers.ValidationError(
+                    'You must be registered for this event to provide feedback. '
+                    'Please register for the event first.'
+                ) from exc
+        except EventParticipant.MultipleObjectsReturned:
+            # If multiple participant records exist (shouldn't happen due to unique_together),
+            # use the first one with valid status
+            logger.warning(
+                f"Multiple participant records found for user {user.id} in event {event.id}"
+            )
+            participant = EventParticipant.objects.filter(
+                event=event,
+                user=user,
+                status__in=['registered', 'confirmed', 'attended']
+            ).first()
+            if not participant:
+                raise serializers.ValidationError(
+                    'You must be registered for this event to provide feedback'
+                )
+            validated_data['participant'] = participant
+            logger.info(f"Using first valid participant {participant.id}")
 
         return super().create(validated_data)
 

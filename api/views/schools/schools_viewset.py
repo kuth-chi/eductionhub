@@ -66,7 +66,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
         # Safely check if the action exists and is "list"
         if getattr(self, 'action', None) == "list":
             # Annotate with unique counts of related branches, colleges, majors, and degrees
-            return queryset.annotate(
+            queryset = queryset.annotate(
                 branch_count=Count('school_branches', distinct=True),
                 college_count=Count(
                     'college_associations__college', distinct=True),
@@ -74,7 +74,9 @@ class SchoolViewSet(viewsets.ModelViewSet):
                 degree_count=Count('degree_offerings__degree', distinct=True),
             )
 
-        return queryset
+        # Explicitly order to prevent pagination warnings
+        # Use 'id' as secondary ordering to ensure consistent results
+        return queryset.order_by('name', 'id')
 
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action == "list":
