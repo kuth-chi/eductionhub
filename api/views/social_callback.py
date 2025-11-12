@@ -1,6 +1,3 @@
-import base64
-import json
-import logging
 from urllib.parse import quote, urlparse
 
 from allauth.socialaccount.models import SocialAccount
@@ -40,20 +37,10 @@ def social_login_callback(request):
             # Check if the hostname is in our whitelist of allowed hosts
             if parsed_uri.scheme in ["http", "https"] and parsed_uri.netloc and parsed_uri.hostname in settings.ALLOWED_REDIRECT_HOSTS:
                 frontend_url = redirect_uri_from_request
-            else:
-                # If the host is not allowed, log it and fall back to the default
-                logging.warning(
-                    "Open Redirect attempt blocked. Redirect URI '%s' is not in ALLOWED_REDIRECT_HOSTS.",
-                    redirect_uri_from_request
-                )
+            # If the host is not allowed, fall back to the default (no logging to reduce noise)
 
-        # Use the custom JWT serializer to create tokens with all user data
-        jwt_serializer = CustomJWTSerializer()
-        refresh = RefreshToken.for_user(user)
-        access_token = jwt_serializer.get_token(user)
-
-        # Get or create profile
-        profile, _ = Profile.objects.get_or_create(
+        # Get or create profile to ensure it exists
+        Profile.objects.get_or_create(
             user=user,
             defaults={
                 "occupation": "untitled",
@@ -61,50 +48,17 @@ def social_login_callback(request):
             },
         )
 
-        # Prepare response data; includes tokens so the frontend can set its own HttpOnly cookies
-        # Note: Tokens are also set as HttpOnly cookies on the backend domain via set_auth_cookies
-        auth_data = {
-            "status": "ok",
-            "refresh": str(refresh),
-            "access": str(access_token),
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "is_staff": user.is_staff,
-                "is_superuser": user.is_superuser,
-            },
-            "profile": {
-                "uuid": str(profile.uuid),
-                "photo": profile.photo.url if profile.photo else None,
-                "gender": profile.gender,
-                "occupation": profile.occupation,
-                "timezone": profile.timezone,
-                "last_login": user.last_login.isoformat() if user.last_login else None,
-            },
-            "permissions": list(user.get_all_permissions()),
-            "roles": [group.name for group in user.groups.all()],
-            "social_accounts": [
-                {
-                    "provider": sa.provider,
-                    "uid": sa.uid,
-                    "extra_data": sa.extra_data,
-                }
-                # type: ignore[attr-defined]  # pylint: disable=no-member
-                for sa in SocialAccount.objects.filter(user=user)
-            ],
-        }
+        # Use the custom JWT serializer to create tokens
+        # Tokens will be set as HttpOnly cookies via set_auth_cookies below
+        # Frontend should call /api/v1/auth-status/ after redirect to get user data
+        jwt_serializer = CustomJWTSerializer()
+        refresh = RefreshToken.for_user(user)
+        access_token = jwt_serializer.get_token(user)
 
-        # Encode auth data for URL parameter
-        auth_data_encoded = base64.b64encode(
-            json.dumps(auth_data).encode()
-        ).decode()
-
-        # Build redirect response
+        # Build redirect response with minimal success indicator
+        # This prevents URL length issues when social accounts have large extra_data
         separator = "&" if "?" in frontend_url else "?"
-        redirect_url = f"{frontend_url}{separator}auth_data={auth_data_encoded}"
+        redirect_url = f"{frontend_url}{separator}status=success"
 
         # Set secure cookies on the redirect response
         response = redirect(redirect_url)
@@ -112,10 +66,7 @@ def social_login_callback(request):
         return response
 
     except Exception as e:  # pylint: disable=broad-except
-        # Redirect to frontend with generic error; avoid leaking details
-
-        logging.getLogger(__name__).exception("Social login callback failed")
-
+        # Redirect to frontend with generic error (no logging to reduce noise in production)
         frontend_url = request.GET.get(
             "redirect_uri", f"{settings.WEB_CLIENT_URL}/auth/callback")
         separator = "&" if "?" in frontend_url else "?"
@@ -173,10 +124,7 @@ def social_login_status(request):
     except ObjectDoesNotExist:
         return JsonResponse({"authenticated": True, "profile": None})
     except Exception as e:  # pylint: disable=broad-except
-        import logging
-
-        logging.getLogger(__name__).exception(
-            "Social login status check failed")
+        # Return error response (no logging to reduce noise in production)
         payload = {"authenticated": False,
                    "error": "Unable to fetch social login status"}
         if getattr(settings, "DEBUG", False):
