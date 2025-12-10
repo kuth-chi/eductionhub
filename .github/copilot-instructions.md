@@ -4,40 +4,89 @@ Concise, project-specific guidance so an AI agent can be productive immediately.
 
 ## 1. Big Picture
 
-- Monorepo-style workspace: Next.js (frontend under `web_frontend/web`) + Django REST backend (`v0.0.2`).
-- when access terminal to backend, `cd v0.0.2 && .venv\Scripts\activate` first.
-- Core domain: school & education data (schools, branches, majors, degrees, scholarships), plus organization / ads manager, geo (countries, states, cities, villages), authentication & user profiles.
-- Frontend uses: Next.js App Router, feature-based modules (`src/modules/<feature>`), tRPC for some internal typing + direct REST calls via `auth-fetch.ts`, TanStack Query for server state, Zod for validation.
-- Backend: Django + DRF viewsets registered in `api/urls.py` using a `DefaultRouter` (naming pattern: kebab-case paths e.g. `major-document-requirements`). Ads manager endpoints share `ad-*` prefix.
+- **Tech Stack:**
+  - **Frontend:** Next.js 16+ (App Router, React Server Components, Turbopack)
+  - **Backend:** Django 5.8+ with Django REST Framework (DRF)
+  - **Database:** SQLite (development), PostgreSQL (production recommended)
+- **Workspace Structure:** Monorepo-style with Next.js frontend under `web_frontend/web` + Django REST backend under `v0.0.2`.
+- **Backend Terminal Access:** When accessing backend terminal, always `cd v0.0.2 && .venv\Scripts\activate` first.
+- **Core Domain:** School & education data (schools, branches, majors, degrees, scholarships), plus organization/ads manager, geo (countries, states, cities, villages), authentication & user profiles.
+- **Frontend Architecture:** Next.js App Router, feature-based modules (`src/modules/<feature>`), tRPC for some internal typing + direct REST calls via `auth-fetch.ts`, TanStack Query for server state, Zod for validation.
+- **Backend Architecture:** Django + DRF viewsets registered in `api/urls.py` using a `DefaultRouter` (naming pattern: kebab-case paths e.g. `major-document-requirements`). Ads manager endpoints share `ad-*` prefix.
 
-## 2. Backend Conventions
+## 2. Backend Conventions (Django 5.8+)
 
-- Add new REST resources as DRF ViewSets; register in `api/urls.py` with kebab-case route + explicit `basename`.
-- Keep authentication-sensitive endpoints aligned with existing patterns: JWT in HttpOnly cookies, auth status at `/api/v1/auth-status/` (see existing auth views in `api/views/auth/`).
-- Environment & cross-domain auth: respect vars defined in backend `.env` (`BACKEND_URL`, `FRONTEND_URL`, etc.).
-- Cache prevention on auth: follow existing headers & patterns—do not re-enable caching for auth routes.
-- File uploads: existing endpoint `upload_file` (see `api/views/upload_views.py`). Reuse rather than reinvent.
+- **Django Version:** 5.8+ with Django REST Framework (DRF)
+- **ViewSets:** Add new REST resources as DRF ViewSets; register in `api/urls.py` with kebab-case route + explicit `basename`.
+- **Authentication:** JWT in HttpOnly cookies, auth status at `/api/v1/auth-status/` (see existing auth views in `api/views/auth/`).
+- **Environment & Cross-Domain:** Respect vars defined in backend `.env` (`BACKEND_URL`, `FRONTEND_URL`, etc.).
+- **Cache Prevention:** Follow existing headers & patterns—do not re-enable caching for auth routes.
+- **File Uploads:** Use existing endpoint `upload_file` (see `api/views/upload_views.py`). Reuse rather than reinvent.
+- **Testing (CRITICAL):** **ALWAYS create unit tests for EVERY CRUD operation**:
 
-## 3. Frontend Conventions
+  - Use Django's `TestCase` or `APITestCase` for API endpoints
+  - Test files located in `<app>/tests/` or `<app>/tests.py`
+  - Cover: Create (POST), Read (GET), Update (PUT/PATCH), Delete (DELETE)
+  - Include edge cases: validation errors, permissions, not found scenarios
+  - Use factories or fixtures for test data setup
+  - Run tests via `python manage.py test` before committing
+  - Example pattern:
 
-- Feature folders: `modules/<feature>/` contain `api/`, `hooks/`, `services/`, `ui/components/`, `ui/views/`, `schemas.ts`, `types.ts`.
-- Shared primitives in `components/` and `components/ui/`; never duplicate a UI primitive—extend via props.
-- Always derive backend URLs using env utility `src/lib/env.ts` (e.g. `BACKEND_API_URL`). Do NOT inline `http://localhost`.
-- Use `auth-fetch.ts` for authenticated REST calls; ensure cache-prevention headers for auth-sensitive actions.
-- Mark auth-related pages & routes with dynamic export flags when necessary (`export const dynamic = 'force-dynamic'` etc.) consistent with docs in `AUTH_CACHE_PREVENTION_SUMMARY.md`.
-- Validation: Zod schemas colocated (e.g. `schemas.ts`); reuse in forms + server calls; do not create ad-hoc runtime validators.
+    ```python
+    from rest_framework.test import APITestCase
+    from rest_framework import status
+
+    class ResourceViewSetTest(APITestCase):
+        def test_create_resource(self): ...
+        def test_list_resources(self): ...
+        def test_retrieve_resource(self): ...
+        def test_update_resource(self): ...
+        def test_delete_resource(self): ...
+        def test_unauthorized_access(self): ...
+    ```
+
+## 3. Frontend Conventions (Next.js 16+)
+
+- **Next.js Version:** 16+ with App Router, React Server Components, and Turbopack
+- **Feature Folders:** `modules/<feature>/` contain `api/`, `hooks/`, `services/`, `ui/components/`, `ui/views/`, `schemas.ts`, `types.ts`.
+- **Shared Primitives:** Use `components/` and `components/ui/`; never duplicate a UI primitive—extend via props.
+- **Environment URLs:** Always derive backend URLs using env utility `src/lib/env.ts` (e.g. `BACKEND_API_URL`). Do NOT inline `http://localhost`.
+- **Auth Fetch:** Use `auth-fetch.ts` for authenticated REST calls; ensure cache-prevention headers for auth-sensitive actions.
+- **Dynamic Exports:** Mark auth-related pages & routes with dynamic export flags when necessary (`export const dynamic = 'force-dynamic'` etc.) consistent with docs in `AUTH_CACHE_PREVENTION_SUMMARY.md`.
+- **Validation:** Zod schemas colocated (e.g. `schemas.ts`); reuse in forms + server calls; do not create ad-hoc runtime validators.
+- **Testing (CRITICAL):** **ALWAYS create unit tests for EVERY CRUD operation**:
+  - Use Jest + React Testing Library for component tests
+  - Test files: `<component>.test.tsx` or `__tests__/<component>.test.tsx`
+  - Cover: Form submissions, API mutations, data fetching, error states
+  - Mock API calls using MSW (Mock Service Worker) or jest.mock
+  - Test user interactions and accessibility
+  - Run tests via `npm test` before committing
+  - Example pattern:
+
+    ```tsx
+    import { render, screen, waitFor } from '@testing-library/react';
+    import userEvent from '@testing-library/user-event';
+
+    describe('ResourceForm', () => {
+      it('creates resource successfully', async () => { ... });
+      it('displays validation errors', async () => { ... });
+      it('handles API errors', async () => { ... });
+    });
+    ```
 
 ### 3.1 SSR-First Architecture (Critical)
 
 **Default to Server Components** — Keep components as server-rendered unless they REQUIRE client-side features.
 
 **When to use `"use client"`:**
+
 - Component uses React hooks (`useState`, `useEffect`, `useContext`, etc.)
 - Component needs browser APIs (`window`, `navigator`, `localStorage`, `document`)
 - Component has event handlers (`onClick`, `onChange`, `onSubmit`)
 - Component uses client-only libraries (chart libraries, animation libs)
 
 **Push `"use client"` down the tree** — Extract interactive parts into separate client components rather than marking entire pages/views as client. Example:
+
 ```tsx
 // ❌ BAD: Entire page is client
 "use client";
@@ -62,6 +111,7 @@ export default function Page() {
 ```
 
 **Benefits of SSR-first:**
+
 - Better SEO (search engines get full HTML)
 - Faster initial page load (less JavaScript)
 - Improved Core Web Vitals
