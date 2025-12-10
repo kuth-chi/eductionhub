@@ -676,12 +676,12 @@ class EventExpenseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for event expenses with approval workflow
     Permissions:
-    - Only organizers with finance permission can view/manage expenses
+    - Anyone can view approved/paid expenses (public transparency)
+    - Only organizers with finance permission can view ALL expenses and manage them
     """
     queryset = EventExpense.objects.select_related(
         'event', 'submitted_by', 'approved_by')
     serializer_class = EventExpenseSerializer
-    permission_classes = [IsAuthenticated]
     parser_classes = [
         parsers.JSONParser,
         parsers.MultiPartParser,
@@ -691,8 +691,14 @@ class EventExpenseViewSet(viewsets.ModelViewSet):
     filterset_fields = ['event', 'category', 'status']
     ordering = ['-expense_date']
 
+    def get_permissions(self):
+        """Define permissions based on action"""
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]  # Allow anonymous viewing
+        return [IsAuthenticated()]  # Require auth for modifications
+
     def get_queryset(self):
-        """Filter based on finance management permissions"""
+        """Filter based on finance management permissions and public visibility"""
         user = self.request.user
         queryset = super().get_queryset()
 
@@ -701,10 +707,22 @@ class EventExpenseViewSet(viewsets.ModelViewSet):
         if event_id:
             try:
                 event = Event.objects.get(id=event_id)
-                EventPermissionChecker.require_finance_management(user, event)
-                return queryset.filter(event_id=event_id)
+
+                # If user is authenticated and has finance permissions, show all expenses
+                if user.is_authenticated and EventPermissionChecker.can_manage_finances(user, event):
+                    return queryset.filter(event_id=event_id)
+
+                # Otherwise, show only approved/paid expenses for transparency
+                return queryset.filter(
+                    event_id=event_id,
+                    status__in=['approved', 'paid']
+                )
             except ObjectDoesNotExist:
                 return queryset.none()
+
+        # If no event filter, require authentication
+        if not user.is_authenticated:
+            return queryset.none()
 
         # Show expenses for events user can manage finances for
         # Get events where user is owner
